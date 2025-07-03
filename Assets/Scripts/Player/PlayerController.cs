@@ -79,6 +79,30 @@ public class PlayerController : MonoBehaviour
         HandleShooting();  // 處理射擊（可連射）
         HandleMovement();  // 直接位移
         ClampPosition();   // 限制邊界
+
+        // 顯示 Ray（以滑鼠指向為例）
+        ShowDebugRay();
+    }
+
+    private void ShowDebugRay()
+    {
+        if (mainCamera == null) return;
+
+        Ray ray = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
+        float maxDistance = 100f;
+        RaycastHit hit;
+
+        // 檢查是否有射到東西
+        if (Physics.Raycast(ray, out hit, maxDistance))
+        {
+            // 有射到，畫紅色到擊中點
+            Debug.DrawRay(ray.origin, ray.direction * hit.distance, Color.red, 0f, false);
+        }
+        else
+        {
+            // 沒射到，畫綠色到最遠距離
+            Debug.DrawRay(ray.origin, ray.direction * maxDistance, Color.green, 0f, false);
+        }
     }
 
     #endregion
@@ -145,9 +169,27 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void HandleShooting()
     {
-        // IsPressed() 在按鍵維持時持續返回 true
         if (attackAction != null && attackAction.IsPressed())
         {
+            // 取得滑鼠指向的世界座標
+            if (mainCamera != null)
+            {
+                Ray ray = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
+                float maxDistance = 500f;
+                RaycastHit hit;
+                Vector3 targetPos;
+
+                if (Physics.Raycast(ray, out hit, maxDistance))
+                {
+                    targetPos = hit.point;
+                }
+                else
+                {
+                    targetPos = ray.origin + ray.direction * maxDistance;
+                }
+                weaponSystem.SetPointerTarget(targetPos);
+            }
+
             weaponSystem?.Fire();
         }
     }

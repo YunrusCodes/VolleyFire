@@ -11,6 +11,7 @@ public struct FirePoint
     public AudioSource audioSource;    // 音效來源
     [Min(0.01f)] public float firePeriod;        // **各自射速 (秒/發)**
     public float projectileSpeed;      // 若 BulletBehavior 需要，可傳此值
+    public Vector3? PointedTarget;     // 指向性子彈的目標位置（可為 null）
 }
 
 #endregion
@@ -104,6 +105,14 @@ public class WeaponSystem : MonoBehaviour
     {
         if (index < 0 || index >= firePoints.Length) return;
         firePoints[index].firePeriod = Mathf.Max(0.01f, newRate);
+    }
+
+    public void SetPointerTarget(Vector3 target)
+    {
+        for (int i = 0; i < firePoints.Length; i++)
+        {
+            firePoints[i].PointedTarget = target;
+        }
     }
 
     #endregion

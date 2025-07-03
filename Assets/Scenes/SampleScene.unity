@@ -393,13 +393,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   firePoints:
   - transform: {fileID: 1708920304}
-    bulletPrefab: {fileID: 1259865673663102, guid: 19dd53b776d69ec449b08a1093b8bcaa, type: 3}
-    fireSound: {fileID: 0}
-    audioSource: {fileID: 0}
-    firePeriod: 0.1
-    projectileSpeed: 100
-  - transform: {fileID: 1128832568}
-    bulletPrefab: {fileID: 1259865673663102, guid: 19dd53b776d69ec449b08a1093b8bcaa, type: 3}
+    bulletPrefab: {fileID: 2126887943765326411, guid: a35a3014c90ded148b298dc7a4b15003, type: 3}
     fireSound: {fileID: 0}
     audioSource: {fileID: 0}
     firePeriod: 0.1
@@ -513,7 +507,7 @@ MeshCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 5
   m_Convex: 1
   m_CookingOptions: 30
@@ -1776,7 +1770,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &565415288
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2465,7 +2459,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &805299563
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3287,7 +3281,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1163541621
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3771,7 +3765,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1305207661
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3944,7 +3938,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1308269355
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4117,7 +4111,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1321631491
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4634,7 +4628,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1566710743
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4983,7 +4977,7 @@ Transform:
   m_GameObject: {fileID: 1708920303}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.15, y: 0.76, z: 7.02}
+  m_LocalPosition: {x: 0.12, y: 0.76, z: 4.9}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5149,7 +5143,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1763097365
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5322,7 +5316,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1763861560
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6361,7 +6355,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8215240564081109644}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 97aca0a1325db8a4ca48f3e2aca59904, type: 3}
   m_Name: 

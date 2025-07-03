@@ -30,10 +30,7 @@ public abstract class BulletBehavior : MonoBehaviour
     
     protected virtual void Start()
     {
-        // 設置初始方向為物件的前方
-        direction = transform.forward;
-        
-        // 如果使用Rigidbody，設置初始速度
+        // 不在這裡設定 direction
         if (useRigidbody && rb != null)
         {
             rb.linearVelocity = direction * speed;
@@ -65,10 +62,8 @@ public abstract class BulletBehavior : MonoBehaviour
     {
         // 重置生成時間
         spawnTime = Time.time;
-        
-        // 設置初始方向為物件的前方
-        direction = transform.forward;
-        firePoint = firePoint;
+        // 不在這裡設定 direction
+        this.firePoint = firePoint;
         speed = firePoint.projectileSpeed;
         // 如果使用Rigidbody，設置初始速度
         if (useRigidbody && rb != null)

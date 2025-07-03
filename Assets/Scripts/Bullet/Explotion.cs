@@ -12,10 +12,7 @@ public class Explotion : MonoBehaviour, EffectBehavior
 
     private IEnumerator DelayDeactivate()
     {
-        Debug.Log("DestroySelf");
-        yield return new WaitForSeconds(destroyDelay);
-        
-        Debug.Log("DestroySelf2");
+        yield return new WaitForSeconds(destroyDelay);        
         gameObject.SetActive(false); // 物件池用
         // 如果不用物件池，改成 Destroy(gameObject);
     }
