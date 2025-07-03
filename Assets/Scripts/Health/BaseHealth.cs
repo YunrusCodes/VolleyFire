@@ -13,6 +13,7 @@ public abstract class BaseHealth : MonoBehaviour, IHealth
 
     public virtual void TakeDamage(int damage)
     {
+        Debug.Log("TakeDamage: " + damage);
         if (isDead) return;
         currentHealth -= damage;
         currentHealth = Mathf.Max(0, currentHealth);

@@ -20,12 +20,13 @@ public class StraightBullet : BulletBehavior
 
     protected void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Enemy"))
+        Debug.Log("targetTag: " + targetTag);
+        if (collision.gameObject.CompareTag(targetTag))
         {
-            var enemyHealth = collision.gameObject.GetComponent<EnemyHealth>();
-            if (enemyHealth != null)
+            var targetHealth = collision.gameObject.GetComponent<BaseHealth>();
+            if (targetHealth != null)
             {
-                enemyHealth.TakeDamage(damage);
+                targetHealth.TakeDamage(damage);
             }
             DestroyBullet();
         }

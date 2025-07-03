@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class PointableBullet : BulletBehavior
 {
+    [SerializeField] private string targetTag;
     [SerializeField] private int damage = 1;
     private Vector3 targetPosition;
     private bool initialized = false;
@@ -13,12 +14,10 @@ public class PointableBullet : BulletBehavior
         {
             targetPosition = firePoint.PointedTarget.Value;
             direction = (targetPosition - transform.position).normalized;
-            Debug.Log("有目標 " + direction);
         }
         else
         {
             // 沒有目標時，預設往前方
-            Debug.Log("沒有目標 預設往前方");
             targetPosition = transform.position + transform.forward * 100f;
             direction = transform.forward;
             initialized = true;
@@ -30,7 +29,6 @@ public class PointableBullet : BulletBehavior
     {
         if (!useRigidbody)
         {
-            Debug.Log(direction);
             transform.position += direction * speed * Time.deltaTime;
         }
         // 如果使用Rigidbody，移動邏輯已在Initialize中設置
@@ -38,12 +36,12 @@ public class PointableBullet : BulletBehavior
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Enemy"))
+        if (collision.gameObject.CompareTag(targetTag))
         {
-            var enemyHealth = collision.gameObject.GetComponent<EnemyHealth>();
-            if (enemyHealth != null)
+            var targetHealth = collision.gameObject.GetComponent<BaseHealth>();
+            if (targetHealth != null)
             {
-                enemyHealth.TakeDamage(damage);
+                targetHealth.TakeDamage(damage);
             }
             DestroyBullet();
         }

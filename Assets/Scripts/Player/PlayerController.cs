@@ -46,6 +46,7 @@ public class PlayerController : MonoBehaviour
     private Camera mainCamera;           // 主攝影機
     private InputAction moveAction;      // Move Action 參考
     private InputAction attackAction;    // Attack Action 參考
+    private Vector3 targetPosition;       // 新增：目前準心指向的目標世界座標
 
     #endregion
 
@@ -93,7 +94,7 @@ public class PlayerController : MonoBehaviour
         ClampPosition();   // 限制邊界
         UpdateCrosshairAndRay();
     }
-
+    
     private void UpdateCrosshairAndRay()
     {
         if (mainCamera == null || crosshairImage == null) return;
@@ -103,17 +104,32 @@ public class PlayerController : MonoBehaviour
 
         // 射線偵測
         Ray ray = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
-        RaycastHit hit;
+        RaycastHit[] hits = Physics.RaycastAll(ray, crosshairRayDistance);
 
-        if (Physics.Raycast(ray, out hit, crosshairRayDistance))
+        bool hitTarget = false;
+        float drawDistance = crosshairRayDistance;
+        targetPosition = ray.origin + ray.direction * crosshairRayDistance; // 預設為極限距離
+
+        foreach (var hit in hits)
         {
-            // 有射到，畫紅色到擊中點
-            Debug.DrawRay(ray.origin, ray.direction * hit.distance, Color.red, 0f, false);
+            // 忽略自己
+            if (hit.collider.gameObject == playerShip)
+                continue;
+
+            // 撞到其他物件（敵人、障礙物等）
+            hitTarget = true;
+            drawDistance = hit.distance;
+            targetPosition = hit.point; // 設定目標點
+            break;
+        }
+
+        if (hitTarget)
+        {
+            Debug.DrawRay(ray.origin, ray.direction * drawDistance, Color.red, 0f, false);
             crosshairImage.color = crosshairTargetColor;
         }
         else
         {
-            // 沒射到，畫綠色到最遠距離
             Debug.DrawRay(ray.origin, ray.direction * crosshairRayDistance, Color.green, 0f, false);
             crosshairImage.color = crosshairNormalColor;
         }
@@ -185,25 +201,8 @@ public class PlayerController : MonoBehaviour
     {
         if (attackAction != null && attackAction.IsPressed())
         {
-            // 取得滑鼠指向的世界座標
-            if (mainCamera != null)
-            {
-                Ray ray = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
-                float maxDistance = 500f;
-                RaycastHit hit;
-                Vector3 targetPos;
-
-                if (Physics.Raycast(ray, out hit, maxDistance))
-                {
-                    targetPos = hit.point;
-                }
-                else
-                {
-                    targetPos = ray.origin + ray.direction * maxDistance;
-                }
-                weaponSystem.SetPointerTarget(targetPos);
-            }
-
+            // 直接使用 targetPosition 作為射擊目標
+            weaponSystem.SetPointerTarget(targetPosition);
             weaponSystem?.Fire();
         }
     }

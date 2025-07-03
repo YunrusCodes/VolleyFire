@@ -66,7 +66,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: e1cac9f87fda27445ac6a54ade344d63, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -125,4 +125,5 @@ MonoBehaviour:
   lifetime: 5
   useRigidbody: 0
   explosionPrefab: {fileID: 8640070007292392689, guid: 1db44c370478b7146823784ef4dd7cc2, type: 3}
+  targetTag: Enemy
   damage: 1
