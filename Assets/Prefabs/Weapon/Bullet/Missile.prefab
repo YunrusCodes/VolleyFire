@@ -101,7 +101,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f379cee114abd28418bd257afc3117cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 30
+  speed: 300
   lifetime: 5
   useRigidbody: 0
   explosionPrefab: {fileID: 8640070007292392689, guid: 1db44c370478b7146823784ef4dd7cc2, type: 3}
