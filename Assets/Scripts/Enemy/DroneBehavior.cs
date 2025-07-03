@@ -37,7 +37,8 @@ public class DroneBehavior : EnemyBehavior
     {
         if (controller.GetHealth().IsDead())
         {
-            Destroy(gameObject);
+            Debug.Log("is dead");
+            gameObject.SetActive(false);
             return;
         }
 
@@ -138,5 +139,15 @@ public class DroneBehavior : EnemyBehavior
         swingTimer = 0f;
         onSwingComplete = () => { isMovingToAlign = true; currentState = DroneState.Fire; };
         currentState = DroneState.Swing;
+    }
+
+    public override void OnWaveMove()
+    {
+        // 波次移動階段，可加特效或待機動畫
+    }
+
+    public override void OnWaveStart()
+    {
+        // 波次開始行動階段，可加初始化或特效
     }
 }

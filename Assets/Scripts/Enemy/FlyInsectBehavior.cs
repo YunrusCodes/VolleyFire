@@ -159,4 +159,14 @@ public class FlyInsectBehavior : EnemyBehavior
             isReturning = true;
         }
     }
+
+    public override void OnWaveMove()
+    {
+        // 波次移動階段，可加特效或待機動畫
+    }
+
+    public override void OnWaveStart()
+    {
+        // 波次開始行動階段，可加初始化或特效
+    }
 } 
