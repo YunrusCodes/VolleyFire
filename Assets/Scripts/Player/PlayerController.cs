@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 /// <summary>
 /// 玩家控制器 - 負責處理玩家的移動、射擊和機體控制。
@@ -31,6 +32,13 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private string moveActionName = "Player/Move";     // 移動動作名稱（Action 路徑）
     [SerializeField] private string attackActionName = "Player/Attack"; // 攻擊動作名稱（Action 路徑）
     [SerializeField] private PlayerInput playerInput;                     // PlayerInput（由 Inspector 指定）
+
+    [Header("準心設定")]
+    public Image crosshairImage;
+    public Color crosshairNormalColor = Color.green;
+    public Color crosshairTargetColor = Color.red;
+
+    [SerializeField] private float crosshairRayDistance = 100f; // 射線距離可在 Inspector 設定
 
     // ------- 私有狀態 -------
     private Vector2 moveInput;           // 移動輸入（-1 ~ 1）
@@ -64,6 +72,10 @@ public class PlayerController : MonoBehaviour
         if (playerShip == null)
             playerShip = gameObject;
         playerShip.tag = "Player";
+
+        // 隱藏並鎖定滑鼠游標
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Confined; // 或 CursorLockMode.Locked
     }
 
     private void OnDestroy()
@@ -79,29 +91,31 @@ public class PlayerController : MonoBehaviour
         HandleShooting();  // 處理射擊（可連射）
         HandleMovement();  // 直接位移
         ClampPosition();   // 限制邊界
-
-        // 顯示 Ray（以滑鼠指向為例）
-        ShowDebugRay();
+        UpdateCrosshairAndRay();
     }
 
-    private void ShowDebugRay()
+    private void UpdateCrosshairAndRay()
     {
-        if (mainCamera == null) return;
+        if (mainCamera == null || crosshairImage == null) return;
 
+        // 讓準心跟隨滑鼠
+        crosshairImage.rectTransform.position = Mouse.current.position.ReadValue();
+
+        // 射線偵測
         Ray ray = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
-        float maxDistance = 100f;
         RaycastHit hit;
 
-        // 檢查是否有射到東西
-        if (Physics.Raycast(ray, out hit, maxDistance))
+        if (Physics.Raycast(ray, out hit, crosshairRayDistance))
         {
             // 有射到，畫紅色到擊中點
             Debug.DrawRay(ray.origin, ray.direction * hit.distance, Color.red, 0f, false);
+            crosshairImage.color = crosshairTargetColor;
         }
         else
         {
             // 沒射到，畫綠色到最遠距離
-            Debug.DrawRay(ray.origin, ray.direction * maxDistance, Color.green, 0f, false);
+            Debug.DrawRay(ray.origin, ray.direction * crosshairRayDistance, Color.green, 0f, false);
+            crosshairImage.color = crosshairNormalColor;
         }
     }
 
