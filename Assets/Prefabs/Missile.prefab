@@ -106,6 +106,7 @@ MonoBehaviour:
   useRigidbody: 0
   explosionPrefab: {fileID: 8640070007292392689, guid: 1db44c370478b7146823784ef4dd7cc2, type: 3}
   targetTag: Enemy
+  damage: 1
 --- !u!54 &1612135955883067724
 Rigidbody:
   m_ObjectHideFlags: 0

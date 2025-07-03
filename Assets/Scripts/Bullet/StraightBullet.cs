@@ -6,6 +6,7 @@ using UnityEngine;
 public class StraightBullet : BulletBehavior
 {
     [SerializeField] private string targetTag;
+    [SerializeField] private int damage = 1;
 
     protected override void Move()
     {
@@ -21,6 +22,11 @@ public class StraightBullet : BulletBehavior
     {
         if (collision.gameObject.CompareTag("Enemy"))
         {
+            var enemyHealth = collision.gameObject.GetComponent<EnemyHealth>();
+            if (enemyHealth != null)
+            {
+                enemyHealth.TakeDamage(damage);
+            }
             DestroyBullet();
         }
     }

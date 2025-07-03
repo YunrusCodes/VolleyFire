@@ -1,0 +1,162 @@
+using UnityEngine;
+
+public class FlyInsectBehavior : EnemyBehavior
+{
+    public float circleRadius = 2f;
+    public float angularSpeed = 2f;
+    public float moveSpeed = 1.5f;
+    public float xMin = -8f, xMax = 8f;
+    public float yMin = -4f, yMax = 4f;
+    public float directionChangeInterval = 1.5f;
+    public float impactSpeed = 10f;
+    public int impactDamage = 1;
+    public float hoverTime = 5f;
+    private EnemyController controller;
+    private Vector2 moveDir;
+    private float directionTimer;
+    private Vector2 baseCenter;
+    private Vector2 circleCenter;
+    private float angle;
+    private float hoverTimer;
+    private bool isImpacting = false;
+    private Transform playerTarget;
+    private Vector3 impactTargetPosition;
+    private bool isFleeing = false;
+    private float fleeTimer = 0f;
+    private Vector3 preImpactPosition;
+    private bool isReturning = false;
+
+    public override void Init(EnemyController controller)
+    {
+        this.controller = controller;
+        baseCenter = transform.position;
+        circleCenter = baseCenter;
+        angle = Random.Range(0f, Mathf.PI * 2f);
+        PickRandomDirection();
+        directionTimer = directionChangeInterval;
+        hoverTimer = hoverTime;
+        isImpacting = false;
+    }
+
+    public override void Tick()
+    {
+        if (controller.GetHealth().IsDead())
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        if (isReturning)
+        {
+            Vector3 dir = (preImpactPosition - transform.position).normalized;
+            float dist = Vector3.Distance(transform.position, preImpactPosition);
+            float moveStep = impactSpeed * Time.deltaTime;
+            if (moveStep >= dist)
+            {
+                transform.position = preImpactPosition;
+                isReturning = false;
+                hoverTimer = hoverTime;
+            }
+            else
+            {
+                transform.position += dir * moveStep;
+            }
+            return;
+        }
+
+        if (!isImpacting)
+        {
+            HoverBehavior();
+            hoverTimer -= Time.deltaTime;
+            if (hoverTimer <= 0f)
+            {
+                playerTarget = GameObject.FindGameObjectWithTag("Player")?.transform;
+                preImpactPosition = transform.position;
+                if (playerTarget != null)
+                    impactTargetPosition = playerTarget.position;
+                isImpacting = true;
+            }
+            return;
+        }
+
+        // Impacting 狀態
+        ImpactBehavior();
+    }
+
+    private void HoverBehavior()
+    {
+        // 隨機換方向
+        directionTimer -= Time.deltaTime;
+        if (directionTimer <= 0f)
+        {
+            PickRandomDirection();
+            directionTimer = directionChangeInterval;
+        }
+        // 盤旋中心也隨機平移，限制在以 baseCenter 為中心的邊界內
+        circleCenter += moveDir * moveSpeed * Time.deltaTime;
+        circleCenter.x = Mathf.Clamp(circleCenter.x, baseCenter.x + xMin, baseCenter.x + xMax);
+        circleCenter.y = Mathf.Clamp(circleCenter.y, baseCenter.y + yMin, baseCenter.y + yMax);
+        // 盤旋角度推進
+        angle += angularSpeed * Time.deltaTime;
+        // 計算盤旋位置
+        float x = circleCenter.x + Mathf.Cos(angle) * circleRadius;
+        float y = circleCenter.y + Mathf.Sin(angle) * circleRadius;
+        Vector3 pos = transform.position;
+        pos.x = x;
+        pos.y = y;
+        // 邊界反彈（針對盤旋位置）
+        if (pos.x < baseCenter.x + xMin || pos.x > baseCenter.x + xMax)
+        {
+            moveDir.x = -moveDir.x;
+            pos.x = Mathf.Clamp(pos.x, baseCenter.x + xMin, baseCenter.x + xMax);
+            circleCenter.x = pos.x - Mathf.Cos(angle) * circleRadius;
+        }
+        if (pos.y < baseCenter.y + yMin || pos.y > baseCenter.y + yMax)
+        {
+            moveDir.y = -moveDir.y;
+            pos.y = Mathf.Clamp(pos.y, baseCenter.y + yMin, baseCenter.y + yMax);
+            circleCenter.y = pos.y - Mathf.Sin(angle) * circleRadius;
+        }
+        transform.position = pos;
+    }
+
+    private void ImpactBehavior()
+    {
+        // 只朝 impactTargetPosition 衝刺
+        Vector3 dir = (impactTargetPosition - transform.position).normalized;
+        float dist = Vector3.Distance(transform.position, impactTargetPosition);
+        float moveStep = impactSpeed * Time.deltaTime;
+        if (moveStep >= dist)
+        {
+            transform.position = impactTargetPosition;
+            isImpacting = false;
+            isReturning = true;
+        }
+        else
+        {
+            transform.position += dir * moveStep;
+        }
+    }
+
+    private void PickRandomDirection()
+    {
+        float randAngle = Random.Range(0f, Mathf.PI * 2f);
+        moveDir = new Vector2(Mathf.Cos(randAngle), Mathf.Sin(randAngle)).normalized;
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (!isImpacting) return;
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            var health = collision.gameObject.GetComponent<IHealth>();
+            if (health != null)
+            {
+                health.TakeDamage(impactDamage);
+            }
+            // 開始沿原路徑飛回 preImpactPosition
+            isImpacting = false;
+            isReturning = true;
+        }
+    }
+} 

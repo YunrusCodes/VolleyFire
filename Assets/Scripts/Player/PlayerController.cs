@@ -63,6 +63,7 @@ public class PlayerController : MonoBehaviour
         // 若未指定 PlayerShip，嘗試使用自身 GameObject
         if (playerShip == null)
             playerShip = gameObject;
+        playerShip.tag = "Player";
     }
 
     private void OnDestroy()
