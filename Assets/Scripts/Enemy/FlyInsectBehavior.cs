@@ -25,13 +25,23 @@ public class FlyInsectBehavior : EnemyBehavior
     private float fleeTimer = 0f;
     private Vector3 preImpactPosition;
     private bool isReturning = false;
+    private bool isSwinging = false;
+    private Vector2 swingDir;
+    private Vector2 swingTarget;
+    public float swingSpeed = 5f; // 可調整
 
     public override void Init(EnemyController controller)
     {
         this.controller = controller;
         baseCenter = transform.position;
+        // Swing 狀態初始化
+        isSwinging = true;
+        float randAngle = Random.Range(0f, Mathf.PI * 2f);
+        swingDir = new Vector2(Mathf.Cos(randAngle), Mathf.Sin(randAngle)).normalized;
+        swingTarget = baseCenter + swingDir * circleRadius;
+        // 其餘初始化
         circleCenter = baseCenter;
-        angle = Random.Range(0f, Mathf.PI * 2f);
+        angle = randAngle;
         PickRandomDirection();
         directionTimer = directionChangeInterval;
         hoverTimer = hoverTime;
@@ -43,6 +53,29 @@ public class FlyInsectBehavior : EnemyBehavior
         if (controller.GetHealth().IsDead())
         {
             gameObject.SetActive(false);
+            return;
+        }
+
+        // Swing 狀態
+        if (isSwinging)
+        {
+            Vector2 currentPos = transform.position;
+            Vector2 dir = (swingTarget - currentPos).normalized;
+            float dist = Vector2.Distance(currentPos, swingTarget);
+            float moveStep = swingSpeed * Time.deltaTime;
+            if (moveStep >= dist)
+            {
+                transform.position = new Vector3(swingTarget.x, swingTarget.y, transform.position.z);
+                isSwinging = false;
+                // 設定盤旋起始角度，讓盤旋起點與swingDir一致
+                circleCenter = baseCenter;
+                angle = Mathf.Atan2(swingDir.y, swingDir.x);
+            }
+            else
+            {
+                Vector2 nextPos = currentPos + dir * moveStep;
+                transform.position = new Vector3(nextPos.x, nextPos.y, transform.position.z);
+            }
             return;
         }
 
