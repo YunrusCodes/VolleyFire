@@ -11,6 +11,7 @@ public class EnemyWave : MonoBehaviour
 
     private bool isMoving = true;
     private bool isWaveActive = false;
+    public bool isWaveClear { get; private set; } = false;
 
     private void Start()
     {
@@ -46,7 +47,7 @@ public class EnemyWave : MonoBehaviour
             if (waveClear)
             {
                 Debug.Log("Wave cleared!");
-                isWaveActive = false;
+                isWaveClear = true;
             }
         }
     }

@@ -42,7 +42,7 @@ public class FlyInsectBehavior : EnemyBehavior
     {
         if (controller.GetHealth().IsDead())
         {
-            Destroy(gameObject);
+            gameObject.SetActive(false);
             return;
         }
 
