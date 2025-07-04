@@ -31,12 +31,14 @@ public class PlayerController : MonoBehaviour
     [Header("輸入設定")]
     [SerializeField] private string moveActionName = "Player/Move";     // 移動動作名稱（Action 路徑）
     [SerializeField] private string attackActionName = "Player/Attack"; // 攻擊動作名稱（Action 路徑）
+    [SerializeField] private string lockActionName = "Player/Lock";     // 鎖定動作名稱（Action 路徑）
     [SerializeField] private PlayerInput playerInput;                     // PlayerInput（由 Inspector 指定）
 
     [Header("準心設定")]
     public Image crosshairImage;
     public Color crosshairNormalColor = Color.green;
     public Color crosshairTargetColor = Color.red;
+    public Color crosshairLockColor = Color.blue;    // 新增：鎖定狀態的顏色
 
     [SerializeField] private float crosshairRayDistance = 100f; // 射線距離可在 Inspector 設定
 
@@ -46,8 +48,12 @@ public class PlayerController : MonoBehaviour
     private Camera mainCamera;           // 主攝影機
     private InputAction moveAction;      // Move Action 參考
     private InputAction attackAction;    // Attack Action 參考
+    private InputAction lockAction;      // Lock Action 參考
     private Vector3 targetPosition;       // 新增：目前準心指向的目標世界座標
+    [SerializeField] private Transform lockedTarget;       // 鎖定的目標
+    private bool isLocked;              // 是否處於鎖定狀態
 
+    public GameObject FireTarget;
     #endregion
 
     #region Unity 生命週期
@@ -84,6 +90,7 @@ public class PlayerController : MonoBehaviour
         // 停用輸入 Action，避免記憶體洩漏
         moveAction?.Disable();
         attackAction?.Disable();
+        lockAction?.Disable();
     }
 
     private void Update()
@@ -94,7 +101,6 @@ public class PlayerController : MonoBehaviour
         ClampPosition();   // 限制邊界
         UpdateCrosshairAndRay();
     }
-    
     private void UpdateCrosshairAndRay()
     {
         if (mainCamera == null || crosshairImage == null) return;
@@ -110,6 +116,29 @@ public class PlayerController : MonoBehaviour
         float drawDistance = crosshairRayDistance;
         targetPosition = ray.origin + ray.direction * crosshairRayDistance; // 預設為極限距離
 
+        // 處理鎖定功能
+        if (lockAction != null)
+        {
+            // 當按下右鍵時
+            if (lockAction.WasPressedThisFrame() && lockedTarget == null)
+            {
+                foreach (var hit in hits)
+                {
+                    if (hit.collider.gameObject == playerShip) continue;
+                    lockedTarget = hit.transform;
+                    isLocked = true;
+                    break;
+                }
+            }
+            // 當放開右鍵時
+            else if (lockAction.WasReleasedThisFrame())
+            {
+                isLocked = false;
+                lockedTarget = null;
+            }
+        }
+        
+        Transform targetFind = null;
         foreach (var hit in hits)
         {
             // 忽略自己
@@ -118,20 +147,38 @@ public class PlayerController : MonoBehaviour
 
             // 撞到其他物件（敵人、障礙物等）
             hitTarget = true;
+            targetFind = hit.transform;      
             drawDistance = hit.distance;
-            targetPosition = hit.point; // 設定目標點
             break;
+        }
+
+        // 根據鎖定狀態設定目標位置
+        if (isLocked)
+        {
+            if (lockedTarget == null)
+                lockedTarget = targetFind;
+            
+            // 計算射線與Z平面的交點
+            float t = (lockedTarget.position.z - ray.origin.z) / ray.direction.z;
+            targetPosition = ray.origin + ray.direction * t;
+            Debug.Log(targetPosition.z);
+        }
+        else
+        {
+            lockedTarget = null;
         }
 
         if (hitTarget)
         {
             Debug.DrawRay(ray.origin, ray.direction * drawDistance, Color.red, 0f, false);
-            crosshairImage.color = crosshairTargetColor;
+            // 根據鎖定狀態決定準心顏色
+            crosshairImage.color = isLocked ? crosshairLockColor : crosshairTargetColor;
         }
         else
         {
             Debug.DrawRay(ray.origin, ray.direction * crosshairRayDistance, Color.green, 0f, false);
-            crosshairImage.color = crosshairNormalColor;
+            // 根據鎖定狀態決定準心顏色
+            crosshairImage.color = isLocked ? crosshairLockColor : crosshairNormalColor;
         }
     }
 
@@ -152,11 +199,14 @@ public class PlayerController : MonoBehaviour
 
         moveAction = playerInput.actions.FindAction(moveActionName);
         attackAction = playerInput.actions.FindAction(attackActionName);
+        lockAction = playerInput.actions.FindAction(lockActionName);
 
         if (moveAction == null)
             Debug.LogError($"找不到移動動作：{moveActionName}");
         if (attackAction == null)
             Debug.LogError($"找不到攻擊動作：{attackActionName}");
+        if (lockAction == null)
+            Debug.LogError($"找不到鎖定動作：{lockActionName}");
     }
 
     /// <summary>
@@ -203,6 +253,8 @@ public class PlayerController : MonoBehaviour
         {
             // 直接使用 targetPosition 作為射擊目標
             weaponSystem.SetPointerTarget(targetPosition);
+            
+            FireTarget.transform.position = targetPosition;
             weaponSystem?.Fire();
         }
     }
@@ -246,6 +298,12 @@ public class PlayerController : MonoBehaviour
     {
         attackActionName = actionName;
         attackAction = playerInput?.actions.FindAction(attackActionName);
+    }
+
+    public void SetLockActionName(string actionName)
+    {
+        lockActionName = actionName;
+        lockAction = playerInput?.actions.FindAction(lockActionName);
     }
 
     #endregion
