@@ -163,9 +163,10 @@ public class PlayerController : MonoBehaviour
             targetPosition = ray.origin + ray.direction * t;
             Debug.Log(targetPosition.z);
         }
-        else
+        else if (targetFind != null)
         {
             lockedTarget = null;
+            targetPosition = targetFind.position;
         }
 
         if (hitTarget)
