@@ -13,10 +13,16 @@ public class WaveDialogueData
     [Header("觸發設定")]
     public bool enabled = true;
     
+    [Header("自動閱讀設定")]
+    public bool autoRead = false;
+    public float autoReadSpeed = 3f; // 自動閱讀間隔（秒）
+    
     public WaveDialogueData()
     {
         dialogues = new List<string>();
         enabled = true;
+        autoRead = false;
+        autoReadSpeed = 3f;
     }
     
     /// <summary>
@@ -29,6 +35,12 @@ public class WaveDialogueData
         foreach (var dialogue in dialogues)
         {
             DialogueManager.Instance.TriggerDialogue(dialogue);
+        }
+        
+        // 如果啟用自動閱讀，開始自動閱讀協程
+        if (autoRead && DialogueManager.Instance != null)
+        {
+            DialogueManager.Instance.StartAutoReadCoroutine(autoReadSpeed);
         }
     }
     
@@ -56,6 +68,13 @@ public class WaveDialogueData
                 enemyWave.SetWaitingForDialogue(true);
                 enemyWave.StartCoroutine(WaitForDialogueComplete());
             }
+            
+            // 如果啟用自動閱讀，在等待協程中處理
+            if (autoRead && DialogueManager.Instance != null)
+            {
+                // 延遲一下再開始自動閱讀，確保對話已經開始顯示
+                enemyWave?.StartCoroutine(DelayedAutoRead());
+            }
         }
     }
     
@@ -75,6 +94,20 @@ public class WaveDialogueData
         {
             enemyWave.SetWaitingForDialogue(false);
             enemyWave.OnDialogueComplete();
+        }
+    }
+    
+    /// <summary>
+    /// 延遲開始自動閱讀的協程
+    /// </summary>
+    private System.Collections.IEnumerator DelayedAutoRead()
+    {
+        // 等待一幀，確保對話已經開始
+        yield return null;
+        
+        if (DialogueManager.Instance != null)
+        {
+            DialogueManager.Instance.StartAutoReadCoroutine(autoReadSpeed);
         }
     }
 }
@@ -97,11 +130,17 @@ public class EnemyHealthDialogueData
     private bool triggered = false; // 避免重複觸發
     public bool Triggered => triggered; // 只讀屬性
     
+    [Header("自動閱讀設定")]
+    public bool autoRead = false;
+    public float autoReadSpeed = 3f; // 自動閱讀間隔（秒）
+    
     public EnemyHealthDialogueData()
     {
         dialogues = new List<string>();
         enabled = true;
         triggered = false;
+        autoRead = false;
+        autoReadSpeed = 3f;
     }
     
     /// <summary>
@@ -118,6 +157,12 @@ public class EnemyHealthDialogueData
             foreach (var dialogue in dialogues)
             {
                 DialogueManager.Instance.TriggerDialogue(dialogue);
+            }
+            
+            // 如果啟用自動閱讀，開始自動閱讀協程
+            if (autoRead && DialogueManager.Instance != null)
+            {
+                DialogueManager.Instance.StartAutoReadCoroutine(autoReadSpeed);
             }
         }
     }
@@ -148,6 +193,10 @@ public class WaveProcessTimeDialogueData
     private bool triggered = false; // 避免重複觸發
     public bool Triggered => triggered; // 只讀屬性
     
+    [Header("自動閱讀設定")]
+    public bool autoRead = false;
+    public float autoReadSpeed = 3f; // 自動閱讀間隔（秒）
+    
     // 私有變數
     private float waveStartTime = 0f;
     private bool isWaveStarted = false;
@@ -161,6 +210,8 @@ public class WaveProcessTimeDialogueData
         waveStartTime = 0f;
         isWaveStarted = false;
         lastDisplayedSecond = 0;
+        autoRead = false;
+        autoReadSpeed = 3f;
     }
     
     /// <summary>
@@ -168,8 +219,7 @@ public class WaveProcessTimeDialogueData
     /// </summary>
     public void StartWaveTimer()
     {
-        if (!enabled) return;
-        
+        enabled = true; // 確保對話被啟用
         waveStartTime = Time.time;
         isWaveStarted = true;
         triggered = false;
@@ -227,9 +277,29 @@ public class WaveProcessTimeDialogueData
             triggered = true;
             Debug.Log($"時間對話觸發！已過時間: {elapsedTime:F1} 秒");
             
+            Debug.Log($"對話列表數量: {dialogues.Count}");
+            if (dialogues.Count == 0)
+            {
+                Debug.LogWarning("對話列表為空！請在 Inspector 中添加對話節點名稱。");
+                return;
+            }
+            
             foreach (var dialogue in dialogues)
             {
+                Debug.Log($"嘗試觸發對話: {dialogue}");
+                if (string.IsNullOrEmpty(dialogue))
+                {
+                    Debug.LogWarning("對話節點名稱為空！");
+                    continue;
+                }
+                
                 DialogueManager.Instance.TriggerDialogue(dialogue);
+            }
+            
+            // 如果啟用自動閱讀，開始自動閱讀協程
+            if (autoRead && DialogueManager.Instance != null)
+            {
+                DialogueManager.Instance.StartAutoReadCoroutine(autoReadSpeed);
             }
         }
     }
