@@ -465,7 +465,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behavior: {fileID: 106673145}
   health: {fileID: 106673147}
-  enemyDialogues: []
+  enemyDeathDialogues: []
 --- !u!1 &131062518
 GameObject:
   m_ObjectHideFlags: 0
@@ -776,7 +776,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behavior: {fileID: 195157082}
   health: {fileID: 195157081}
-  enemyDialogues: []
+  enemyDeathDialogues: []
 --- !u!114 &195157081
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1920,16 +1920,18 @@ MonoBehaviour:
   - {fileID: 1321631494}
   targetPosition: {fileID: 999589439}
   moveSpeed: 100
-  waveDialogues:
-  - nodeName: Wave2_0
-    pauseGame: 0
-    delay: 0
-    triggerType: 2
-    healthThreshold: 0
-    waveIndex: 0
-    triggerOnce: 0
-    isTriggered: 0
-  waveIndex: 0
+  waveMoveBeforeDialogues:
+    dialogues: []
+    enabled: 1
+  waveMoveDuringDialogues:
+    dialogues:
+    - Wave2_1
+    enabled: 1
+  waveAttackBeforeDialogues:
+    dialogues: []
+    enabled: 1
+  waveProcessTimeDialogues: []
+  enemyHealthDialogues: []
 --- !u!1 &334242001
 GameObject:
   m_ObjectHideFlags: 0
@@ -2783,7 +2785,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behavior: {fileID: 471496136}
   health: {fileID: 471496138}
-  enemyDialogues: []
+  enemyDeathDialogues: []
 --- !u!1 &507613973
 GameObject:
   m_ObjectHideFlags: 0
@@ -3057,7 +3059,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behavior: {fileID: 565415288}
   health: {fileID: 565415290}
-  enemyDialogues: []
+  enemyDeathDialogues: []
 --- !u!23 &565415292
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -4060,7 +4062,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behavior: {fileID: 805299563}
   health: {fileID: 805299565}
-  enemyDialogues: []
+  enemyDeathDialogues: []
 --- !u!23 &805299567
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -4304,24 +4306,19 @@ MonoBehaviour:
   - {fileID: 2027753288}
   targetPosition: {fileID: 999589439}
   moveSpeed: 100
-  waveDialogues:
-  - nodeName: Wave1_0
-    pauseGame: 0
-    delay: 0
-    triggerType: 2
-    healthThreshold: 0
-    waveIndex: 0
-    triggerOnce: 0
-    isTriggered: 0
-  - nodeName: Wave1_1
-    pauseGame: 0
-    delay: 0
-    triggerType: 1
-    healthThreshold: 0
-    waveIndex: 0
-    triggerOnce: 0
-    isTriggered: 0
-  waveIndex: 0
+  waveMoveBeforeDialogues:
+    dialogues:
+    - Wave1_1
+    enabled: 1
+  waveMoveDuringDialogues:
+    dialogues: []
+    enabled: 1
+  waveAttackBeforeDialogues:
+    dialogues:
+    - Wave1_2
+    enabled: 1
+  waveProcessTimeDialogues: []
+  enemyHealthDialogues: []
 --- !u!4 &905350716
 Transform:
   m_ObjectHideFlags: 0
@@ -4887,24 +4884,23 @@ MonoBehaviour:
   - {fileID: 195157080}
   targetPosition: {fileID: 999589439}
   moveSpeed: 100
-  waveDialogues:
-  - nodeName: Wave3_0
-    pauseGame: 0
-    delay: 0
-    triggerType: 2
-    healthThreshold: 0
-    waveIndex: 0
-    triggerOnce: 0
-    isTriggered: 0
-  - nodeName: Wave3_1
-    pauseGame: 0
-    delay: 0
-    triggerType: 1
-    healthThreshold: 0
-    waveIndex: 0
-    triggerOnce: 0
-    isTriggered: 0
-  waveIndex: 0
+  waveMoveBeforeDialogues:
+    dialogues: []
+    enabled: 1
+  waveMoveDuringDialogues:
+    dialogues: []
+    enabled: 1
+  waveAttackBeforeDialogues:
+    dialogues:
+    - Wave3_1
+    enabled: 1
+  waveProcessTimeDialogues:
+  - triggerTime: 5
+    dialogues:
+    - Wave3_2
+    enabled: 0
+    triggered: 0
+  enemyHealthDialogues: []
 --- !u!4 &1045033824
 Transform:
   m_ObjectHideFlags: 0
@@ -5472,7 +5468,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behavior: {fileID: 1163541621}
   health: {fileID: 1163541623}
-  enemyDialogues: []
+  enemyDeathDialogues: []
 --- !u!23 &1163541625
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -6108,7 +6104,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behavior: {fileID: 1305207661}
   health: {fileID: 1305207663}
-  enemyDialogues: []
+  enemyDeathDialogues: []
 --- !u!23 &1305207665
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -6283,7 +6279,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behavior: {fileID: 1308269355}
   health: {fileID: 1308269357}
-  enemyDialogues: []
+  enemyDeathDialogues: []
 --- !u!23 &1308269359
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -6458,7 +6454,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behavior: {fileID: 1321631491}
   health: {fileID: 1321631493}
-  enemyDialogues: []
+  enemyDeathDialogues: []
 --- !u!23 &1321631495
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -7074,7 +7070,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behavior: {fileID: 1566710743}
   health: {fileID: 1566710745}
-  enemyDialogues: []
+  enemyDeathDialogues: []
 --- !u!23 &1566710747
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -7811,7 +7807,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behavior: {fileID: 1763097365}
   health: {fileID: 1763097367}
-  enemyDialogues: []
+  enemyDeathDialogues: []
 --- !u!23 &1763097369
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -7986,7 +7982,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behavior: {fileID: 1763861560}
   health: {fileID: 1763861562}
-  enemyDialogues: []
+  enemyDeathDialogues: []
 --- !u!23 &1763861564
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -8299,7 +8295,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behavior: {fileID: 2027753290}
   health: {fileID: 2027753289}
-  enemyDialogues: []
+  enemyDeathDialogues: []
 --- !u!114 &2027753289
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9068,7 +9064,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behavior: {fileID: 8246959078627281729}
   health: {fileID: 8246959078627281725}
-  enemyDialogues: []
+  enemyDeathDialogues: []
 --- !u!54 &8246959078627281728
 Rigidbody:
   m_ObjectHideFlags: 0

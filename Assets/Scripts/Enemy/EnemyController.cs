@@ -8,7 +8,7 @@ public class EnemyController : MonoBehaviour
     [SerializeField] private BaseHealth health;
     
     [Header("對話系統")]
-    public List<DialogueTrigger> enemyDialogues = new List<DialogueTrigger>();
+    public List<string> enemyDeathDialogues = new List<string>();
 
     private void Awake()
     {
@@ -38,31 +38,9 @@ public class EnemyController : MonoBehaviour
     public void WaveProcessing()
     {
         behavior?.Tick();
-        
-        // 檢查敵人個別的對話觸發
-        CheckEnemyDialogues();
     }
     
-    /// <summary>
-    /// 檢查敵人個別的對話觸發
-    /// </summary>
-    private void CheckEnemyDialogues()
-    {
-        if (DialogueManager.Instance == null || health.IsDead()) return;
-        
-        float healthPercentage = health.GetHealthPercentage();
-        
-        foreach (var dialogue in enemyDialogues)
-        {
-            if (dialogue.triggerType == DialogueTriggerType.HealthThreshold && 
-                dialogue.CanTrigger() && 
-                healthPercentage <= dialogue.healthThreshold)
-            {
-                DialogueManager.Instance.TriggerDialogue(dialogue);
-                dialogue.MarkAsTriggered();
-            }
-        }
-    }
+
     
     /// <summary>
     /// 敵人死亡時觸發對話
@@ -71,14 +49,10 @@ public class EnemyController : MonoBehaviour
     {
         if (DialogueManager.Instance == null) return;
         
-        foreach (var dialogue in enemyDialogues)
-        {
-            if (dialogue.triggerType == DialogueTriggerType.EnemyDeath && dialogue.CanTrigger())
-            {
-                DialogueManager.Instance.TriggerDialogue(dialogue);
-                dialogue.MarkAsTriggered();
-            }
-        }
+        // 創建一個臨時的 WaveDialogueData 來處理死亡對話
+        var deathDialogue = new WaveDialogueData();
+        deathDialogue.dialogues = enemyDeathDialogues;
+        deathDialogue.TriggerDialogues();
     }
 
     public BaseHealth GetHealth() => health;

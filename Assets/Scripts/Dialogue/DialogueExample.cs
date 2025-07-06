@@ -21,30 +21,24 @@ public class DialogueExample : MonoBehaviour
     {
         if (exampleWave == null) return;
         
-        // 添加波次開始對話
-        var waveStartDialogue = new DialogueTrigger("WaveStart_Dialogue", DialogueTriggerType.WaveStart)
-        {
-            pauseGame = false,
-            triggerOnce = true,
-            waveIndex = 0 // 只在第一波觸發
-        };
-        exampleWave.waveDialogues.Add(waveStartDialogue);
+        // 添加波次移動前對話
+        exampleWave.waveMoveBeforeDialogues.dialogues.Add("WaveMoveBefore_Dialogue");
         
-        // 添加波次移動對話
-        var waveMoveDialogue = new DialogueTrigger("WaveMove_Dialogue", DialogueTriggerType.WaveMove)
-        {
-            pauseGame = false,
-            triggerOnce = false // 每波都觸發
-        };
-        exampleWave.waveDialogues.Add(waveMoveDialogue);
+        // 添加波次攻擊前對話
+        exampleWave.waveAttackBeforeDialogues.dialogues.Add("WaveAttackBefore_Dialogue");
         
-        // 添加血量閾值對話
-        var healthDialogue = new DialogueTrigger("HealthThreshold_Dialogue", DialogueTriggerType.HealthThreshold)
+        // 添加波次進行時間對話（30秒後觸發）
+        exampleWave.AddWaveProcessTimeDialogue(30f, new System.Collections.Generic.List<string>{"WaveProcessTime_Dialogue"});
+        
+        // 添加敵人血量對話示例
+        if (exampleWave.enemies.Count > 0)
         {
-            healthThreshold = 0.3f, // 血量低於 30% 時觸發
-            triggerOnce = true
-        };
-        exampleWave.waveDialogues.Add(healthDialogue);
+            var enemyHealth = exampleWave.enemies[0].GetHealth();
+            if (enemyHealth != null)
+            {
+                exampleWave.AddEnemyHealthDialogue(enemyHealth, 50f, new System.Collections.Generic.List<string>{"EnemyLowHealth_Dialogue"});
+            }
+        }
     }
     
     /// <summary>
@@ -55,11 +49,10 @@ public class DialogueExample : MonoBehaviour
     {
         if (DialogueManager.Instance != null)
         {
-            var emergencyTrigger = new DialogueTrigger("Emergency_Dialogue", DialogueTriggerType.Manual)
-            {
-                pauseGame = true // 暫停遊戲
-            };
-            DialogueManager.Instance.TriggerDialogue(emergencyTrigger);
+            // 創建一個臨時的 WaveDialogueData 來處理緊急對話
+            var emergencyDialogue = new WaveDialogueData();
+            emergencyDialogue.dialogues.Add("Emergency_Dialogue");
+            emergencyDialogue.TriggerDialogues();
         }
     }
     

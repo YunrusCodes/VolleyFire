@@ -17,7 +17,7 @@ public class DialogueManager : MonoBehaviour
     
     // 對話狀態
     private bool isDialogueActive = false;
-    private Queue<DialogueTrigger> pendingDialogues = new Queue<DialogueTrigger>();
+    private Queue<string> pendingDialogues = new Queue<string>();
     
     // 事件系統
     public static event Action<string> OnDialogueStarted;
@@ -59,44 +59,38 @@ public class DialogueManager : MonoBehaviour
     /// <summary>
     /// 觸發對話
     /// </summary>
-    /// <param name="trigger">對話觸發器</param>
-    public void TriggerDialogue(DialogueTrigger trigger)
+    /// <param name="nodeName">對話節點名稱</param>
+    public void TriggerDialogue(string nodeName)
     {
         if (!enableDialogueSystem) return;
         
         // 如果當前有對話在進行，加入等待佇列
         if (isDialogueActive)
         {
-            pendingDialogues.Enqueue(trigger);
+            pendingDialogues.Enqueue(nodeName);
             return;
         }
         
-        StartDialogue(trigger);
+        StartDialogue(nodeName);
     }
     
     /// <summary>
     /// 開始播放對話
     /// </summary>
-    private void StartDialogue(DialogueTrigger trigger)
+    private void StartDialogue(string nodeName)
     {
-        if (dialogueRunner == null || string.IsNullOrEmpty(trigger.nodeName))
+        if (dialogueRunner == null || string.IsNullOrEmpty(nodeName))
         {
             Debug.LogWarning("對話系統未正確設置或節點名稱為空");
             return;
         }
         
         isDialogueActive = true;
-        OnDialogueStarted?.Invoke(trigger.nodeName);
+        OnDialogueStarted?.Invoke(nodeName);
         
-        // 暫停遊戲邏輯（可選）
-        if (trigger.pauseGame)
-        {
-            Time.timeScale = 0f;
-        }
+        dialogueRunner.StartDialogue(nodeName);
         
-        dialogueRunner.StartDialogue(trigger.nodeName);
-        
-        Debug.Log($"開始播放對話: {trigger.nodeName}");
+        Debug.Log($"開始播放對話: {nodeName}");
     }
     
     /// <summary>
@@ -134,6 +128,9 @@ public class DialogueManager : MonoBehaviour
         {
             dialogueRunner.Stop();
         }
+        
+        // 清空等待佇列
+        pendingDialogues.Clear();
         OnDialogueComplete();
     }
     

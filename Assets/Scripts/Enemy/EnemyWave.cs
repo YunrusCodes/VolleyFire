@@ -10,8 +10,11 @@ public class EnemyWave : MonoBehaviour
     public float moveSpeed = 5f;
 
     [Header("對話系統")]
-    public List<DialogueTrigger> waveDialogues = new List<DialogueTrigger>();
-    public int waveIndex = 0; // 波次索引，用於對話觸發條件
+    public WaveDialogueData waveMoveBeforeDialogues = new WaveDialogueData();    // 波次移動前
+    public WaveDialogueData waveMoveDuringDialogues = new WaveDialogueData();    // 波次移動中
+    public WaveDialogueData waveAttackBeforeDialogues = new WaveDialogueData();  // 波次攻擊前
+    public List<WaveProcessTimeDialogueData> waveProcessTimeDialogues = new List<WaveProcessTimeDialogueData>(); // 波次進行時間觸發
+    public List<EnemyHealthDialogueData> enemyHealthDialogues = new List<EnemyHealthDialogueData>(); // 敵人血量觸發
 
     private bool isMoving = true;
     private bool isWaveActive = false;
@@ -20,8 +23,16 @@ public class EnemyWave : MonoBehaviour
 
     private void Start()
     {
-        // 觸發波次移動對話，並等待對話完成後才開始移動
-        TriggerDialoguesAndWait(DialogueTriggerType.WaveMove);
+        // 觸發波次移動前對話，並等待對話完成後才開始移動
+        waveMoveBeforeDialogues.TriggerDialoguesAndWait();
+        
+        // 初始化波次進行時間對話（如果列表為空）
+        if (waveProcessTimeDialogues.Count == 0)
+        {
+            // 可以添加一些預設的時間對話
+            // AddWaveProcessTimeDialogue(5f, new List<string>{"EarlyWarning_Dialogue"});
+            // AddWaveProcessTimeDialogue(15f, new List<string>{"MidWarning_Dialogue"});
+        }
     }
 
     private void Update()
@@ -36,15 +47,25 @@ public class EnemyWave : MonoBehaviour
         {
             // 父物件移動
             transform.position = Vector3.MoveTowards(transform.position, targetPosition.position, moveSpeed * Time.deltaTime);
+            
+            // 觸發波次移動中對話
+            waveMoveDuringDialogues.TriggerDialogues();
+            
             foreach (var enemy in enemies)
                 enemy.OnWaveMove();
+                
             if (Vector3.Distance(transform.position, targetPosition.position) < 0.1f)
             {
                 isMoving = false;
                 isWaveActive = true;
                 
-                // 觸發波次開始對話
-                TriggerDialogues(DialogueTriggerType.WaveStart);
+                Debug.Log("波次進入戰鬥階段，開始計時對話");
+                
+                // 觸發波次攻擊前對話
+                waveAttackBeforeDialogues.TriggerDialogues();
+                
+                // 開始波次進行時間對話計時
+                StartWaveProcessTimeDialogues();
                 
                 foreach (var enemy in enemies)
                     enemy.OnWaveStart();
@@ -52,15 +73,18 @@ public class EnemyWave : MonoBehaviour
         }
         else if (isWaveActive)
         {
+            // 檢查波次進行時間觸發對話
+            CheckWaveProcessTimeDialogues();
+            
+            // 檢查敵人血量觸發對話
+            CheckEnemyHealthDialogues();
+            
             bool waveClear = true;
             foreach (var enemy in enemies)
             {
                 enemy.WaveProcessing();
                 waveClear = waveClear && enemy.GetHealth().IsDead();
             }
-            
-            // 檢查血量閾值對話觸發
-            CheckHealthThresholdDialogues();
                 
             if (waveClear)
             {
@@ -68,115 +92,94 @@ public class EnemyWave : MonoBehaviour
                 isWaveClear = true;
             }
         }
-    }
-    
-    /// <summary>
-    /// 觸發指定類型的對話
-    /// </summary>
-    private void TriggerDialogues(DialogueTriggerType triggerType)
-    {
-        if (DialogueManager.Instance == null) return;
-        
-        foreach (var dialogue in waveDialogues)
-        {
-            if (dialogue.triggerType == triggerType && dialogue.CanTrigger())
-            {
-                // 檢查波次索引條件
-                if (dialogue.waveIndex == -1 || dialogue.waveIndex == waveIndex)
-                {
-                    DialogueManager.Instance.TriggerDialogue(dialogue);
-                    dialogue.MarkAsTriggered();
-                }
-            }
-        }
-    }
-    
-    /// <summary>
-    /// 觸發對話並等待完成後開始移動
-    /// </summary>
-    private void TriggerDialoguesAndWait(DialogueTriggerType triggerType)
-    {
-        if (DialogueManager.Instance == null) return;
-        
-        bool hasTriggeredDialogue = false;
-        
-        foreach (var dialogue in waveDialogues)
-        {
-            if (dialogue.triggerType == triggerType && dialogue.CanTrigger())
-            {
-                // 檢查波次索引條件
-                if (dialogue.waveIndex == -1 || dialogue.waveIndex == waveIndex)
-                {
-                    DialogueManager.Instance.TriggerDialogue(dialogue);
-                    dialogue.MarkAsTriggered();
-                    hasTriggeredDialogue = true;
-                }
-            }
-        }
-        
-        // 如果有觸發對話，則等待對話完成
-        if (hasTriggeredDialogue)
-        {
-            isWaitingForDialogue = true;
-            StartCoroutine(WaitForDialogueComplete());
-        }
         else
         {
-            // 沒有對話，直接開始移動
-            StartEnemyMovement();
-        }
-    }
-    
-    /// <summary>
-    /// 等待對話完成的協程
-    /// </summary>
-    private System.Collections.IEnumerator WaitForDialogueComplete()
-    {
-        // 等待對話完成
-        while (DialogueManager.Instance.IsDialogueActive())
-        {
-            yield return null;
-        }
-        
-        // 對話完成後，開始敵人移動
-        isWaitingForDialogue = false;
-        StartEnemyMovement();
-    }
-    
-    /// <summary>
-    /// 開始敵人移動
-    /// </summary>
-    private void StartEnemyMovement()
-    {
-        foreach (var enemy in enemies)
-            enemy.OnWaveMove();
-    }
-    
-    /// <summary>
-    /// 檢查血量閾值對話觸發
-    /// </summary>
-    private void CheckHealthThresholdDialogues()
-    {
-        if (DialogueManager.Instance == null) return;
-        
-        foreach (var enemy in enemies)
-        {
-            if (enemy.GetHealth().IsDead()) continue;
-            
-            float healthPercentage = enemy.GetHealth().GetHealthPercentage();
-            
-            foreach (var dialogue in waveDialogues)
+            // Debug: 確認波次狀態
+            if (isWaveClear)
             {
-                if (dialogue.triggerType == DialogueTriggerType.HealthThreshold && 
-                    dialogue.CanTrigger() && 
-                    healthPercentage <= dialogue.healthThreshold)
-                {
-                    DialogueManager.Instance.TriggerDialogue(dialogue);
-                    dialogue.MarkAsTriggered();
-                }
+                Debug.Log("波次已結束，無法觸發時間對話");
             }
         }
     }
+    
+    /// <summary>
+    /// 開始波次進行時間對話計時
+    /// </summary>
+    private void StartWaveProcessTimeDialogues()
+    {
+        Debug.Log($"開始波次進行時間對話計時，共有 {waveProcessTimeDialogues.Count} 個時間對話");
+        foreach (var timeDialogue in waveProcessTimeDialogues)
+        {
+            timeDialogue.StartWaveTimer();
+        }
+    }
+    
+    /// <summary>
+    /// 檢查波次進行時間觸發對話
+    /// </summary>
+    private void CheckWaveProcessTimeDialogues()
+    {
+        if (waveProcessTimeDialogues.Count > 0)
+        {
+            Debug.Log($"檢查時間對話，共 {waveProcessTimeDialogues.Count} 個");
+        }
+        
+        foreach (var timeDialogue in waveProcessTimeDialogues)
+        {
+            timeDialogue.CheckAndTriggerDialogue();
+        }
+    }
+    
+    /// <summary>
+    /// 檢查敵人血量觸發對話
+    /// </summary>
+    private void CheckEnemyHealthDialogues()
+    {
+        foreach (var healthDialogue in enemyHealthDialogues)
+        {
+            healthDialogue.CheckAndTriggerDialogue();
+        }
+    }
+    
+    /// <summary>
+    /// 設置等待對話狀態
+    /// </summary>
+    public void SetWaitingForDialogue(bool waiting)
+    {
+        isWaitingForDialogue = waiting;
+    }
+    
+    /// <summary>
+    /// 對話完成回調
+    /// </summary>
+    public void OnDialogueComplete()
+    {
+        // 這個方法現在主要用於其他回調，等待狀態由 SetWaitingForDialogue 控制
+    }
+    
+    /// <summary>
+    /// 重置所有血量對話觸發狀態
+    /// </summary>
+    public void ResetHealthDialogues()
+    {
+        foreach (var healthDialogue in enemyHealthDialogues)
+        {
+            healthDialogue.ResetTrigger();
+        }
+    }
+    
+    /// <summary>
+    /// 重置所有時間對話觸發狀態
+    /// </summary>
+    public void ResetTimeDialogues()
+    {
+        foreach (var timeDialogue in waveProcessTimeDialogues)
+        {
+            timeDialogue.ResetTrigger();
+        }
+    }
+    
+
     
     /// <summary>
     /// 手動觸發對話
@@ -185,18 +188,55 @@ public class EnemyWave : MonoBehaviour
     {
         if (DialogueManager.Instance == null) return;
         
-        var manualTrigger = new DialogueTrigger(nodeName, DialogueTriggerType.Manual);
-        DialogueManager.Instance.TriggerDialogue(manualTrigger);
+        // 創建一個臨時的 WaveDialogueData 來處理手動觸發
+        var manualDialogue = new WaveDialogueData();
+        manualDialogue.dialogues.Add(nodeName);
+        manualDialogue.TriggerDialogues();
     }
     
     /// <summary>
-    /// 重置所有對話觸發狀態
+    /// 添加敵人血量對話
     /// </summary>
-    public void ResetDialogueTriggers()
+    public void AddEnemyHealthDialogue(BaseHealth targetHealth, float healthThreshold, List<string> dialogues)
     {
-        foreach (var dialogue in waveDialogues)
+        var healthDialogue = new EnemyHealthDialogueData();
+        healthDialogue.targetHealth = targetHealth;
+        healthDialogue.healthThreshold = healthThreshold;
+        healthDialogue.dialogues = dialogues;
+        
+        enemyHealthDialogues.Add(healthDialogue);
+    }
+    
+    /// <summary>
+    /// 添加波次進行時間對話
+    /// </summary>
+    public void AddWaveProcessTimeDialogue(float triggerTime, List<string> dialogues)
+    {
+        var timeDialogue = new WaveProcessTimeDialogueData();
+        timeDialogue.triggerTime = triggerTime;
+        timeDialogue.dialogues = dialogues;
+        
+        waveProcessTimeDialogues.Add(timeDialogue);
+    }
+    
+    /// <summary>
+    /// 測試時間對話（用於調試）
+    /// </summary>
+    [ContextMenu("測試時間對話")]
+    public void TestTimeDialogues()
+    {
+        Debug.Log($"當前波次狀態: isMoving={isMoving}, isWaveActive={isWaveActive}");
+        Debug.Log($"時間對話數量: {waveProcessTimeDialogues.Count}");
+        
+        if (waveProcessTimeDialogues.Count > 0)
         {
-            dialogue.ResetTrigger();
+            foreach (var timeDialogue in waveProcessTimeDialogues)
+            {
+                Debug.Log($"時間對話: triggerTime={timeDialogue.triggerTime}, enabled={timeDialogue.enabled}, triggered={timeDialogue.Triggered}");
+            }
         }
+        
+        // 強制開始計時
+        StartWaveProcessTimeDialogues();
     }
 } 

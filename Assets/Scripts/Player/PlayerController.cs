@@ -54,6 +54,11 @@ public class PlayerController : MonoBehaviour
     private bool isLocked;              // 是否處於鎖定狀態
 
     public GameObject FireTarget;
+    
+    // 全域射擊控制
+    private static bool globalFireEnabled = true;
+    public static bool GlobalFireEnabled => globalFireEnabled;
+    
     #endregion
 
     #region Unity 生命週期
@@ -250,8 +255,8 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void HandleShooting()
     {
-        // 檢查是否有對話正在進行，如果有則禁止射擊
-        if (DialogueManager.Instance != null && DialogueManager.Instance.IsDialogueActive())
+        // 檢查全域射擊控制
+        if (!globalFireEnabled)
         {
             return;
         }
@@ -277,6 +282,29 @@ public class PlayerController : MonoBehaviour
         pos.x = Mathf.Clamp(pos.x, -xBoundary, xBoundary);
         pos.y = Mathf.Clamp(pos.y, -yBoundary, yBoundary);
         playerShip.transform.position = pos;
+    }
+
+    #endregion
+
+    #region 全域射擊控制
+
+    /// <summary>
+    /// 啟用或禁用全域射擊功能
+    /// </summary>
+    /// <param name="enabled">是否啟用射擊</param>
+    public static void EnableFire(bool enabled)
+    {
+        globalFireEnabled = enabled;
+        Debug.Log($"全域射擊功能已{(enabled ? "啟用" : "禁用")}");
+    }
+
+    /// <summary>
+    /// 獲取當前全域射擊狀態
+    /// </summary>
+    /// <returns>是否啟用射擊</returns>
+    public static bool IsFireEnabled()
+    {
+        return globalFireEnabled;
     }
 
     #endregion

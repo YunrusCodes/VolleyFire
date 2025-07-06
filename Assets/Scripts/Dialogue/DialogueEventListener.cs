@@ -7,7 +7,7 @@ using System.Collections.Generic;
 public class DialogueEventListener : MonoBehaviour
 {
     [Header("對話觸發設定")]
-    public List<DialogueTrigger> eventDialogues = new List<DialogueTrigger>();
+    public List<string> playerDamageDialogues = new List<string>();
     
     private void Start()
     {
@@ -52,8 +52,10 @@ public class DialogueEventListener : MonoBehaviour
     {
         if (DialogueManager.Instance == null) return;
         
-        var trigger = new DialogueTrigger(nodeName, DialogueTriggerType.Manual);
-        DialogueManager.Instance.TriggerDialogue(trigger);
+        // 創建一個臨時的 WaveDialogueData 來處理事件對話
+        var eventDialogue = new WaveDialogueData();
+        eventDialogue.dialogues.Add(nodeName);
+        eventDialogue.TriggerDialogues();
     }
     
     /// <summary>
@@ -63,14 +65,9 @@ public class DialogueEventListener : MonoBehaviour
     {
         if (DialogueManager.Instance == null) return;
         
-        foreach (var dialogue in eventDialogues)
-        {
-            if (dialogue.triggerType == DialogueTriggerType.PlayerDamage && dialogue.CanTrigger())
-            {
-                DialogueManager.Instance.TriggerDialogue(dialogue);
-                dialogue.MarkAsTriggered();
-                break; // 只觸發第一個符合條件的對話
-            }
-        }
+        // 創建一個臨時的 WaveDialogueData 來處理玩家受傷對話
+        var damageDialogue = new WaveDialogueData();
+        damageDialogue.dialogues = playerDamageDialogues;
+        damageDialogue.TriggerDialogues();
     }
 } 
