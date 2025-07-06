@@ -465,6 +465,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behavior: {fileID: 106673145}
   health: {fileID: 106673147}
+  enemyDialogues: []
 --- !u!1 &131062518
 GameObject:
   m_ObjectHideFlags: 0
@@ -775,6 +776,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behavior: {fileID: 195157082}
   health: {fileID: 195157081}
+  enemyDialogues: []
 --- !u!114 &195157081
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1624,6 +1626,18 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2958262986520364888, guid: 52571f68872914e24837210513edea1d, type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 358667bdb0dfe3f4d8e767df5dcda321, type: 2}
+    - target: {fileID: 2958262986520364888, guid: 52571f68872914e24837210513edea1d, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: -7513344887864402797, guid: 358667bdb0dfe3f4d8e767df5dcda321, type: 2}
+    - target: {fileID: 2958262986520364888, guid: 52571f68872914e24837210513edea1d, type: 3}
+      propertyPath: m_hasFontAssetChanged
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2958262987206614837, guid: 52571f68872914e24837210513edea1d, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -1646,6 +1660,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2958262987206614837, guid: 52571f68872914e24837210513edea1d, type: 3}
       propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2958262987206614838, guid: 52571f68872914e24837210513edea1d, type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 358667bdb0dfe3f4d8e767df5dcda321, type: 2}
+    - target: {fileID: 2958262987206614838, guid: 52571f68872914e24837210513edea1d, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: -7513344887864402797, guid: 358667bdb0dfe3f4d8e767df5dcda321, type: 2}
+    - target: {fileID: 2958262987206614838, guid: 52571f68872914e24837210513edea1d, type: 3}
+      propertyPath: m_hasFontAssetChanged
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7262066351540048079, guid: 52571f68872914e24837210513edea1d, type: 3}
@@ -1722,7 +1748,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8309902628685535410, guid: 52571f68872914e24837210513edea1d, type: 3}
       propertyPath: autoStart
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8309902628685535410, guid: 52571f68872914e24837210513edea1d, type: 3}
       propertyPath: startNode
@@ -1894,6 +1920,16 @@ MonoBehaviour:
   - {fileID: 1321631494}
   targetPosition: {fileID: 999589439}
   moveSpeed: 100
+  waveDialogues:
+  - nodeName: Wave2_0
+    pauseGame: 0
+    delay: 0
+    triggerType: 2
+    healthThreshold: 0
+    waveIndex: 0
+    triggerOnce: 0
+    isTriggered: 0
+  waveIndex: 0
 --- !u!1 &334242001
 GameObject:
   m_ObjectHideFlags: 0
@@ -2747,6 +2783,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behavior: {fileID: 471496136}
   health: {fileID: 471496138}
+  enemyDialogues: []
 --- !u!1 &507613973
 GameObject:
   m_ObjectHideFlags: 0
@@ -3020,6 +3057,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behavior: {fileID: 565415288}
   health: {fileID: 565415290}
+  enemyDialogues: []
 --- !u!23 &565415292
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -4022,6 +4060,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behavior: {fileID: 805299563}
   health: {fileID: 805299565}
+  enemyDialogues: []
 --- !u!23 &805299567
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -4265,6 +4304,24 @@ MonoBehaviour:
   - {fileID: 2027753288}
   targetPosition: {fileID: 999589439}
   moveSpeed: 100
+  waveDialogues:
+  - nodeName: Wave1_0
+    pauseGame: 0
+    delay: 0
+    triggerType: 2
+    healthThreshold: 0
+    waveIndex: 0
+    triggerOnce: 0
+    isTriggered: 0
+  - nodeName: Wave1_1
+    pauseGame: 0
+    delay: 0
+    triggerType: 1
+    healthThreshold: 0
+    waveIndex: 0
+    triggerOnce: 0
+    isTriggered: 0
+  waveIndex: 0
 --- !u!4 &905350716
 Transform:
   m_ObjectHideFlags: 0
@@ -4830,6 +4887,24 @@ MonoBehaviour:
   - {fileID: 195157080}
   targetPosition: {fileID: 999589439}
   moveSpeed: 100
+  waveDialogues:
+  - nodeName: Wave3_0
+    pauseGame: 0
+    delay: 0
+    triggerType: 2
+    healthThreshold: 0
+    waveIndex: 0
+    triggerOnce: 0
+    isTriggered: 0
+  - nodeName: Wave3_1
+    pauseGame: 0
+    delay: 0
+    triggerType: 1
+    healthThreshold: 0
+    waveIndex: 0
+    triggerOnce: 0
+    isTriggered: 0
+  waveIndex: 0
 --- !u!4 &1045033824
 Transform:
   m_ObjectHideFlags: 0
@@ -5397,6 +5472,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behavior: {fileID: 1163541621}
   health: {fileID: 1163541623}
+  enemyDialogues: []
 --- !u!23 &1163541625
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -5877,6 +5953,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1304675285}
   - component: {fileID: 1304675284}
+  - component: {fileID: 1304675286}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -5915,6 +5992,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1304675286
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1304675283}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fee15f2821e396d4396c5a18c4736314, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dialogueRunner: {fileID: 1374499568}
+  dialogueUI: {fileID: 1972253494}
+  enableDialogueSystem: 1
 --- !u!1 &1305207660
 GameObject:
   m_ObjectHideFlags: 0
@@ -6016,6 +6108,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behavior: {fileID: 1305207661}
   health: {fileID: 1305207663}
+  enemyDialogues: []
 --- !u!23 &1305207665
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -6190,6 +6283,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behavior: {fileID: 1308269355}
   health: {fileID: 1308269357}
+  enemyDialogues: []
 --- !u!23 &1308269359
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -6364,6 +6458,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behavior: {fileID: 1321631491}
   health: {fileID: 1321631493}
+  enemyDialogues: []
 --- !u!23 &1321631495
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -6523,6 +6618,17 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1370817382}
   m_Mesh: {fileID: 4300000, guid: a48942f1defa105409300c6ae5ade981, type: 3}
+--- !u!114 &1374499568 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8309902628685535410, guid: 52571f68872914e24837210513edea1d, type: 3}
+  m_PrefabInstance: {fileID: 283558715}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bec29c0a230741bdac901dba8da47ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1428574443
 GameObject:
   m_ObjectHideFlags: 0
@@ -6968,6 +7074,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behavior: {fileID: 1566710743}
   health: {fileID: 1566710745}
+  enemyDialogues: []
 --- !u!23 &1566710747
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -7704,6 +7811,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behavior: {fileID: 1763097365}
   health: {fileID: 1763097367}
+  enemyDialogues: []
 --- !u!23 &1763097369
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -7878,6 +7986,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behavior: {fileID: 1763861560}
   health: {fileID: 1763861562}
+  enemyDialogues: []
 --- !u!23 &1763861564
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -8090,6 +8199,17 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1970671256}
   m_Mesh: {fileID: 4300000, guid: a48942f1defa105409300c6ae5ade981, type: 3}
+--- !u!114 &1972253494 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3443573992243610163, guid: 52571f68872914e24837210513edea1d, type: 3}
+  m_PrefabInstance: {fileID: 283558715}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2004598668
 GameObject:
   m_ObjectHideFlags: 0
@@ -8179,6 +8299,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behavior: {fileID: 2027753290}
   health: {fileID: 2027753289}
+  enemyDialogues: []
 --- !u!114 &2027753289
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8947,6 +9068,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behavior: {fileID: 8246959078627281729}
   health: {fileID: 8246959078627281725}
+  enemyDialogues: []
 --- !u!54 &8246959078627281728
 Rigidbody:
   m_ObjectHideFlags: 0

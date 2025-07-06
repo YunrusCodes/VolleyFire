@@ -250,6 +250,12 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void HandleShooting()
     {
+        // 檢查是否有對話正在進行，如果有則禁止射擊
+        if (DialogueManager.Instance != null && DialogueManager.Instance.IsDialogueActive())
+        {
+            return;
+        }
+        
         if (attackAction != null && attackAction.IsPressed())
         {
             // 直接使用 targetPosition 作為射擊目標
