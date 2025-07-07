@@ -789,7 +789,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 720595bbfcaf692428fb0a0a59037d14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 50
+  maxHealth: 100
   currentHealth: 0
 --- !u!114 &195157082
 MonoBehaviour:
@@ -2693,6 +2693,80 @@ MonoBehaviour:
   behavior: {fileID: 471496136}
   health: {fileID: 471496138}
   enemyDeathDialogues: []
+--- !u!1 &495601957
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 495601959}
+  - component: {fileID: 495601958}
+  m_Layer: 0
+  m_Name: Wave0
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &495601958
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 495601957}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39f43a7382c25a44d90293ef627194d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enemies: []
+  targetPosition: {fileID: 999589439}
+  moveSpeed: 50
+  waveMoveBeforeDialogues:
+    dialogues:
+    - Wave0_1
+    enabled: 1
+    autoRead: 1
+    autoReadSpeed: 2
+    enablePlayerFire: 0
+  waveMoveDuringDialogues:
+    dialogues: []
+    enabled: 0
+    autoRead: 1
+    autoReadSpeed: 3
+    enablePlayerFire: 0
+  waveAttackBeforeDialogues:
+    dialogues: []
+    enabled: 0
+    autoRead: 1
+    autoReadSpeed: 3
+    enablePlayerFire: 0
+  waveProcessTimeDialogues:
+  - triggerTime: 0
+    dialogues: []
+    enabled: 0
+    autoRead: 1
+    autoReadSpeed: 3
+    enablePlayerFire: 1
+  enemyHealthDialogues: []
+--- !u!4 &495601959
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 495601957}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 206.2}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &507613973
 GameObject:
   m_ObjectHideFlags: 0
@@ -4837,9 +4911,9 @@ MonoBehaviour:
     enablePlayerFire: 1
   enemyHealthDialogues:
   - targetHealth: {fileID: 195157081}
-    healthThreshold: 49
+    healthThreshold: 0
     dialogues:
-    - Wave3_2
+    - Wave3_3
     enabled: 1
     autoRead: 0
     autoReadSpeed: 3
@@ -5914,6 +5988,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   waves:
+  - {fileID: 495601958}
   - {fileID: 905350715}
   - {fileID: 305109111}
   - {fileID: 1045033823}
@@ -8728,7 +8803,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 609, y: 66}
   m_SizeDelta: {x: 40, y: 20}
   m_Pivot: {x: 0, y: 1}
 --- !u!1 &2958262986135786489
@@ -10588,6 +10663,7 @@ SceneRoots:
   - {fileID: 410087041}
   - {fileID: 832575519}
   - {fileID: 9127619513034172900}
+  - {fileID: 495601959}
   - {fileID: 905350716}
   - {fileID: 305109110}
   - {fileID: 1045033824}
