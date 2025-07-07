@@ -1,36 +1,44 @@
 title: Wave1_1
 ---
-艾蕾希亞: 曲速引擎作用中...發現前方威脅個體。
+<<setPortrait "Alicia">>
+艾蕾希亞: 曲速引擎作用中...
+艾蕾希亞: 亞空間狀態，曲率正常。
 ===
 
 title: Wave1_2
 ---
-艾蕾希亞: 正在逼近中。
+<<setPortrait "Alicia">>
+艾蕾希亞: 發現前方威脅個體，正在逼近中!
 ===
 
 title: Wave1_3
 ---
+<<setPortrait "Alicia">>
 艾蕾希亞: 請進行排除。
 ===
 
 title: Wave1_4
 ---
+<<setPortrait "Alicia">>
 艾蕾希亞: 請瞄準個體，透過紅準心進行射擊。
 ===
 
 title: Wave2_1
 ---
+<<setPortrait "Alicia">>
 艾蕾希亞: 前方發現威脅個體族群。
 艾蕾希亞: 請持續作戰。
 ===
 
 title: Wave3_1
 ---
+<<setPortrait "Alicia">>
 艾蕾希亞: 發現前方高威脅個體，判定為族群頭目。
 ===
 
 title: Wave3_2
 ---
+<<setPortrait "Alicia">>
 艾蕾希亞: 目標為高速移動型
 艾蕾希亞: 建議在紅準心狀態下按下左鍵，進入索敵模式
 艾蕾希亞: 進入索敵模式時，呈現藍準心
