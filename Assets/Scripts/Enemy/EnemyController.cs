@@ -1,10 +1,14 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(EnemyHealth))]
 public class EnemyController : MonoBehaviour
 {
     [SerializeField] private EnemyBehavior behavior;
     [SerializeField] private BaseHealth health;
+    
+    [Header("對話系統")]
+    public List<string> enemyDeathDialogues = new List<string>();
 
     private void Awake()
     {
@@ -34,6 +38,21 @@ public class EnemyController : MonoBehaviour
     public void WaveProcessing()
     {
         behavior?.Tick();
+    }
+    
+
+    
+    /// <summary>
+    /// 敵人死亡時觸發對話
+    /// </summary>
+    public void TriggerDeathDialogue()
+    {
+        if (DialogueManager.Instance == null) return;
+        
+        // 創建一個臨時的 WaveDialogueData 來處理死亡對話
+        var deathDialogue = new WaveDialogueData();
+        deathDialogue.dialogues = enemyDeathDialogues;
+        deathDialogue.TriggerDialogues();
     }
 
     public BaseHealth GetHealth() => health;

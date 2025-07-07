@@ -32,6 +32,16 @@ public abstract class BaseHealth : MonoBehaviour, IHealth
     public int GetCurrentHealth() => currentHealth;
     public int GetMaxHealth() => maxHealth;
     public bool IsDead() => isDead;
+    
+    /// <summary>
+    /// 獲取血量百分比 (0.0f - 1.0f)
+    /// </summary>
+    public float GetHealthPercentage()
+    {
+        if (maxHealth <= 0) return 0f;
+        return (float)currentHealth / maxHealth;
+    }
+    
     public void SetMaxHealth(int newMaxHealth)
     {
         maxHealth = newMaxHealth;
