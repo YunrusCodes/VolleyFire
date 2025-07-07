@@ -17,12 +17,16 @@ public class WaveDialogueData
     public bool autoRead = false;
     public float autoReadSpeed = 3f; // 自動閱讀間隔（秒）
     
+    [Header("玩家控制設定")]
+    public bool enablePlayerFire = true; // 對話時是否啟用玩家射擊
+    
     public WaveDialogueData()
     {
         dialogues = new List<string>();
         enabled = true;
         autoRead = false;
         autoReadSpeed = 3f;
+        enablePlayerFire = true;
     }
     
     /// <summary>
@@ -31,6 +35,9 @@ public class WaveDialogueData
     public void TriggerDialogues()
     {
         if (!enabled || DialogueManager.Instance == null) return;
+        
+        // 控制玩家射擊
+        PlayerController.EnableFire(enablePlayerFire);
         
         foreach (var dialogue in dialogues)
         {
@@ -42,6 +49,23 @@ public class WaveDialogueData
         {
             DialogueManager.Instance.StartAutoReadCoroutine(autoReadSpeed);
         }
+        
+        // 如果禁用了玩家射擊，需要監聽對話完成事件來恢復
+        if (!enablePlayerFire)
+        {
+            DialogueManager.OnDialogueEnded += OnDialogueEnded;
+        }
+    }
+    
+    /// <summary>
+    /// 對話結束回調
+    /// </summary>
+    private void OnDialogueEnded()
+    {
+        // 恢復玩家射擊
+        PlayerController.EnableFire(true);
+        // 取消訂閱事件
+        DialogueManager.OnDialogueEnded -= OnDialogueEnded;
     }
     
     /// <summary>
@@ -50,6 +74,9 @@ public class WaveDialogueData
     public void TriggerDialoguesAndWait()
     {
         if (!enabled || DialogueManager.Instance == null) return;
+        
+        // 控制玩家射擊
+        PlayerController.EnableFire(enablePlayerFire);
         
         bool hasTriggeredDialogue = false;
         
@@ -87,6 +114,9 @@ public class WaveDialogueData
         {
             yield return null;
         }
+        
+        // 對話完成後恢復玩家射擊
+        PlayerController.EnableFire(true);
         
         // 通知 EnemyWave 對話完成
         var enemyWave = MonoBehaviour.FindObjectOfType<EnemyWave>();
@@ -134,6 +164,9 @@ public class EnemyHealthDialogueData
     public bool autoRead = false;
     public float autoReadSpeed = 3f; // 自動閱讀間隔（秒）
     
+    [Header("玩家控制設定")]
+    public bool enablePlayerFire = true; // 對話時是否啟用玩家射擊
+    
     public EnemyHealthDialogueData()
     {
         dialogues = new List<string>();
@@ -141,6 +174,7 @@ public class EnemyHealthDialogueData
         triggered = false;
         autoRead = false;
         autoReadSpeed = 3f;
+        enablePlayerFire = true;
     }
     
     /// <summary>
@@ -154,6 +188,9 @@ public class EnemyHealthDialogueData
         {
             triggered = true;
             
+            // 控制玩家射擊
+            PlayerController.EnableFire(enablePlayerFire);
+            
             foreach (var dialogue in dialogues)
             {
                 DialogueManager.Instance.TriggerDialogue(dialogue);
@@ -164,7 +201,24 @@ public class EnemyHealthDialogueData
             {
                 DialogueManager.Instance.StartAutoReadCoroutine(autoReadSpeed);
             }
+            
+            // 如果禁用了玩家射擊，需要監聽對話完成事件來恢復
+            if (!enablePlayerFire)
+            {
+                DialogueManager.OnDialogueEnded += OnDialogueEnded;
+            }
         }
+    }
+    
+    /// <summary>
+    /// 對話結束回調
+    /// </summary>
+    private void OnDialogueEnded()
+    {
+        // 恢復玩家射擊
+        PlayerController.EnableFire(true);
+        // 取消訂閱事件
+        DialogueManager.OnDialogueEnded -= OnDialogueEnded;
     }
     
     /// <summary>
@@ -197,6 +251,9 @@ public class WaveProcessTimeDialogueData
     public bool autoRead = false;
     public float autoReadSpeed = 3f; // 自動閱讀間隔（秒）
     
+    [Header("玩家控制設定")]
+    public bool enablePlayerFire = true; // 對話時是否啟用玩家射擊
+    
     // 私有變數
     private float waveStartTime = 0f;
     private bool isWaveStarted = false;
@@ -212,6 +269,7 @@ public class WaveProcessTimeDialogueData
         lastDisplayedSecond = 0;
         autoRead = false;
         autoReadSpeed = 3f;
+        enablePlayerFire = true;
     }
     
     /// <summary>
@@ -284,6 +342,9 @@ public class WaveProcessTimeDialogueData
                 return;
             }
             
+            // 控制玩家射擊
+            PlayerController.EnableFire(enablePlayerFire);
+            
             foreach (var dialogue in dialogues)
             {
                 Debug.Log($"嘗試觸發對話: {dialogue}");
@@ -301,7 +362,24 @@ public class WaveProcessTimeDialogueData
             {
                 DialogueManager.Instance.StartAutoReadCoroutine(autoReadSpeed);
             }
+            
+            // 如果禁用了玩家射擊，需要監聽對話完成事件來恢復
+            if (!enablePlayerFire)
+            {
+                DialogueManager.OnDialogueEnded += OnDialogueEnded;
+            }
         }
+    }
+    
+    /// <summary>
+    /// 對話結束回調
+    /// </summary>
+    private void OnDialogueEnded()
+    {
+        // 恢復玩家射擊
+        PlayerController.EnableFire(true);
+        // 取消訂閱事件
+        DialogueManager.OnDialogueEnded -= OnDialogueEnded;
     }
     
     /// <summary>

@@ -1923,13 +1923,22 @@ MonoBehaviour:
   waveMoveBeforeDialogues:
     dialogues: []
     enabled: 1
+    autoRead: 0
+    autoReadSpeed: 3
+    enablePlayerFire: 1
   waveMoveDuringDialogues:
     dialogues:
     - Wave2_1
     enabled: 1
+    autoRead: 1
+    autoReadSpeed: 1
+    enablePlayerFire: 1
   waveAttackBeforeDialogues:
     dialogues: []
-    enabled: 1
+    enabled: 0
+    autoRead: 0
+    autoReadSpeed: 3
+    enablePlayerFire: 1
   waveProcessTimeDialogues: []
   enemyHealthDialogues: []
 --- !u!1 &334242001
@@ -4305,19 +4314,36 @@ MonoBehaviour:
   - {fileID: 106673150}
   - {fileID: 2027753288}
   targetPosition: {fileID: 999589439}
-  moveSpeed: 100
+  moveSpeed: 50
   waveMoveBeforeDialogues:
     dialogues:
     - Wave1_1
     enabled: 1
+    autoRead: 1
+    autoReadSpeed: 2
+    enablePlayerFire: 0
   waveMoveDuringDialogues:
-    dialogues: []
-    enabled: 1
-  waveAttackBeforeDialogues:
     dialogues:
     - Wave1_2
     enabled: 1
-  waveProcessTimeDialogues: []
+    autoRead: 1
+    autoReadSpeed: 3
+    enablePlayerFire: 0
+  waveAttackBeforeDialogues:
+    dialogues:
+    - Wave1_3
+    enabled: 1
+    autoRead: 1
+    autoReadSpeed: 3
+    enablePlayerFire: 0
+  waveProcessTimeDialogues:
+  - triggerTime: 0
+    dialogues:
+    - Wave1_4
+    enabled: 1
+    autoRead: 1
+    autoReadSpeed: 3
+    enablePlayerFire: 1
   enemyHealthDialogues: []
 --- !u!4 &905350716
 Transform:
@@ -4887,20 +4913,39 @@ MonoBehaviour:
   waveMoveBeforeDialogues:
     dialogues: []
     enabled: 1
+    autoRead: 0
+    autoReadSpeed: 3
+    enablePlayerFire: 1
   waveMoveDuringDialogues:
-    dialogues: []
-    enabled: 1
-  waveAttackBeforeDialogues:
     dialogues:
     - Wave3_1
     enabled: 1
+    autoRead: 1
+    autoReadSpeed: 1
+    enablePlayerFire: 1
+  waveAttackBeforeDialogues:
+    dialogues: []
+    enabled: 1
+    autoRead: 0
+    autoReadSpeed: 3
+    enablePlayerFire: 1
   waveProcessTimeDialogues:
   - triggerTime: 5
     dialogues:
     - Wave3_2
-    enabled: 0
-    triggered: 0
-  enemyHealthDialogues: []
+    enabled: 1
+    autoRead: 1
+    autoReadSpeed: 3
+    enablePlayerFire: 1
+  enemyHealthDialogues:
+  - targetHealth: {fileID: 195157081}
+    healthThreshold: 49
+    dialogues:
+    - Wave3_2
+    enabled: 1
+    autoRead: 0
+    autoReadSpeed: 3
+    enablePlayerFire: 1
 --- !u!4 &1045033824
 Transform:
   m_ObjectHideFlags: 0

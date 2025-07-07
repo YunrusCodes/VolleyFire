@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
 
 public class EnemyWave : MonoBehaviour
 {
@@ -23,8 +24,8 @@ public class EnemyWave : MonoBehaviour
 
     private void Start()
     {
-        // 觸發波次移動前對話，並等待對話完成後才開始移動
-        waveMoveBeforeDialogues.TriggerDialoguesAndWait();
+        // 使用協程串接對話與移動流程
+        StartCoroutine(WaveDialogueAndMoveFlow());
         
         // 初始化波次進行時間對話（如果列表為空）
         if (waveProcessTimeDialogues.Count == 0)
@@ -35,57 +36,80 @@ public class EnemyWave : MonoBehaviour
         }
     }
 
-    private void Update()
+    private IEnumerator WaveDialogueAndMoveFlow()
     {
-        // 如果正在等待對話完成，則不執行移動邏輯
-        if (isWaitingForDialogue)
+        // 1. 等待移動前對話結束
+        waveMoveBeforeDialogues.TriggerDialoguesAndWait();
+        while (isWaitingForDialogue) yield return null;
+
+        // 2. 進入移動階段
+        isMoving = true;
+
+        bool hasMoveDuring = waveMoveDuringDialogues != null && waveMoveDuringDialogues.dialogues.Count > 0 && waveMoveDuringDialogues.enabled;
+        bool moveDuringDialogueDone = !hasMoveDuring;
+
+        if (hasMoveDuring)
         {
-            return;
+            // 有移動中對話，移動同時觸發對話（等待）
+            waveMoveDuringDialogues.TriggerDialoguesAndWait();
+            // 啟動一個協程監聽對話結束
+            StartCoroutine(WaitForMoveDuringDialogue(() => moveDuringDialogueDone = true));
         }
-        
-        if (isMoving && targetPosition != null)
+
+        // 3. 等待移動到目標位置
+        while (isMoving && targetPosition != null)
         {
-            // 父物件移動
             transform.position = Vector3.MoveTowards(transform.position, targetPosition.position, moveSpeed * Time.deltaTime);
-            
-            // 觸發波次移動中對話
-            waveMoveDuringDialogues.TriggerDialogues();
-            
             foreach (var enemy in enemies)
                 enemy.OnWaveMove();
-                
             if (Vector3.Distance(transform.position, targetPosition.position) < 0.1f)
             {
                 isMoving = false;
-                isWaveActive = true;
-                
-                Debug.Log("波次進入戰鬥階段，開始計時對話");
-                
-                // 觸發波次攻擊前對話
-                waveAttackBeforeDialogues.TriggerDialogues();
-                
-                // 開始波次進行時間對話計時
-                StartWaveProcessTimeDialogues();
-                
-                foreach (var enemy in enemies)
-                    enemy.OnWaveStart();
             }
+            yield return null;
         }
-        else if (isWaveActive)
+
+        // 4. 等待「移動中對話結束」與「移動結束」都成立
+        while (!moveDuringDialogueDone) yield return null;
+
+        // 5. 進入攻擊前對話，並等待結束
+        waveAttackBeforeDialogues.TriggerDialoguesAndWait();
+        while (isWaitingForDialogue) yield return null;
+
+        // 6. 進入戰鬥階段
+        isWaveActive = true;
+        Debug.Log("波次進入戰鬥階段，開始計時對話");
+        StartWaveProcessTimeDialogues();
+        foreach (var enemy in enemies)
+            enemy.OnWaveStart();
+    }
+
+    // 新增：監聽 waveMoveDuringDialogues 對話結束
+    private IEnumerator WaitForMoveDuringDialogue(System.Action onDone)
+    {
+        while (isWaitingForDialogue) yield return null;
+        onDone?.Invoke();
+    }
+
+    private void Update()
+    {
+        // 如果正在等待對話完成，則不執行戰鬥邏輯
+        if (isWaitingForDialogue)
+            return;
+
+        // 只負責戰鬥階段
+        if (isWaveActive)
         {
             // 檢查波次進行時間觸發對話
             CheckWaveProcessTimeDialogues();
-            
             // 檢查敵人血量觸發對話
             CheckEnemyHealthDialogues();
-            
             bool waveClear = true;
             foreach (var enemy in enemies)
             {
                 enemy.WaveProcessing();
                 waveClear = waveClear && enemy.GetHealth().IsDead();
             }
-                
             if (waveClear)
             {
                 Debug.Log("Wave cleared!");
@@ -94,11 +118,8 @@ public class EnemyWave : MonoBehaviour
         }
         else
         {
-            // Debug: 確認波次狀態
             if (isWaveClear)
-            {
                 Debug.Log("波次已結束，無法觸發時間對話");
-            }
         }
     }
     
