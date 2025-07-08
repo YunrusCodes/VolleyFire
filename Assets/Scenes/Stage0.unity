@@ -1749,6 +1749,7 @@ MonoBehaviour:
     autoRead: 0
     autoReadSpeed: 3
     enablePlayerFire: 1
+    BGMToSwitch: {fileID: 0}
   waveMoveDuringDialogues:
     dialogues:
     - Wave2_1
@@ -1756,12 +1757,14 @@ MonoBehaviour:
     autoRead: 1
     autoReadSpeed: 1
     enablePlayerFire: 1
+    BGMToSwitch: {fileID: 0}
   waveAttackBeforeDialogues:
     dialogues: []
     enabled: 0
     autoRead: 0
     autoReadSpeed: 3
     enablePlayerFire: 1
+    BGMToSwitch: {fileID: 0}
   waveProcessTimeDialogues: []
   enemyHealthDialogues: []
 --- !u!1 &334242001
@@ -2189,18 +2192,21 @@ MonoBehaviour:
     autoRead: 1
     autoReadSpeed: 3
     enablePlayerFire: 0
+    BGMToSwitch: {fileID: 8300000, guid: fe71f9770b6b61242a041e0b755f30d5, type: 3}
   waveMoveDuringDialogues:
     dialogues: []
     enabled: 0
     autoRead: 1
     autoReadSpeed: 3
     enablePlayerFire: 0
+    BGMToSwitch: {fileID: 0}
   waveAttackBeforeDialogues:
     dialogues: []
     enabled: 0
     autoRead: 0
     autoReadSpeed: 3
     enablePlayerFire: 1
+    BGMToSwitch: {fileID: 0}
   waveProcessTimeDialogues: []
   enemyHealthDialogues: []
 --- !u!4 &389702297
@@ -2800,18 +2806,21 @@ MonoBehaviour:
     autoRead: 1
     autoReadSpeed: 2
     enablePlayerFire: 0
+    BGMToSwitch: {fileID: 0}
   waveMoveDuringDialogues:
     dialogues: []
     enabled: 0
     autoRead: 1
     autoReadSpeed: 3
     enablePlayerFire: 0
+    BGMToSwitch: {fileID: 0}
   waveAttackBeforeDialogues:
     dialogues: []
     enabled: 0
     autoRead: 1
     autoReadSpeed: 3
     enablePlayerFire: 0
+    BGMToSwitch: {fileID: 0}
   waveProcessTimeDialogues:
   - triggerTime: 0
     dialogues: []
@@ -2819,6 +2828,7 @@ MonoBehaviour:
     autoRead: 1
     autoReadSpeed: 3
     enablePlayerFire: 1
+    BGMToSwitch: {fileID: 0}
   enemyHealthDialogues: []
 --- !u!4 &495601959
 Transform:
@@ -4362,6 +4372,7 @@ MonoBehaviour:
     autoRead: 1
     autoReadSpeed: 2
     enablePlayerFire: 0
+    BGMToSwitch: {fileID: 8300000, guid: 34a863218b6ab3e46a1f1b50bfb0ef86, type: 3}
   waveMoveDuringDialogues:
     dialogues:
     - Wave1_2
@@ -4369,6 +4380,7 @@ MonoBehaviour:
     autoRead: 1
     autoReadSpeed: 3
     enablePlayerFire: 0
+    BGMToSwitch: {fileID: 0}
   waveAttackBeforeDialogues:
     dialogues:
     - Wave1_3
@@ -4376,6 +4388,7 @@ MonoBehaviour:
     autoRead: 1
     autoReadSpeed: 3
     enablePlayerFire: 0
+    BGMToSwitch: {fileID: 0}
   waveProcessTimeDialogues:
   - triggerTime: 0
     dialogues:
@@ -4384,6 +4397,7 @@ MonoBehaviour:
     autoRead: 1
     autoReadSpeed: 3
     enablePlayerFire: 1
+    BGMToSwitch: {fileID: 0}
   enemyHealthDialogues: []
 --- !u!4 &905350716
 Transform:
@@ -4956,6 +4970,7 @@ MonoBehaviour:
     autoRead: 0
     autoReadSpeed: 3
     enablePlayerFire: 0
+    BGMToSwitch: {fileID: 0}
   waveMoveDuringDialogues:
     dialogues:
     - Wave3_1
@@ -4963,12 +4978,14 @@ MonoBehaviour:
     autoRead: 1
     autoReadSpeed: 3
     enablePlayerFire: 0
+    BGMToSwitch: {fileID: 0}
   waveAttackBeforeDialogues:
     dialogues: []
     enabled: 1
     autoRead: 0
     autoReadSpeed: 3
     enablePlayerFire: 1
+    BGMToSwitch: {fileID: 0}
   waveProcessTimeDialogues:
   - triggerTime: 5
     dialogues:
@@ -4977,6 +4994,7 @@ MonoBehaviour:
     autoRead: 1
     autoReadSpeed: 3
     enablePlayerFire: 1
+    BGMToSwitch: {fileID: 0}
   enemyHealthDialogues: []
 --- !u!4 &1045033824
 Transform:
@@ -6028,6 +6046,7 @@ GameObject:
   - component: {fileID: 1304675284}
   - component: {fileID: 1304675286}
   - component: {fileID: 1304675287}
+  - component: {fileID: 1304675288}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -6100,6 +6119,19 @@ MonoBehaviour:
   defaultPortrait: {fileID: 7482667652216324306, guid: c36fd27db0de0cc4ba09d96c54dbe605, type: 3}
   aliciaPortrait: {fileID: 21300000, guid: 59feb76e3fdb2204c9046e3b4f5d4dc4, type: 3}
   dialogueRunner: {fileID: 8309902628402502537}
+--- !u!114 &1304675288
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1304675283}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e529e3feb047e474b9e08677df52b771, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  StartBgm: {fileID: 8300000, guid: fe71f9770b6b61242a041e0b755f30d5, type: 3}
 --- !u!1 &1305207660
 GameObject:
   m_ObjectHideFlags: 0
@@ -8736,7 +8768,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -45.999817, y: 890}
+  m_AnchoredPosition: {x: -45.999756, y: 890}
   m_SizeDelta: {x: -696.543, y: 0}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &2958262985733681113
@@ -9681,7 +9713,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -46.000793, y: 889.99994}
+  m_AnchoredPosition: {x: -46.000732, y: 889.99994}
   m_SizeDelta: {x: -696.54, y: 0}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!1 &8020628925382253110

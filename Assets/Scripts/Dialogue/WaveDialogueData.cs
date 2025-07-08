@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+// using YourNamespace; // 如果 BGMManager 有命名空間，請取消註解並填入正確命名空間
 
 /// <summary>
 /// 波次對話數據 - 管理單一類型的對話列表
@@ -20,6 +21,9 @@ public class WaveDialogueData
     [Header("玩家控制設定")]
     public bool enablePlayerFire = true; // 對話時是否啟用玩家射擊
     
+    [Header("BGM 切換（可選）")]
+    public AudioClip BGMToSwitch;
+    
     public WaveDialogueData()
     {
         dialogues = new List<string>();
@@ -36,6 +40,11 @@ public class WaveDialogueData
     {
         if (!enabled || DialogueManager.Instance == null) return;
         
+        // 切換 BGM
+        if (BGMToSwitch != null && BGMManager.Instance != null)
+        {
+            BGMManager.Instance.SwitchBGM(BGMToSwitch);
+        }
         // 控制玩家射擊
         PlayerController.EnableFire(enablePlayerFire);
         
@@ -75,6 +84,11 @@ public class WaveDialogueData
     {
         if (!enabled || DialogueManager.Instance == null) return;
         
+        // 切換 BGM
+        if (BGMToSwitch != null && BGMManager.Instance != null)
+        {
+            BGMManager.Instance.SwitchBGM(BGMToSwitch);
+        }
         // 控制玩家射擊
         PlayerController.EnableFire(enablePlayerFire);
         
@@ -167,6 +181,9 @@ public class EnemyHealthDialogueData
     [Header("玩家控制設定")]
     public bool enablePlayerFire = true; // 對話時是否啟用玩家射擊
     
+    [Header("BGM 切換（可選）")]
+    public AudioClip BGMToSwitch;
+    
     public EnemyHealthDialogueData()
     {
         dialogues = new List<string>();
@@ -184,6 +201,11 @@ public class EnemyHealthDialogueData
     {
         if (!enabled || triggered || targetHealth == null || DialogueManager.Instance == null) return;
         
+        // 切換 BGM
+        if (BGMToSwitch != null && BGMManager.Instance != null)
+        {
+            BGMManager.Instance.SwitchBGM(BGMToSwitch);
+        }
         if (targetHealth.GetCurrentHealth() <= healthThreshold)
         {
             triggered = true;
@@ -217,6 +239,11 @@ public class EnemyHealthDialogueData
     {
         if (!enabled || triggered || targetHealth == null || DialogueManager.Instance == null) return;
 
+        // 切換 BGM
+        if (BGMToSwitch != null && BGMManager.Instance != null)
+        {
+            BGMManager.Instance.SwitchBGM(BGMToSwitch);
+        }
         if (targetHealth.GetCurrentHealth() <= healthThreshold)
         {
             triggered = true;
@@ -315,6 +342,9 @@ public class WaveProcessTimeDialogueData
     [Header("玩家控制設定")]
     public bool enablePlayerFire = true; // 對話時是否啟用玩家射擊
     
+    [Header("BGM 切換（可選）")]
+    public AudioClip BGMToSwitch;
+    
     // 私有變數
     private float waveStartTime = 0f;
     private bool isWaveStarted = false;
@@ -393,6 +423,11 @@ public class WaveProcessTimeDialogueData
         
         if (elapsedTime >= triggerTime)
         {
+            // 切換 BGM
+            if (BGMToSwitch != null && BGMManager.Instance != null)
+            {
+                BGMManager.Instance.SwitchBGM(BGMToSwitch);
+            }
             triggered = true;
             Debug.Log($"時間對話觸發！已過時間: {elapsedTime:F1} 秒");
             
