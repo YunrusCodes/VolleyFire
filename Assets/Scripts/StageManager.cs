@@ -1,10 +1,14 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class StageManager : MonoBehaviour
 {
     [Header("敵人波次列表")]
     public List<EnemyWave> waves = new List<EnemyWave>();
+    
+    [Header("下一關卡場景名稱（留空則重載本關）")]
+    public string NextStageSceneName = "";
     
     private int currentWaveIndex = 0;
     private EnemyWave currentWave;
@@ -57,6 +61,14 @@ public class StageManager : MonoBehaviour
     private void OnStageCompleted()
     {
         isStageCompleted = true;
+        if (!string.IsNullOrEmpty(NextStageSceneName))
+        {
+            SceneManager.LoadScene(NextStageSceneName);
+        }
+        else
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
         Debug.Log("所有波次完成！");
     }
 } 

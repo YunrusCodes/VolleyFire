@@ -211,6 +211,67 @@ public class EnemyHealthDialogueData
     }
     
     /// <summary>
+    /// 檢查並觸發血量對話（會等待對話結束才解除波次）
+    /// </summary>
+    public void CheckAndTriggerDialogueAndWait()
+    {
+        if (!enabled || triggered || targetHealth == null || DialogueManager.Instance == null) return;
+
+        if (targetHealth.GetCurrentHealth() <= healthThreshold)
+        {
+            triggered = true;
+            PlayerController.EnableFire(enablePlayerFire);
+
+            foreach (var dialogue in dialogues)
+            {
+                DialogueManager.Instance.TriggerDialogue(dialogue);
+            }
+
+            var enemyWave = MonoBehaviour.FindObjectOfType<EnemyWave>();
+            if (enemyWave != null)
+            {
+                enemyWave.SetWaitingForDialogue(true);
+                enemyWave.StartCoroutine(WaitForDialogueComplete(enemyWave));
+            }
+
+            if (autoRead && DialogueManager.Instance != null)
+            {
+                // 延遲一下再開始自動閱讀，確保對話已經開始顯示
+                enemyWave?.StartCoroutine(DelayedAutoRead());
+            }
+        }
+    }
+
+    /// <summary>
+    /// 等待對話完成的協程
+    /// </summary>
+    private System.Collections.IEnumerator WaitForDialogueComplete(EnemyWave enemyWave)
+    {
+        while (DialogueManager.Instance.IsDialogueActive())
+        {
+            yield return null;
+        }
+        PlayerController.EnableFire(true);
+        if (enemyWave != null)
+        {
+            enemyWave.SetWaitingForDialogue(false);
+            enemyWave.OnDialogueComplete();
+        }
+    }
+
+    /// <summary>
+    /// 延遲開始自動閱讀的協程
+    /// </summary>
+    private System.Collections.IEnumerator DelayedAutoRead()
+    {
+        yield return null;
+        if (DialogueManager.Instance != null)
+        {
+            DialogueManager.Instance.StartAutoReadCoroutine(autoReadSpeed);
+        }
+    }
+    
+    /// <summary>
     /// 對話結束回調
     /// </summary>
     private void OnDialogueEnded()

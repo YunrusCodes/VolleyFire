@@ -1,13 +1,31 @@
 using UnityEngine;
- 
+using UnityEngine.SceneManagement;
+using Yarn.Unity;
+
 public class PlayerHealth : BaseHealth
 {
-    // 這裡可擴充玩家專屬的受傷、死亡行為
-    // 目前直接繼承 BaseHealth 的邏輯
+    private DialogueRunner dialogueRunner;
+
     protected override void Die()
     {
         if (isDead) return;
         isDead = true;
         gameObject.SetActive(false);
+
+        dialogueRunner = FindObjectOfType<DialogueRunner>();
+        if (dialogueRunner != null)
+        {
+            dialogueRunner.onDialogueComplete.AddListener(OnDialogueComplete);
+            dialogueRunner.StartDialogue("MissionFailed");
+            PlayerController.EnableFire(false);
+        }
+    }
+
+    private void OnDialogueComplete()
+    {
+        // 解除註冊，避免重複
+        dialogueRunner.onDialogueComplete.RemoveListener(OnDialogueComplete);
+        // 重新載入場景
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 } 
