@@ -2,25 +2,19 @@ using UnityEngine;
 using UnityEngine.UI;
 using Yarn.Unity;
 
-/// <summary>
-/// 對話頭像控制器：支援 Yarn Spinner 3.x 指令 <<setPortrait "角色名">>
-/// </summary>
 public class DialoguePortraitController : MonoBehaviour
 {
     [Header("頭像 Image 物件")]
     public Image portraitImage;
 
-    [Header("頭像圖庫")]
+    [Header("預設頭像")]
     public Sprite defaultPortrait;
-    public Sprite aliciaPortrait;
-    // TODO: 你可以在 Inspector 加更多角色頭像
 
     [Header("Yarn DialogueRunner (可於 Inspector 指定)")]
     public DialogueRunner dialogueRunner;
 
     private void Awake()
     {
-        // 優先使用 Inspector 指定的 dialogueRunner，否則自動尋找
         var runner = dialogueRunner != null ? dialogueRunner : FindObjectOfType<DialogueRunner>();
         if (runner != null)
         {
@@ -29,20 +23,19 @@ public class DialoguePortraitController : MonoBehaviour
     }
 
     /// <summary>
-    /// Yarn 指令：<<setPortrait "Alicia">>
+    /// Yarn 指令：<<setPortrait "角色名">>
     /// </summary>
-    /// <param name="portraitName">角色名</param>
     public void SetPortrait(string portraitName)
     {
-        switch (portraitName)
+        // 從 Resources/Portraits/ 依名字自動載入
+        Sprite sprite = Resources.Load<Sprite>($"Portraits/{portraitName}");
+        if (sprite != null)
         {
-            case "Alicia":
-                portraitImage.sprite = aliciaPortrait;
-                break;
-            // TODO: 你可以加更多角色
-            default:
-                portraitImage.sprite = defaultPortrait;
-                break;
+            portraitImage.sprite = sprite;
+        }
+        else
+        {
+            portraitImage.sprite = defaultPortrait;
         }
     }
 } 
