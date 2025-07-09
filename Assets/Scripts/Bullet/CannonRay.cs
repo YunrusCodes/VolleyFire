@@ -10,14 +10,16 @@ public class CannonRay : BulletBehavior
     [SerializeField] private float expandSpeed = 100f;     // 雷射擴展速度
     [SerializeField] private float shrinkSpeed = 5f;      // 雷射收縮速度
     [SerializeField] private float maxLength = 30f;       // 最大長度
-    [SerializeField] private string targetTag = "Enemy";   // 目標標籤
-    [SerializeField] private int damage = 5;              // 傷害值
+    [SerializeField] private string targetTag = "Player";   // 目標標籤
+    [SerializeField] private float damage = 5;              // 傷害值
 
     private float elapsedTime = 0f;                       // 已經過時間
     private bool isCharging = true;                       // 是否在續能中
     private bool isActive = false;                        // 是否在作用中
     private bool isShrinking = false;                     // 是否在收縮中
     private Transform spawnPoint;                         // 發射點
+    private float damageInterval = 0.1f; // 傷害間隔
+    private float damageTimer = 0f;      // 傷害計時器
 
     protected override void BehaviorOnStart()
     {
@@ -126,23 +128,34 @@ public class CannonRay : BulletBehavior
         }
     }
 
-    private void CheckCollision()
+    private void OnCollisionStay(Collision collision)
     {
-        // 使用 Raycast 檢查碰撞
-        RaycastHit hit;
-        if (Physics.Raycast(transform.position, transform.forward, out hit, maxLength))
-        {
-            if (hit.collider.CompareTag(targetTag))
-            {
-                // 在碰撞點產生爆炸特效
-                transform.position = hit.point;
-                DestroyBullet();
+        if (!isActive) return; // 只在作用階段造成傷害
+        if (!collision.collider.CompareTag(targetTag)) return;
 
-                // 造成傷害
-                var targetHealth = hit.collider.GetComponent<BaseHealth>();
-                if (targetHealth != null)
+        damageTimer += Time.deltaTime;
+        if (damageTimer >= damageInterval)
+        {
+            damageTimer = 0f;
+            var targetHealth = collision.collider.GetComponent<BaseHealth>();
+            if (targetHealth != null)
+            {
+                targetHealth.TakeDamage(damage / 10f);
+
+                // 產生隨機小位移
+                Vector3 randomOffset = new Vector3(
+                    Random.Range(-0.2f, 0.2f),
+                    Random.Range(-0.2f, 0.2f),
+                    Random.Range(-0.2f, 0.2f)
+                );
+                // 產生爆炸特效
+                if (explosionPrefab != null && collision.contactCount > 0)
                 {
-                    targetHealth.TakeDamage(damage);
+                    Instantiate(
+                        explosionPrefab,
+                        collision.GetContact(0).point + randomOffset,
+                        Quaternion.identity
+                    );
                 }
             }
         }

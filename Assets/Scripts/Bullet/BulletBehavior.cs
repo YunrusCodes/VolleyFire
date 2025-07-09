@@ -16,7 +16,7 @@ public abstract class BulletBehavior : MonoBehaviour
     protected Vector3 direction;      // 移動方向
     protected float spawnTime;        // 生成時間
     
-    [SerializeField] private GameObject explosionPrefab;
+    [SerializeField] protected GameObject explosionPrefab;
     private GameObject myExplosionEffect;
     
     protected virtual void Awake()

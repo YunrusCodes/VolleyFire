@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 public class FederalBattleShip : EnemyBehavior
 {
@@ -16,29 +17,35 @@ public class FederalBattleShip : EnemyBehavior
 
     private EnemyController controller;
     private Vector3 alignTargetPos;
-    private float alignLerpSpeed = 8f;
+    public float alignSpeed = 10f;
 
-    private enum BattleShipState { Patrol, Attack }
+    private enum BattleShipState { Patrol, AlignToPlayer }
     private BattleShipState currentState = BattleShipState.Patrol;
-    private Vector3 patrolTargetPos;
     private float patrolMoveSpeed = 3f;
-    private float patrolDuration = 2f;
+    public float patrolDuration = 5f;
     private float patrolTimer = 0f;
     private Vector3 patrolMoveDir;
-    private System.Action onPatrolComplete;
-    private bool isMovingToAlign = false;
-    private bool useRandomPatrol = true; // 交替用：true=隨機方向，false=朝玩家
-    private bool useCannonRay = false;   // 交替使用飛彈和雷射
+    private float fireTimer = 0f;
+    public float alignDuration = 3f; // 對齊狀態持續時間
+    private float alignTimer = 0f;
+
+    [Header("攻擊間隔")]
+    [SerializeField] private float missileFireInterval = 3f;
+    [SerializeField] private float cannonFireInterval = 2f;
+    private float missileFireTimer = 0f;
+    private float cannonFireTimer = 0f;
+
+    private List<Vector3> patrolDirectionsQueue = new List<Vector3>();
+    private int patrolDirectionIndex = 0;
 
     public override void Init(EnemyController controller)
     {
         this.controller = controller;
-        useRandomPatrol = true; // 初始為隨機方向
-        useCannonRay = false;   // 初始為飛彈
         SetNextPatrolTarget();
         patrolTimer = 0f;
-        onPatrolComplete = () => { isMovingToAlign = true; currentState = BattleShipState.Attack; };
         currentState = BattleShipState.Patrol;
+        missileFireTimer = 0f;
+        cannonFireTimer = 0f;
     }
 
     public override void Tick()
@@ -52,17 +59,42 @@ public class FederalBattleShip : EnemyBehavior
             return;
         }
 
+        // 取得目前血量
+        float currentHp = controller.GetHealth().GetCurrentHealth();
+
         if (currentState == BattleShipState.Patrol)
         {
-            PatrolMove();
+            PatrolMove(currentHp);
+            missileFireTimer += Time.deltaTime;
+            if (missileFireTimer >= missileFireInterval)
+            {
+                FireMissileAtPlayer();
+                missileFireTimer = 0f;
+            }
             return;
         }
 
-        if (currentState == BattleShipState.Attack)
+        if (currentState == BattleShipState.AlignToPlayer)
         {
-            if (isMovingToAlign)
+            // 血量高於等於250時不能進入加農砲狀態，強制切回巡邏
+            if (currentHp >= 250f)
             {
-                MoveToAlignWithPlayer();
+                currentState = BattleShipState.Patrol;
+                SetNextPatrolTarget();
+                return;
+            }
+            alignTimer += Time.deltaTime;
+            MoveToAlignWithPlayer();
+            cannonFireTimer += Time.deltaTime;
+            if (cannonFireTimer >= cannonFireInterval)
+            {
+                FireCannonRayAtPlayer();
+                cannonFireTimer = 0f;
+            }
+            if (alignTimer >= alignDuration)
+            {
+                currentState = BattleShipState.Patrol;
+                SetNextPatrolTarget();
             }
             return;
         }
@@ -112,83 +144,92 @@ public class FederalBattleShip : EnemyBehavior
 
     private void MoveToAlignWithPlayer()
     {
-        transform.position = Vector3.Lerp(transform.position, alignTargetPos, alignLerpSpeed * Time.deltaTime);
-        if (Vector3.Distance(transform.position, alignTargetPos) < 0.05f)
+        Vector3 current = transform.position;
+        Vector3 target = new Vector3(alignTargetPos.x, alignTargetPos.y, current.z); // Z 不變
+        Vector2 current2D = new Vector2(current.x, current.y);
+        Vector2 target2D = new Vector2(target.x, target.y);
+        Vector2 dir = (target2D - current2D).normalized;
+        float distance = Vector2.Distance(current2D, target2D);
+        float moveStep = alignSpeed * Time.deltaTime;
+        if (distance <= moveStep)
         {
-            transform.position = alignTargetPos;
-            isMovingToAlign = false;
-            StartCoroutine(FireWeaponBurst());
+            transform.position = target;
+            currentState = BattleShipState.Patrol;
+            SetNextPatrolTarget();
+        }
+        else
+        {
+            Vector2 newPos2D = current2D + dir * moveStep;
+            transform.position = new Vector3(newPos2D.x, newPos2D.y, current.z);
         }
     }
 
     private void SetNextPatrolTarget()
     {
-        if (useRandomPatrol)
+        float currentHp = controller != null && controller.GetHealth() != null ? controller.GetHealth().GetCurrentHealth() : 9999f;
+        // 血量低於250時，巡邏方向改為朝向玩家
+        if (currentHp < 250f)
         {
-            // 隨機單位向量，但限制在上半部分移動
-            float angle = Random.Range(-45f, 45f) * Mathf.Deg2Rad; // 限制在 -45 到 45 度之間
-            patrolMoveDir = new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f).normalized;
-        }
-        else
-        {
-            // 朝玩家
             var player = GameObject.FindGameObjectWithTag("Player");
             if (player != null)
             {
-                patrolTargetPos = new Vector3(player.transform.position.x, player.transform.position.y + 2f, transform.position.z);
-                patrolMoveDir = (patrolTargetPos - transform.position).normalized;
+                Vector3 toPlayer = player.transform.position - transform.position;
+                patrolMoveDir = new Vector3(toPlayer.x, toPlayer.y, 0f).normalized;
             }
             else
             {
-                patrolMoveDir = Vector3.right; // 預設右
+                patrolMoveDir = Vector3.right;
             }
+            return;
         }
+        // 否則維持原本八次隨機分布
+        if (patrolDirectionsQueue.Count == 0 || patrolDirectionIndex >= patrolDirectionsQueue.Count)
+        {
+            patrolDirectionsQueue = new List<Vector3>
+            {
+                Vector3.up, Vector3.up,
+                Vector3.down, Vector3.down,
+                Vector3.left, Vector3.left,
+                Vector3.right, Vector3.right
+            };
+            // 洗牌
+            patrolDirectionsQueue = patrolDirectionsQueue.OrderBy(x => Random.value).ToList();
+            patrolDirectionIndex = 0;
+        }
+        patrolMoveDir = patrolDirectionsQueue[patrolDirectionIndex];
+        patrolDirectionIndex++;
     }
 
-    private void PatrolMove()
+    private void PatrolMove(float currentHp)
     {
         transform.position += patrolMoveDir * patrolMoveSpeed * Time.deltaTime;
         patrolTimer += Time.deltaTime;
         if (patrolTimer >= patrolDuration)
         {
-            currentState = BattleShipState.Attack;
-            alignTargetPos = transform.position;
-            onPatrolComplete?.Invoke();
-            onPatrolComplete = null;
-            useRandomPatrol = !useRandomPatrol; // 交替巡邏方式
+            patrolTimer = 0f;
+            SetNextPatrolTarget(); // 每隔 patrolDuration 秒隨機換方向
+
+            // 只有血量低於250時才切換到加農砲狀態，否則繼續巡邏
+            if (currentHp < 250f)
+            {
+                currentState = BattleShipState.AlignToPlayer;
+                alignTargetPos = GetPlayerAlignPos();
+                alignTimer = 0f;
+                cannonFireTimer = 0f;
+                FireCannonRayAtPlayer(); // 先發射雷射砲
+                return;
+            }
         }
     }
 
-    private IEnumerator FireWeaponBurst()
+    private Vector3 GetPlayerAlignPos()
     {
-        // 根據當前武器類型發射
-        if (useCannonRay)
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
         {
-            if (cannonRaySpawnPoints.Count == 0)
-            {
-                Debug.LogWarning("FederalBattleShip: 沒有設置雷射發射點！");
-                yield break;
-            }
-            FireCannonRayAtPlayer();
+            return new Vector3(player.transform.position.x, player.transform.position.y + 2f, transform.position.z);
         }
-        else
-        {
-            if (missileSpawnPoints.Count == 0)
-            {
-                Debug.LogWarning("FederalBattleShip: 沒有設置飛彈發射點！");
-                yield break;
-            }
-            FireMissileAtPlayer();
-        }
-
-        yield return new WaitForSeconds(0.2f);
-
-        // 攻擊結束後回到巡邏
-        SetNextPatrolTarget();
-        patrolTimer = 0f;
-        onPatrolComplete = () => { isMovingToAlign = true; currentState = BattleShipState.Attack; };
-        currentState = BattleShipState.Patrol;
-        useCannonRay = !useCannonRay; // 交替武器類型
+        return transform.position;
     }
 
     public override void OnWaveMove()

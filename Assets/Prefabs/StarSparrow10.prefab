@@ -138,6 +138,11 @@ MonoBehaviour:
   cannonRaySpawnPoints:
   - {fileID: 5831141365712752020}
   - {fileID: 5172642272005254890}
+  alignSpeed: 30
+  patrolDuration: 2
+  alignDuration: 12
+  missileFireInterval: 2
+  cannonFireInterval: 8
 --- !u!1 &892638413486198879
 GameObject:
   m_ObjectHideFlags: 0
@@ -214,7 +219,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 720595bbfcaf692428fb0a0a59037d14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
+  maxHealth: 500
   currentHealth: 0
 --- !u!54 &7325740540097245333
 Rigidbody:

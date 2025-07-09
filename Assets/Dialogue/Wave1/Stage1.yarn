@@ -66,11 +66,14 @@ title: Wave3_3
 艾蕾希亞: 請留意導彈動向，勿停留於導引區域!
 ===
 
-title: Wave4_1
+title: Wave3_4
 ---
+<<setPortrait "Federation">>
+宇宙聯邦軍: 高能雷射炮——準備發射!
 <<setPortrait "Alicia">>
-艾蕾希亞: 敵艦核心啟動，進入戰鬥模式。高熱源反應確認。
-艾蕾希亞: 進入 BOSS 戰——請強化索敵與躲避機制。
+艾蕾希亞: 警告：敵艦能量急遽上升，推測即將發射主炮。
+<<setPortrait "Federation">>
+宇宙聯邦軍: 全艦推進!主炮同步開火，壓制目標!
 ===
 
 title: Wave4_2

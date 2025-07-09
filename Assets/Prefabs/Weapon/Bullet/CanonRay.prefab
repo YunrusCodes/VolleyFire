@@ -81,11 +81,11 @@ MonoBehaviour:
   chargingEffect: {fileID: 6287826014323221964}
   laserObject: {fileID: 5593562330755968787}
   chargingTime: 3
-  activeTime: 2
+  activeTime: 3
   expandSpeed: 100
   shrinkSpeed: 5
   maxLength: 100
-  targetTag: Enemy
+  targetTag: Player
   damage: 5
 --- !u!1 &5593562330755968787
 GameObject:
