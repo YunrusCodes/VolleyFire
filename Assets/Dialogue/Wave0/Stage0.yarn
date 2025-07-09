@@ -30,12 +30,7 @@ title: Wave1_2
 title: Wave1_3
 ---
 <<setPortrait "Alicia">>
-艾蕾希亞: 請立即排除干擾目標，確保機體完整。
-===
-
-title: Wave1_4
----
-<<setPortrait "Alicia">>
+艾蕾希亞: 請立即排除干擾目標。
 艾蕾希亞: 對準紅色準心區域，執行射擊。
 ===
 
@@ -63,7 +58,6 @@ title: Wave3_2
 title: Wave4_1
 ---
 <<setPortrait "Alicia">>
-艾蕾希亞: 目標狀態確認……
 艾蕾希亞: 敵性個體已排除。
 艾蕾希亞: 即將進入高密度威脅區域，請提高警戒。
 艾蕾希亞: 正在啟動亞空間脫離程序，座標重構中。
