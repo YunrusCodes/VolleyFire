@@ -7,6 +7,16 @@ public class PointableBullet : BulletBehavior
     private Vector3 targetPosition;
     private bool initialized = false;
 
+    protected override void BehaviorOnStart()
+    {
+        // 初始化基本設定
+        initialized = false;
+        
+        // 預設往前方
+        targetPosition = transform.position + transform.forward * 100f;
+        direction = transform.forward;
+    }
+
     public override void Initialize(FirePoint firePoint)
     {
         base.Initialize(firePoint);
@@ -14,13 +24,6 @@ public class PointableBullet : BulletBehavior
         {
             targetPosition = firePoint.PointedTarget.Value;
             direction = (targetPosition - transform.position).normalized;
-        }
-        else
-        {
-            // 沒有目標時，預設往前方
-            targetPosition = transform.position + transform.forward * 100f;
-            direction = transform.forward;
-            initialized = true;
         }
         initialized = true;
     }

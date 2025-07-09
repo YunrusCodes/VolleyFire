@@ -8,6 +8,16 @@ public class StraightBullet : BulletBehavior
     [SerializeField] private string targetTag;
     [SerializeField] private int damage = 1;
 
+    protected override void BehaviorOnStart()
+    {
+        // 直線子彈的初始化
+        // 使用物件的前方作為預設方向
+        if (direction == Vector3.zero)
+        {
+            direction = transform.forward;
+        }
+    }
+
     protected override void Move()
     {
         // 如果不使用Rigidbody，使用Transform移動
@@ -31,5 +41,4 @@ public class StraightBullet : BulletBehavior
             DestroyBullet();
         }
     }
-    
 } 

@@ -26,6 +26,9 @@ public abstract class BulletBehavior : MonoBehaviour
         
         // 記錄生成時間
         spawnTime = Time.time;
+
+        // 呼叫子類別的初始化行為
+        BehaviorOnStart();
     }
     
     protected virtual void Start()
@@ -54,6 +57,11 @@ public abstract class BulletBehavior : MonoBehaviour
     /// 移動邏輯 - 子類別必須實作此方法
     /// </summary>
     protected abstract void Move();
+
+    /// <summary>
+    /// 初始化行為 - 子類別必須實作此方法
+    /// </summary>
+    protected abstract void BehaviorOnStart();
     
     /// <summary>
     /// 初始化子彈

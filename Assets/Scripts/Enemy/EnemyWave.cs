@@ -158,7 +158,7 @@ public class EnemyWave : MonoBehaviour
     {
         foreach (var healthDialogue in enemyHealthDialogues)
         {
-            healthDialogue.CheckAndTriggerDialogueAndWait();
+            healthDialogue.CheckAndTriggerDialogue();
         }
     }
     

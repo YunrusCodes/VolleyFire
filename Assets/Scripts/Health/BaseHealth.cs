@@ -22,7 +22,10 @@ public abstract class BaseHealth : MonoBehaviour, IHealth
             Die();
         }
     }
-
+    public bool IsHurt()
+    {
+        return currentHealth < maxHealth;
+    }
     protected virtual void Die()
     {
         if (isDead) return;

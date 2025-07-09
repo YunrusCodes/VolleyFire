@@ -201,14 +201,15 @@ public class EnemyHealthDialogueData
     {
         if (!enabled || triggered || targetHealth == null || DialogueManager.Instance == null) return;
         
-        // 切換 BGM
-        if (BGMToSwitch != null && BGMManager.Instance != null)
-        {
-            BGMManager.Instance.SwitchBGM(BGMToSwitch);
-        }
         if (targetHealth.GetCurrentHealth() <= healthThreshold)
         {
             triggered = true;
+            
+            // 切換 BGM
+            if (BGMToSwitch != null && BGMManager.Instance != null)
+            {
+                BGMManager.Instance.SwitchBGM(BGMToSwitch);
+            }
             
             // 控制玩家射擊
             PlayerController.EnableFire(enablePlayerFire);
@@ -228,43 +229,6 @@ public class EnemyHealthDialogueData
             if (!enablePlayerFire)
             {
                 DialogueManager.OnDialogueEnded += OnDialogueEnded;
-            }
-        }
-    }
-    
-    /// <summary>
-    /// 檢查並觸發血量對話（會等待對話結束才解除波次）
-    /// </summary>
-    public void CheckAndTriggerDialogueAndWait()
-    {
-        if (!enabled || triggered || targetHealth == null || DialogueManager.Instance == null) return;
-
-        // 切換 BGM
-        if (BGMToSwitch != null && BGMManager.Instance != null)
-        {
-            BGMManager.Instance.SwitchBGM(BGMToSwitch);
-        }
-        if (targetHealth.GetCurrentHealth() <= healthThreshold)
-        {
-            triggered = true;
-            PlayerController.EnableFire(enablePlayerFire);
-
-            foreach (var dialogue in dialogues)
-            {
-                DialogueManager.Instance.TriggerDialogue(dialogue);
-            }
-
-            var enemyWave = MonoBehaviour.FindObjectOfType<EnemyWave>();
-            if (enemyWave != null)
-            {
-                enemyWave.SetWaitingForDialogue(true);
-                enemyWave.StartCoroutine(WaitForDialogueComplete(enemyWave));
-            }
-
-            if (autoRead && DialogueManager.Instance != null)
-            {
-                // 延遲一下再開始自動閱讀，確保對話已經開始顯示
-                enemyWave?.StartCoroutine(DelayedAutoRead());
             }
         }
     }
