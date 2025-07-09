@@ -129,7 +129,8 @@ public class PlayerController : MonoBehaviour
             {
                 foreach (var hit in hits)
                 {
-                    if (hit.collider.gameObject == playerShip) continue;
+                    if (hit.collider.gameObject.tag != "Enemy") Debug.Log(hit.collider.gameObject.name);
+                    if (hit.collider.gameObject.tag != "Enemy") continue;
                     lockedTarget = hit.transform;
                     isLocked = true;
                     break;
@@ -146,9 +147,9 @@ public class PlayerController : MonoBehaviour
         Transform targetFind = null;
         foreach (var hit in hits)
         {
-            // 忽略自己
-            if (hit.collider.gameObject == playerShip)
-                continue;
+            // 忽略非敵方物件
+            if (hit.collider.gameObject.tag != "Enemy") Debug.Log(hit.collider.gameObject.name);
+            if (hit.collider.gameObject.tag != "Enemy") continue;
 
             // 撞到其他物件（敵人、障礙物等）
             hitTarget = true;

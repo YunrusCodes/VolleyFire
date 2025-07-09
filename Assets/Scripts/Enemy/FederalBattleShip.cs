@@ -6,11 +6,13 @@ public class FederalBattleShip : EnemyBehavior
 {
     [Header("戰艦參數")]
     public GameObject missilePrefab;
+    public GameObject cannonRayPrefab;
     public float fireInterval = 3f;
     public float missileSpeed = 8f;
     
     [Header("發射點設置")]
     public List<Transform> missileSpawnPoints = new List<Transform>();
+    public List<Transform> cannonRaySpawnPoints = new List<Transform>();
 
     private EnemyController controller;
     private Vector3 alignTargetPos;
@@ -26,11 +28,13 @@ public class FederalBattleShip : EnemyBehavior
     private System.Action onPatrolComplete;
     private bool isMovingToAlign = false;
     private bool useRandomPatrol = true; // 交替用：true=隨機方向，false=朝玩家
+    private bool useCannonRay = false;   // 交替使用飛彈和雷射
 
     public override void Init(EnemyController controller)
     {
         this.controller = controller;
         useRandomPatrol = true; // 初始為隨機方向
+        useCannonRay = false;   // 初始為飛彈
         SetNextPatrolTarget();
         patrolTimer = 0f;
         onPatrolComplete = () => { isMovingToAlign = true; currentState = BattleShipState.Attack; };
@@ -83,6 +87,29 @@ public class FederalBattleShip : EnemyBehavior
         }
     }
 
+    private void FireCannonRayAtPlayer()
+    {
+        if (cannonRayPrefab == null || cannonRaySpawnPoints.Count == 0) return;
+
+        // 從每個發射點發射一道雷射
+        foreach (Transform spawnPoint in cannonRaySpawnPoints)
+        {
+            // 使用發射點的位置和方向
+            GameObject ray = Instantiate(cannonRayPrefab, spawnPoint.position, spawnPoint.rotation);
+            var bullet = ray.GetComponent<BulletBehavior>();
+            if (bullet != null)
+            {
+                bullet.SetDirection(spawnPoint.forward);
+            }
+            // 設置發射點
+            var cannonRay = ray.GetComponent<CannonRay>();
+            if (cannonRay != null)
+            {
+                cannonRay.SetSpawnPoint(spawnPoint);
+            }
+        }
+    }
+
     private void MoveToAlignWithPlayer()
     {
         transform.position = Vector3.Lerp(transform.position, alignTargetPos, alignLerpSpeed * Time.deltaTime);
@@ -90,7 +117,7 @@ public class FederalBattleShip : EnemyBehavior
         {
             transform.position = alignTargetPos;
             isMovingToAlign = false;
-            StartCoroutine(FireMissileBurst());
+            StartCoroutine(FireWeaponBurst());
         }
     }
 
@@ -128,21 +155,32 @@ public class FederalBattleShip : EnemyBehavior
             alignTargetPos = transform.position;
             onPatrolComplete?.Invoke();
             onPatrolComplete = null;
-            useRandomPatrol = !useRandomPatrol; // 交替
+            useRandomPatrol = !useRandomPatrol; // 交替巡邏方式
         }
     }
 
-    private IEnumerator FireMissileBurst()
+    private IEnumerator FireWeaponBurst()
     {
-        // 如果沒有發射點，直接結束
-        if (missileSpawnPoints.Count == 0)
+        // 根據當前武器類型發射
+        if (useCannonRay)
         {
-            Debug.LogWarning("FederalBattleShip: 沒有設置發射點！");
-            yield break;
+            if (cannonRaySpawnPoints.Count == 0)
+            {
+                Debug.LogWarning("FederalBattleShip: 沒有設置雷射發射點！");
+                yield break;
+            }
+            FireCannonRayAtPlayer();
+        }
+        else
+        {
+            if (missileSpawnPoints.Count == 0)
+            {
+                Debug.LogWarning("FederalBattleShip: 沒有設置飛彈發射點！");
+                yield break;
+            }
+            FireMissileAtPlayer();
         }
 
-        // 只發射一輪
-        FireMissileAtPlayer();
         yield return new WaitForSeconds(0.2f);
 
         // 攻擊結束後回到巡邏
@@ -150,6 +188,7 @@ public class FederalBattleShip : EnemyBehavior
         patrolTimer = 0f;
         onPatrolComplete = () => { isMovingToAlign = true; currentState = BattleShipState.Attack; };
         currentState = BattleShipState.Patrol;
+        useCannonRay = !useCannonRay; // 交替武器類型
     }
 
     public override void OnWaveMove()
@@ -167,7 +206,11 @@ public class FederalBattleShip : EnemyBehavior
         // 在編輯器中檢查發射點設置
         if (missileSpawnPoints.Count == 0)
         {
-            Debug.LogWarning("FederalBattleShip: 請設置發射點！");
+            Debug.LogWarning("FederalBattleShip: 請設置飛彈發射點！");
+        }
+        if (cannonRaySpawnPoints.Count == 0)
+        {
+            Debug.LogWarning("FederalBattleShip: 請設置雷射發射點！");
         }
     }
 } 

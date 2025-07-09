@@ -11,9 +11,7 @@ GameObject:
   - component: {fileID: 6005448995833186671}
   - component: {fileID: 9003583084836786325}
   - component: {fileID: 4282925236123300287}
-  - component: {fileID: 1657732794529719420}
   - component: {fileID: 3832759016297795476}
-  - component: {fileID: 2350733721841860086}
   - component: {fileID: 3709381824866779465}
   m_Layer: 0
   m_Name: StarSparrow10
@@ -42,6 +40,8 @@ Transform:
   - {fileID: 7293281507675219765}
   - {fileID: 6244867796394342086}
   - {fileID: 3601280581640307155}
+  - {fileID: 5831141365712752020}
+  - {fileID: 5172642272005254890}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0.625, y: 180, z: 0}
 --- !u!33 &9003583084836786325
@@ -97,20 +97,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &1657732794529719420
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 575142444076333836}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 720595bbfcaf692428fb0a0a59037d14, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxHealth: 100
-  currentHealth: 0
 --- !u!114 &3832759016297795476
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -123,36 +109,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 97aca0a1325db8a4ca48f3e2aca59904, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  behavior: {fileID: 0}
-  health: {fileID: 0}
+  behavior: {fileID: 3709381824866779465}
+  health: {fileID: 7755458984054806178}
   enemyDeathDialogues: []
---- !u!54 &2350733721841860086
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 575142444076333836}
-  serializedVersion: 4
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 0
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 126
-  m_CollisionDetection: 0
 --- !u!114 &3709381824866779465
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -166,6 +125,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   missilePrefab: {fileID: 1259865673663102, guid: 16a3c04a126cdbe4eab995217fd77e0c, type: 3}
+  cannonRayPrefab: {fileID: 3611619835520319577, guid: a881f7964155a1d48b29ab1d4ce9bf2d, type: 3}
   fireInterval: 3
   missileSpeed: 8
   missileSpawnPoints:
@@ -175,6 +135,9 @@ MonoBehaviour:
   - {fileID: 7293281507675219765}
   - {fileID: 6244867796394342086}
   - {fileID: 3601280581640307155}
+  cannonRaySpawnPoints:
+  - {fileID: 5831141365712752020}
+  - {fileID: 5172642272005254890}
 --- !u!1 &892638413486198879
 GameObject:
   m_ObjectHideFlags: 0
@@ -184,9 +147,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4419630350200542025}
+  - component: {fileID: 7755458984054806178}
+  - component: {fileID: 7325740540097245333}
   m_Layer: 0
   m_Name: Collider
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -237,6 +202,47 @@ Transform:
   - {fileID: 4992797884727849407}
   m_Father: {fileID: 6005448995833186671}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7755458984054806178
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 892638413486198879}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 720595bbfcaf692428fb0a0a59037d14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHealth: 100
+  currentHealth: 0
+--- !u!54 &7325740540097245333
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 892638413486198879}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 126
+  m_CollisionDetection: 0
 --- !u!1 &1413295479279378208
 GameObject:
   m_ObjectHideFlags: 0
@@ -280,7 +286,7 @@ GameObject:
   - component: {fileID: 752378783987581915}
   m_Layer: 0
   m_Name: Collider17
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -335,7 +341,7 @@ GameObject:
   - component: {fileID: 9050812621589004238}
   m_Layer: 0
   m_Name: Collider7
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -388,7 +394,7 @@ GameObject:
   - component: {fileID: 854018278236629386}
   m_Layer: 0
   m_Name: Collider11
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -441,7 +447,7 @@ GameObject:
   - component: {fileID: 9177616082322063877}
   m_Layer: 0
   m_Name: Collider30
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -494,7 +500,7 @@ GameObject:
   - component: {fileID: 5879155491740276909}
   m_Layer: 0
   m_Name: Collider29
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -578,7 +584,7 @@ GameObject:
   - component: {fileID: 9216153383474341479}
   m_Layer: 0
   m_Name: Collider27
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -631,7 +637,7 @@ GameObject:
   - component: {fileID: 6485771492994961936}
   m_Layer: 0
   m_Name: Collider2
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -686,7 +692,7 @@ GameObject:
   - component: {fileID: 100981780907136174}
   m_Layer: 0
   m_Name: Collider24
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -739,7 +745,7 @@ GameObject:
   - component: {fileID: 8144413676287719608}
   m_Layer: 0
   m_Name: Collider31
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -792,7 +798,7 @@ GameObject:
   - component: {fileID: 1087998006067980543}
   m_Layer: 0
   m_Name: Collider1
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -847,7 +853,7 @@ GameObject:
   - component: {fileID: 7917017207867918302}
   m_Layer: 0
   m_Name: Collider23
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -995,7 +1001,7 @@ GameObject:
   - component: {fileID: 8585946712635221675}
   m_Layer: 0
   m_Name: Collider9
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1048,7 +1054,7 @@ GameObject:
   - component: {fileID: 3663786966750234851}
   m_Layer: 0
   m_Name: Collider6
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1103,7 +1109,7 @@ GameObject:
   - component: {fileID: 5382137826869453158}
   m_Layer: 0
   m_Name: Collider5
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1158,7 +1164,7 @@ GameObject:
   - component: {fileID: 397742507068922324}
   m_Layer: 0
   m_Name: Collider22
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1201,6 +1207,37 @@ CapsuleCollider:
   m_Height: 4.42
   m_Direction: 2
   m_Center: {x: 0, y: -0.15, z: 0}
+--- !u!1 &5630921606365777938
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5172642272005254890}
+  m_Layer: 0
+  m_Name: Firepoint (7)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5172642272005254890
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5630921606365777938}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.8, y: -0.67, z: 3.69}
+  m_LocalScale: {x: 0.28325725, y: 0.28325748, z: 0.28325737}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6005448995833186671}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5743609181906136529
 GameObject:
   m_ObjectHideFlags: 0
@@ -1213,7 +1250,7 @@ GameObject:
   - component: {fileID: 392956186203401099}
   m_Layer: 0
   m_Name: Collider14
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1266,7 +1303,7 @@ GameObject:
   - component: {fileID: 8387935098215662193}
   m_Layer: 0
   m_Name: Collider20
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1319,7 +1356,7 @@ GameObject:
   - component: {fileID: 3356294369369989344}
   m_Layer: 0
   m_Name: Collider15
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1372,7 +1409,7 @@ GameObject:
   - component: {fileID: 2054606398899523757}
   m_Layer: 0
   m_Name: Collider28
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1425,7 +1462,7 @@ GameObject:
   - component: {fileID: 5267673496140116199}
   m_Layer: 0
   m_Name: Collider3
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1480,7 +1517,7 @@ GameObject:
   - component: {fileID: 5302767354065402294}
   m_Layer: 0
   m_Name: Collider16
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1533,7 +1570,7 @@ GameObject:
   - component: {fileID: 4257088157570653189}
   m_Layer: 0
   m_Name: Collider26
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1586,7 +1623,7 @@ GameObject:
   - component: {fileID: 5472976824019354701}
   m_Layer: 0
   m_Name: Collider21
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1639,7 +1676,7 @@ GameObject:
   - component: {fileID: 49731869509265963}
   m_Layer: 0
   m_Name: Collider19
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1692,7 +1729,7 @@ GameObject:
   - component: {fileID: 7709001706816062077}
   m_Layer: 0
   m_Name: Collider12
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1745,7 +1782,7 @@ GameObject:
   - component: {fileID: 5506583471576620724}
   m_Layer: 0
   m_Name: Collider10
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1798,7 +1835,7 @@ GameObject:
   - component: {fileID: 7373095391713446775}
   m_Layer: 0
   m_Name: Collider8
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1839,6 +1876,37 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.14684956, y: 2.9228678, z: 0.61}
   m_Center: {x: 0, y: 1.44, z: -0.1}
+--- !u!1 &8394875039120751127
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5831141365712752020}
+  m_Layer: 0
+  m_Name: Firepoint (6)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5831141365712752020
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8394875039120751127}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.99, y: -0.67, z: 3.69}
+  m_LocalScale: {x: 0.28325725, y: 0.28325748, z: 0.28325737}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6005448995833186671}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8460811328289858500
 GameObject:
   m_ObjectHideFlags: 0
@@ -1851,7 +1919,7 @@ GameObject:
   - component: {fileID: 3258145894575721292}
   m_Layer: 0
   m_Name: Collider4
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1904,7 +1972,7 @@ GameObject:
   - component: {fileID: 2976637390409676360}
   m_Layer: 0
   m_Name: Collider18
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1959,7 +2027,7 @@ GameObject:
   - component: {fileID: 5760363742926686810}
   m_Layer: 0
   m_Name: Collider25
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2043,7 +2111,7 @@ GameObject:
   - component: {fileID: 557598962539564835}
   m_Layer: 0
   m_Name: Collider13
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

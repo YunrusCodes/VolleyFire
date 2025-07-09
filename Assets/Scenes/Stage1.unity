@@ -1077,6 +1077,17 @@ Transform:
   - {fileID: 980731359}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &906253110 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7755458984054806178, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+  m_PrefabInstance: {fileID: 5367582699877975873}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 720595bbfcaf692428fb0a0a59037d14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &980731358
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1228,7 +1239,7 @@ MonoBehaviour:
     BGMToSwitch: {fileID: 0}
   waveProcessTimeDialogues: []
   enemyHealthDialogues:
-  - targetHealth: {fileID: 5017003703181273409}
+  - targetHealth: {fileID: 906253110}
     healthThreshold: 499
     dialogues:
     - Wave3_3
@@ -1330,10 +1341,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   waves:
+  - {fileID: 1045033823}
   - {fileID: 495601958}
   - {fileID: 905350715}
   - {fileID: 305109111}
-  - {fileID: 1045033823}
   - {fileID: 389702296}
   NextStageSceneName: Stage1
 --- !u!4 &1304675285
@@ -2613,17 +2624,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6005448995833186671, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
   m_PrefabInstance: {fileID: 5367582699877975873}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &5017003703181273409 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1657732794529719420, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
-  m_PrefabInstance: {fileID: 5367582699877975873}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 720595bbfcaf692428fb0a0a59037d14, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &5367582699877975873
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2636,9 +2636,77 @@ PrefabInstance:
       propertyPath: m_Name
       value: StarSparrow10
       objectReference: {fileID: 0}
-    - target: {fileID: 1657732794529719420, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
-      propertyPath: maxHealth
-      value: 500
+    - target: {fileID: 1440592871196389063, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 1496281466788156609, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 1886003988269949185, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 1896180489945198860, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 2400073698234887828, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 2524668809643037444, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 3122485181265682567, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 3176051641676794764, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 3337083324279147730, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 3496819089481627720, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 3509763337220774017, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 4865930221980775600, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 5008311560281887004, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 5053580733737096029, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 5081424767952733913, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 5743609181906136529, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 5809634807021696126, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 5994919477524786565, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
       objectReference: {fileID: 0}
     - target: {fileID: 6005448995833186671, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2679,6 +2747,62 @@ PrefabInstance:
     - target: {fileID: 6005448995833186671, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6201781920115859591, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 6969486702607893060, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 7427953463539094198, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 7755458984054806178, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: maxHealth
+      value: 500
+      objectReference: {fileID: 0}
+    - target: {fileID: 7822705050018410351, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 7906833751103771436, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 7980699717934928363, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 7999330112090581852, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 8076980350396484094, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 8391066710395317344, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 8460811328289858500, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 8509347182481401203, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 8533588215461571876, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 8968587649560900805, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
