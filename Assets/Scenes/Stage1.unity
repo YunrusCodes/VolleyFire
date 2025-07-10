@@ -11565,6 +11565,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: StarSparrow10
       objectReference: {fileID: 0}
+    - target: {fileID: 3709381824866779465, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: missileFireInterval
+      value: 1.5
+      objectReference: {fileID: 0}
     - target: {fileID: 6005448995833186671, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
