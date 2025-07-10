@@ -10,6 +10,8 @@ using UnityEngine.UI;
 public class PlayerController : MonoBehaviour
 {
     #region 欄位與屬性
+    [Header("血量設定")]
+    [SerializeField] private PlayerHealth playerHealth;
 
     [Header("移動設定")]
     [SerializeField] private float moveSpeed = 15f;       // 基礎移動速度（每秒位移量）
@@ -53,11 +55,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform lockedTarget;       // 鎖定的目標
     private bool isLocked;              // 是否處於鎖定狀態
 
-    public GameObject FireTarget;
     
     // 全域射擊控制
     private static bool globalFireEnabled = true;
     public static bool GlobalFireEnabled => globalFireEnabled;
+
+    [SerializeField] private GameObject crashEffect;
     
     #endregion
 
@@ -97,9 +100,13 @@ public class PlayerController : MonoBehaviour
         attackAction?.Disable();
         lockAction?.Disable();
     }
-
+    
     private void Update()
     {
+        if (playerHealth.IsDead()){
+            crashEffect.SetActive(true);
+            return;
+        }
         HandleInput();     // 取得輸入
         HandleShooting();  // 處理射擊（可連射）
         HandleMovement();  // 直接位移
@@ -266,8 +273,6 @@ public class PlayerController : MonoBehaviour
         {
             // 直接使用 targetPosition 作為射擊目標
             weaponSystem.SetPointerTarget(targetPosition);
-            
-            FireTarget.transform.position = targetPosition;
             weaponSystem?.Fire();
         }
     }

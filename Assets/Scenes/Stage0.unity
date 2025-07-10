@@ -12050,30 +12050,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1978755119561635033, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
-      propertyPath: m_Name
-      value: InputManager
-      objectReference: {fileID: 0}
-    - target: {fileID: 3979411327566914285, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
-      propertyPath: volume
-      value: 
-      objectReference: {fileID: 832575518}
-    - target: {fileID: 3979411327566914285, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
-      propertyPath: globalVolume
-      value: 
-      objectReference: {fileID: 832575518}
-    - target: {fileID: 5533274148140480604, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 1.3149
-      objectReference: {fileID: 0}
-    - target: {fileID: 5533274148140480604, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 1.7342
-      objectReference: {fileID: 0}
-    - target: {fileID: 5533274148140480604, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -0.91817
-      objectReference: {fileID: 0}
     - target: {fileID: 5593117490783122087, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -12114,18 +12090,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 7720245402069381931, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
-      propertyPath: firePoints.Array.data[0].projectileSpeed
-      value: 200
+    - target: {fileID: 6643417292323480715, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 8222259579982980384, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
-      propertyPath: TestCube
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 8222259579982980384, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
-      propertyPath: FireTarget
-      value: 
-      objectReference: {fileID: 746268326}
     - target: {fileID: 8222259579982980384, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
       propertyPath: crosshairImage
       value: 
