@@ -1,8 +1,8 @@
 public interface IHealth
 {
-    int GetCurrentHealth();
-    int GetMaxHealth();
+    float GetCurrentHealth();
+    float GetMaxHealth();
     bool IsDead();
-    void TakeDamage(int damage);
-    void SetMaxHealth(int newMaxHealth);
+    void TakeDamage(float damage);
+    void SetMaxHealth(float newMaxHealth);
 } 

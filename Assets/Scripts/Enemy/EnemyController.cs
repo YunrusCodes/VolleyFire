@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-[RequireComponent(typeof(EnemyHealth))]
 public class EnemyController : MonoBehaviour
 {
     [SerializeField] private EnemyBehavior behavior;

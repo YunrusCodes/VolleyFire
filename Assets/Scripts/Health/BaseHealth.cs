@@ -2,8 +2,8 @@ using UnityEngine;
 
 public abstract class BaseHealth : MonoBehaviour, IHealth
 {
-    [SerializeField] protected int maxHealth = 100;
-    [SerializeField] protected int currentHealth;
+    [SerializeField] protected float maxHealth = 100;
+    [SerializeField] protected float currentHealth;
     protected bool isDead = false;
 
     protected virtual void Awake()
@@ -11,7 +11,7 @@ public abstract class BaseHealth : MonoBehaviour, IHealth
         currentHealth = maxHealth;
     }
 
-    public virtual void TakeDamage(int damage)
+    public virtual void TakeDamage(float damage)
     {
         Debug.Log("TakeDamage: " + damage);
         if (isDead) return;
@@ -32,8 +32,8 @@ public abstract class BaseHealth : MonoBehaviour, IHealth
         isDead = true;
     }
 
-    public int GetCurrentHealth() => currentHealth;
-    public int GetMaxHealth() => maxHealth;
+    public float GetCurrentHealth() => currentHealth;
+    public float GetMaxHealth() => maxHealth;
     public bool IsDead() => isDead;
     
     /// <summary>
@@ -45,7 +45,7 @@ public abstract class BaseHealth : MonoBehaviour, IHealth
         return (float)currentHealth / maxHealth;
     }
     
-    public void SetMaxHealth(int newMaxHealth)
+    public void SetMaxHealth(float newMaxHealth)
     {
         maxHealth = newMaxHealth;
         if (currentHealth > maxHealth)
