@@ -15,8 +15,8 @@ Shader "Custom/URP_Transparent_Emission"
 
         Pass
         {
-            Blend SrcAlpha OneMinusSrcAlpha
-            ZWrite Off
+        Blend SrcAlpha OneMinusSrcAlpha
+        ZWrite Off
             Cull Off
 
             HLSLPROGRAM
@@ -39,7 +39,7 @@ Shader "Custom/URP_Transparent_Emission"
             sampler2D _BaseMap;
             float4 _BaseMap_ST;
             float4 _Color;
-            float _Alpha;
+        float _Alpha;
             float4 _EmissionColor;
             float _EmissionStrength;
 

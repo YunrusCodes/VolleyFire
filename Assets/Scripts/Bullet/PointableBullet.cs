@@ -15,6 +15,7 @@ public class PointableBullet : BulletBehavior
         // 預設往前方
         targetPosition = transform.position + transform.forward * 100f;
         direction = transform.forward;
+        
     }
 
     public override void Initialize(FirePoint firePoint)

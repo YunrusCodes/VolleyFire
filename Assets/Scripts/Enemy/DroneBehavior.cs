@@ -7,6 +7,9 @@ public class DroneBehavior : EnemyBehavior
     public GameObject missilePrefab;
     public float fireInterval = 2f;
     public float missileSpeed = 10f;
+    [Header("音效")]
+    public AudioClip missileFireSfx;
+    private AudioSource audioSource;
 
     private EnemyController controller;
     private Vector3 alignTargetPos;
@@ -26,6 +29,7 @@ public class DroneBehavior : EnemyBehavior
     public override void Init(EnemyController controller)
     {
         this.controller = controller;
+        audioSource = GetComponent<AudioSource>();
         useRandomSwing = true; // 初始為隨機方向
         SetNextSwingTarget();
         swingTimer = 0f;
@@ -127,6 +131,10 @@ public class DroneBehavior : EnemyBehavior
 
     private IEnumerator FireMissileBurst()
     {
+        if (audioSource != null && missileFireSfx != null)
+        {
+            audioSource.PlayOneShot(missileFireSfx);
+        }
         int burstCount = Random.Range(1, 6);
         for (int i = 0; i < burstCount; i++)
         {

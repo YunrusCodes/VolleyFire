@@ -51,4 +51,8 @@ public abstract class BaseHealth : MonoBehaviour, IHealth
         if (currentHealth > maxHealth)
             currentHealth = maxHealth;
     }
+    public void ResetHealth()
+    {
+        currentHealth = maxHealth;
+    }
 } 

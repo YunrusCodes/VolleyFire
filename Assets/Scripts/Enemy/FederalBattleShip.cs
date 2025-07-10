@@ -10,10 +10,14 @@ public class FederalBattleShip : EnemyBehavior
     public GameObject cannonRayPrefab;
     public float fireInterval = 3f;
     public float missileSpeed = 8f;
+    [Header("音效")]
+    public AudioClip missileFireSfx;
+    private AudioSource missileAudioSource;
     
     [Header("發射點設置")]
     public List<Transform> missileSpawnPoints = new List<Transform>();
     public List<Transform> cannonRaySpawnPoints = new List<Transform>();
+    private List<GameObject> cannonRayInstances = new List<GameObject>();
 
     private EnemyController controller;
     private Vector3 alignTargetPos;
@@ -33,7 +37,7 @@ public class FederalBattleShip : EnemyBehavior
     [SerializeField] private float missileFireInterval = 3f;
     [SerializeField] private float cannonFireInterval = 2f;
     private float missileFireTimer = 0f;
-    private float cannonFireTimer = 0f;
+    public float cannonFireTimer = 0f;
 
     private List<Vector3> patrolDirectionsQueue = new List<Vector3>();
     private int patrolDirectionIndex = 0;
@@ -41,11 +45,24 @@ public class FederalBattleShip : EnemyBehavior
     public override void Init(EnemyController controller)
     {
         this.controller = controller;
+        // 嘗試從子物件或自身取得 AudioSource
+        var audioSources = GetComponentsInChildren<AudioSource>();
+        if (audioSources.Length >= 1)
+        {
+            missileAudioSource = audioSources[0];
+        }
+        else
+        {
+            missileAudioSource = gameObject.AddComponent<AudioSource>();
+        }
         SetNextPatrolTarget();
         patrolTimer = 0f;
         currentState = BattleShipState.Patrol;
         missileFireTimer = 0f;
         cannonFireTimer = 0f;
+        // 初始化 cannonRayInstances
+        cannonRayInstances = new List<GameObject>(new GameObject[cannonRaySpawnPoints.Count]);
+        controller.GetHealth().ResetHealth();
     }
 
     public override void Tick()
@@ -84,6 +101,11 @@ public class FederalBattleShip : EnemyBehavior
                 return;
             }
             alignTimer += Time.deltaTime;
+            if (alignTimer < alignDuration )
+            {
+                alignTargetPos = GetPlayerAlignPos(); // 前1/4持續修正
+            }
+            // 後半段不再修正 alignTargetPos
             MoveToAlignWithPlayer();
             cannonFireTimer += Time.deltaTime;
             if (cannonFireTimer >= cannonFireInterval)
@@ -104,6 +126,10 @@ public class FederalBattleShip : EnemyBehavior
     {
         if (missilePrefab == null || missileSpawnPoints.Count == 0) return;
 
+        if (missileAudioSource != null && missileFireSfx != null)
+        {
+            missileAudioSource.PlayOneShot(missileFireSfx);
+        }
         // 從每個發射點發射一顆飛彈
         foreach (Transform spawnPoint in missileSpawnPoints)
         {
@@ -123,27 +149,35 @@ public class FederalBattleShip : EnemyBehavior
     {
         if (cannonRayPrefab == null || cannonRaySpawnPoints.Count == 0) return;
 
-        // 從每個發射點發射一道雷射
-        foreach (Transform spawnPoint in cannonRaySpawnPoints)
+        // 確保 cannonRayInstances 長度正確
+        while (cannonRayInstances.Count < cannonRaySpawnPoints.Count)
+            cannonRayInstances.Add(null);
+        for (int i = 0; i < cannonRaySpawnPoints.Count; i++)
         {
-            // 使用發射點的位置和方向
-            GameObject ray = Instantiate(cannonRayPrefab, spawnPoint.position, spawnPoint.rotation);
-            var bullet = ray.GetComponent<BulletBehavior>();
-            if (bullet != null)
+            Transform spawnPoint = cannonRaySpawnPoints[i];
+            GameObject ray = cannonRayInstances[i];
+            if (ray == null || !ray.activeSelf)
             {
-                bullet.SetDirection(spawnPoint.forward);
+                ray = Instantiate(cannonRayPrefab, spawnPoint.position, spawnPoint.rotation);
+                cannonRayInstances[i] = ray;
+                var bullet = ray.GetComponent<BulletBehavior>();
+                if (bullet != null)
+                {
+                    bullet.SetDirection(spawnPoint.forward);
+                }
+                var cannonRay = ray.GetComponent<CannonRay>();
+                if (cannonRay != null)
+                {
+                    cannonRay.SetSpawnPoint(spawnPoint);
+                }
             }
-            // 設置發射點
-            var cannonRay = ray.GetComponent<CannonRay>();
-            if (cannonRay != null)
-            {
-                cannonRay.SetSpawnPoint(spawnPoint);
-            }
+            // 若物件還在 active 狀態則不重複生成
         }
     }
 
     private void MoveToAlignWithPlayer()
     {
+        Debug.Log(alignTargetPos.x+" "+alignTargetPos.y);
         Vector3 current = transform.position;
         Vector3 target = new Vector3(alignTargetPos.x, alignTargetPos.y, current.z); // Z 不變
         Vector2 current2D = new Vector2(current.x, current.y);
@@ -215,7 +249,6 @@ public class FederalBattleShip : EnemyBehavior
                 currentState = BattleShipState.AlignToPlayer;
                 alignTargetPos = GetPlayerAlignPos();
                 alignTimer = 0f;
-                cannonFireTimer = 0f;
                 FireCannonRayAtPlayer(); // 先發射雷射砲
                 return;
             }

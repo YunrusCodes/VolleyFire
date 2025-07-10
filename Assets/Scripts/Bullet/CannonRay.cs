@@ -12,6 +12,10 @@ public class CannonRay : BulletBehavior
     [SerializeField] private float maxLength = 30f;       // 最大長度
     [SerializeField] private string targetTag = "Player";   // 目標標籤
     [SerializeField] private float damage = 5;              // 傷害值
+    [Header("音效")]
+    public AudioClip chargeSfx;
+    public AudioClip releaseSfx;
+    private AudioSource audioSource;
 
     private float elapsedTime = 0f;                       // 已經過時間
     private bool isCharging = true;                       // 是否在續能中
@@ -40,6 +44,17 @@ public class CannonRay : BulletBehavior
 
         // 關閉 Rigidbody 控制
         useRigidbody = false;
+        // 取得 AudioSource
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+        // 播放 charge 音效
+        if (audioSource != null && chargeSfx != null)
+        {
+            audioSource.PlayOneShot(chargeSfx);
+        }
     }
 
     public void SetSpawnPoint(Transform point)
@@ -86,6 +101,11 @@ public class CannonRay : BulletBehavior
             // 切換特效
             if (chargingEffect) chargingEffect.SetActive(false);
             if (laserObject) laserObject.SetActive(true);
+            // 播放 release 音效
+            if (audioSource != null && releaseSfx != null)
+            {
+                audioSource.PlayOneShot(releaseSfx);
+            }
         }
     }
 
