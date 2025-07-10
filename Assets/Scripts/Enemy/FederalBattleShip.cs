@@ -227,7 +227,9 @@ public class FederalBattleShip : EnemyBehavior
         var player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
         {
-            return new Vector3(player.transform.position.x, player.transform.position.y + 2f, transform.position.z);
+            Vector3 playerPos = player.transform.position;
+            Vector3 dirToPlayer = (playerPos - transform.position).normalized;
+            return new Vector3(playerPos.x + dirToPlayer.x * 0.2f, playerPos.y + 2f + dirToPlayer.y * 0.2f, transform.position.z);
         }
         return transform.position;
     }
