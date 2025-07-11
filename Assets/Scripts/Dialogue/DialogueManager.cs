@@ -2,30 +2,27 @@ using UnityEngine;
 using Yarn.Unity;
 using System;
 using System.Collections.Generic;
+using System.Collections;
 
 [DisallowMultipleComponent]
 public class DialogueManager : MonoBehaviour
 {
     [Header("對話系統設定")]
     [SerializeField] private DialogueRunner dialogueRunner;
-    [SerializeField] private MonoBehaviour dialogueUI; // 避免類型限制錯誤
+    [SerializeField] private MonoBehaviour dialogueUI;
 
     [Header("對話觸發設定")]
     [SerializeField] private bool enableDialogueSystem = true;
 
-    // 單例
     public static DialogueManager Instance { get; private set; }
 
-    // 狀態
     private bool isDialogueActive = false;
     private Queue<string> pendingDialogues = new Queue<string>();
 
-    // 自動閱讀
     private bool isAutoReading = false;
     private float autoReadSpeed = 3f;
     private Coroutine autoReadCoroutine;
 
-    // 事件
     public static event Action<string> OnDialogueStarted;
     public static event Action OnDialogueEnded;
 
@@ -43,19 +40,13 @@ public class DialogueManager : MonoBehaviour
 
     private void InitializeDialogueSystem()
     {
-        if (dialogueRunner == null)
-            dialogueRunner = FindObjectOfType<DialogueRunner>();
-
-        if (dialogueUI == null)
-            dialogueUI = FindObjectOfType<MonoBehaviour>();
-
         if (dialogueRunner != null)
             dialogueRunner.onDialogueComplete.AddListener(OnDialogueComplete);
         else
             Debug.LogError("找不到 DialogueRunner，請確認場景中有該組件。");
     }
 
-    /// <summary> 觸發對話 </summary>
+    /// <summary> 觸發對話（如果正在進行其他對話則排隊） </summary>
     public void TriggerDialogue(string nodeName)
     {
         if (!enableDialogueSystem)
@@ -73,19 +64,45 @@ public class DialogueManager : MonoBehaviour
         StartDialogue(nodeName);
     }
 
-    /// <summary> 強制觸發（結束目前對話） </summary>
-    public void ForceTriggerDialogue(string nodeName)
+    /// <summary> 強制打斷當前對話並立即啟動新對話 </summary>
+    public void ForceTriggerDialogue(string nodeName, Action onComplete = null)
     {
-        if (!enableDialogueSystem)
+        // 1. 先打斷
+        AbortDialogue(() =>
         {
-            Debug.LogWarning("對話系統已被禁用");
+            // 2. 臨時訂閱
+            void TempHandler()
+            {
+                OnDialogueEnded = null; // 自動解除
+                onComplete?.Invoke();           // 執行外部回呼
+            }
+
+            if (onComplete != null)
+                OnDialogueEnded += TempHandler;
+
+            // 3. 再觸發新對話
+            TriggerDialogue(nodeName);
+        });
+    }
+
+
+    /// <summary> 結束當前對話，清除排隊（可選擇執行後續動作） </summary>
+    public void AbortDialogue(Action callback = null)
+    {
+        if (!isDialogueActive)
+        {
+            callback?.Invoke();
             return;
         }
 
-        if (isDialogueActive)
-            ForceEndDialogue();
+        dialogueRunner?.Stop();
+        isDialogueActive = false;
+        pendingDialogues.Clear();
 
-        StartDialogue(nodeName);
+        OnDialogueEnded?.Invoke();
+        Time.timeScale = 1f;
+        StopCoroutine(autoReadCoroutine);
+        callback?.Invoke();
     }
 
     private void StartDialogue(string nodeName)
@@ -98,7 +115,12 @@ public class DialogueManager : MonoBehaviour
 
         isDialogueActive = true;
         OnDialogueStarted?.Invoke(nodeName);
-        dialogueRunner.StartDialogue(nodeName);
+        StartCoroutine(StartDialogueDelayFrame(nodeName));
+    }
+    IEnumerator StartDialogueDelayFrame(string nodename)
+    {
+        yield return null;        
+        dialogueRunner.StartDialogue(nodename);
     }
 
     private void OnDialogueComplete()
@@ -113,16 +135,9 @@ public class DialogueManager : MonoBehaviour
 
     public bool IsDialogueActive() => isDialogueActive || pendingDialogues.Count > 0;
 
-    public void ForceEndDialogue()
-    {
-        dialogueRunner?.Stop();
-        pendingDialogues.Clear();
-        OnDialogueComplete();
-    }
-
     public void ClearPendingDialogues() => pendingDialogues.Clear();
 
-    /// <summary> 啟動自動閱讀 </summary>
+    // --- 自動閱讀功能 ---
     public void StartAutoReadCoroutine(float speed)
     {
         StopAutoReadCoroutine();
@@ -131,7 +146,6 @@ public class DialogueManager : MonoBehaviour
         autoReadCoroutine = StartCoroutine(AutoReadRoutine());
     }
 
-    /// <summary> 停止自動閱讀 </summary>
     public void StopAutoReadCoroutine()
     {
         if (autoReadCoroutine != null)

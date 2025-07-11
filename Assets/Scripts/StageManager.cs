@@ -89,15 +89,14 @@ public class StageManager : MonoBehaviour
         Debug.Log("玩家死亡");
         if (dialogueManager != null)
         {
-            DialogueManager.OnDialogueEnded += OnDeathDialogueComplete;
-            dialogueManager.ForceTriggerDialogue("MissionFailed");
+            dialogueManager.ForceTriggerDialogue("MissionFailed",OnDeathDialogueComplete);
         }
         else
         {
-            // 如果沒有對話系統，直接執行死亡後處理
             StartCoroutine(BloomAndReload());
         }
     }
+
 
     private void OnDeathDialogueComplete()
     {
