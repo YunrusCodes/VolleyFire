@@ -90,7 +90,7 @@ public class StageManager : MonoBehaviour
         if (dialogueManager != null)
         {
             DialogueManager.OnDialogueEnded += OnDeathDialogueComplete;
-            dialogueManager.TriggerDialogue("MissionFailed");
+            dialogueManager.ForceTriggerDialogue("MissionFailed");
         }
         else
         {
