@@ -412,6 +412,17 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 1
+--- !u!114 &443518998 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8222259579982980384, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
+  m_PrefabInstance: {fileID: 9127619513034172900}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6df2bde1f31c90c4285ec4890aa649a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &462441016
 GameObject:
   m_ObjectHideFlags: 0
@@ -5927,6 +5938,8 @@ MonoBehaviour:
   - {fileID: 389702296}
   NextStageSceneName: Stage1
   volume: {fileID: 832575518}
+  playerController: {fileID: 443518998}
+  dialogueRunner: {fileID: 1973778179}
 --- !u!4 &1304675285
 Transform:
   m_ObjectHideFlags: 0

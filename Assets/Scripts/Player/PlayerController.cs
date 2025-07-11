@@ -12,6 +12,7 @@ public class PlayerController : MonoBehaviour
     #region 欄位與屬性
     [Header("血量設定")]
     [SerializeField] private PlayerHealth playerHealth;
+    public PlayerHealth PlayerHealth => playerHealth;
 
     [Header("移動設定")]
     [SerializeField] private float moveSpeed = 15f;       // 基礎移動速度（每秒位移量）

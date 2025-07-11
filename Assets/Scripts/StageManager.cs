@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using Yarn.Unity;
 
 public class StageManager : MonoBehaviour
 {
@@ -17,12 +18,29 @@ public class StageManager : MonoBehaviour
     public Volume volume; // 拖入場景中的 Volume
     private Bloom bloom; // 用來操作泛白
     
+    [Header("玩家設定")]
+    public PlayerController playerController;
+
+    [Header("對話系統")]
+    public DialogueRunner dialogueRunner;
+
     private int currentWaveIndex = 0;
     private EnemyWave currentWave;
     private bool isStageCompleted = false;
 
+    // PlayerPrefs 的 key
+    private const string RETRY_KEY = "IsRetry";
+    private const string WAVE_INDEX_KEY = "LastWaveIndex";
+
     private void Start()
     {
+        // 檢查是否為重試
+        bool isRetry = PlayerPrefs.GetInt(RETRY_KEY, 0) == 1;
+        if (isRetry)
+        {
+            currentWaveIndex = PlayerPrefs.GetInt(WAVE_INDEX_KEY, 0);
+        }
+
         // 取得 Volume 中的 Bloom
         if (volume != null && volume.profile.TryGet<Bloom>(out bloom))
         {
@@ -33,14 +51,73 @@ public class StageManager : MonoBehaviour
         {
             Debug.LogWarning("Volume 未設置或未加 Bloom 覆蓋！");
         }
+
+        // 設置玩家死亡事件監聽
+        if (playerController != null && playerController.PlayerHealth != null)
+        {
+            playerController.PlayerHealth.onPlayerDeath.AddListener(HandlePlayerDeath);
+        }
+
         if (waves.Count > 0)
         {
+            if (isRetry)
+            {
+                Debug.Log($"重試：從第 {currentWaveIndex + 1} 波開始");
+                // 重置重試標記
+                PlayerPrefs.SetInt(RETRY_KEY, 0);
+                PlayerPrefs.Save();
+            }
             StartNextWave();
         }
         else
         {
             Debug.LogWarning("沒有設置任何敵人波次！");
         }
+    }
+
+    private void OnDestroy()
+    {
+        // 移除事件監聽
+        if (playerController != null && playerController.PlayerHealth != null)
+        {
+            playerController.PlayerHealth.onPlayerDeath.RemoveListener(HandlePlayerDeath);
+        }
+
+        // 移除對話完成事件監聽
+        if (dialogueRunner != null)
+        {
+            dialogueRunner.onDialogueComplete.RemoveListener(OnDeathDialogueComplete);
+        }
+    }
+
+    private void HandlePlayerDeath()
+    {
+        Debug.Log("玩家死亡");
+        if (dialogueRunner != null)
+        {
+            dialogueRunner.onDialogueComplete.AddListener(OnDeathDialogueComplete);
+            dialogueRunner.StartDialogue("MissionFailed");
+        }
+        else
+        {
+            // 如果沒有對話系統，直接執行死亡後處理
+            OnDeathDialogueComplete();
+        }
+    }
+
+    private void OnDeathDialogueComplete()
+    {
+        if (dialogueRunner != null)
+        {
+            dialogueRunner.onDialogueComplete.RemoveListener(OnDeathDialogueComplete);
+        }
+
+        // 保存重試資訊
+        PlayerPrefs.SetInt(RETRY_KEY, 1);
+        PlayerPrefs.SetInt(WAVE_INDEX_KEY, currentWaveIndex);
+        PlayerPrefs.Save();
+
+        StartCoroutine(BloomAndReload());
     }
 
     private void Update()
@@ -131,5 +208,30 @@ public class StageManager : MonoBehaviour
             }
             bloom.intensity.value = to;
         }
+    }
+
+    private IEnumerator BloomAndReload()
+    {
+        float duration = 2f;
+        float timer = 0f;
+        float from = 0f;
+        float to = 50f;
+        if (bloom != null)
+        {
+            while (timer < duration)
+            {
+                timer += Time.deltaTime;
+                float value = Mathf.Lerp(from, to, timer / duration);
+                bloom.intensity.value = value;
+                yield return null;
+            }
+            bloom.intensity.value = to;
+        }
+        else
+        {
+            Debug.Log("未取得 Bloom 組件");
+        }
+        // 重新載入當前場景
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 } 
