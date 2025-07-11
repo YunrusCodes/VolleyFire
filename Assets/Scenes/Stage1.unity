@@ -5939,7 +5939,7 @@ MonoBehaviour:
   NextStageSceneName: Stage1
   volume: {fileID: 832575518}
   playerController: {fileID: 443518998}
-  dialogueRunner: {fileID: 1973778179}
+  dialogueManager: {fileID: 1304675286}
 --- !u!4 &1304675285
 Transform:
   m_ObjectHideFlags: 0

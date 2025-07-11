@@ -22,7 +22,7 @@ public class StageManager : MonoBehaviour
     public PlayerController playerController;
 
     [Header("對話系統")]
-    public DialogueRunner dialogueRunner;
+    public DialogueManager dialogueManager;
 
     private int currentWaveIndex = 0;
     private EnemyWave currentWave;
@@ -82,34 +82,33 @@ public class StageManager : MonoBehaviour
         {
             playerController.PlayerHealth.onPlayerDeath.RemoveListener(HandlePlayerDeath);
         }
-
-        // 移除對話完成事件監聽
-        if (dialogueRunner != null)
-        {
-            dialogueRunner.onDialogueComplete.RemoveListener(OnDeathDialogueComplete);
-        }
     }
 
     private void HandlePlayerDeath()
     {
         Debug.Log("玩家死亡");
-        if (dialogueRunner != null)
+        if (dialogueManager != null)
         {
-            dialogueRunner.onDialogueComplete.AddListener(OnDeathDialogueComplete);
-            dialogueRunner.StartDialogue("MissionFailed");
+            DialogueManager.OnDialogueEnded += OnDeathDialogueComplete;
+            dialogueManager.TriggerDialogue("MissionFailed");
         }
         else
         {
             // 如果沒有對話系統，直接執行死亡後處理
-            OnDeathDialogueComplete();
+            StartCoroutine(BloomAndReload());
         }
     }
 
     private void OnDeathDialogueComplete()
     {
-        if (dialogueRunner != null)
+        // 移除事件監聽
+        DialogueManager.OnDialogueEnded -= OnDeathDialogueComplete;
+
+        // 確保 StageManager 還存在
+        if (this == null || !gameObject.activeInHierarchy)
         {
-            dialogueRunner.onDialogueComplete.RemoveListener(OnDeathDialogueComplete);
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            return;
         }
 
         // 保存重試資訊
@@ -212,20 +211,30 @@ public class StageManager : MonoBehaviour
 
     private IEnumerator BloomAndReload()
     {
+        // 確保 StageManager 還存在
+        if (this == null || !gameObject.activeInHierarchy)
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            yield break;
+        }
+
         float duration = 2f;
         float timer = 0f;
         float from = 0f;
         float to = 50f;
         if (bloom != null)
         {
-            while (timer < duration)
+            while (timer < duration && gameObject != null && gameObject.activeInHierarchy)
             {
                 timer += Time.deltaTime;
                 float value = Mathf.Lerp(from, to, timer / duration);
                 bloom.intensity.value = value;
                 yield return null;
             }
-            bloom.intensity.value = to;
+            if (bloom != null) // 再次檢查 bloom 是否存在
+            {
+                bloom.intensity.value = to;
+            }
         }
         else
         {
