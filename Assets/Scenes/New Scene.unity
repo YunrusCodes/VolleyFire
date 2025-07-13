@@ -933,10 +933,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84cf3aab5c995b445a609e12c6a25905, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mode: 3
+  mode: 2
   sword: {fileID: 399480284}
   mode2Duration: 5
-  mode3Duration: 5
+  mode3Duration: 8
 --- !u!114 &919132149316538225
 MonoBehaviour:
   m_ObjectHideFlags: 0
