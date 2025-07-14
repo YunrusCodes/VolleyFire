@@ -30,6 +30,13 @@ public class RobotBehavior : EnemyBehavior
     private int bulletsFired = 0;                         // 已發射子彈數
     private const int MAX_BULLETS = 100;                   // 最大發射子彈數
 
+    [Header("劍模式設置")]
+    public Vector3 slashDistance = new Vector3(0f, 0f, 3f);    // 斬擊距離
+    public float swordMoveSpeed = 8f;   // 劍模式移動速度
+    public float returnSpeed = 10f;     // 返回原位速度
+    [SerializeField] private bool isReturning = false;   // 是否正在返回原位
+    [SerializeField] private Transform swordTransform;   // 劍的Transform
+
     // ──────────────────────────────────────────────────────────────
     private EnemyController controller;
     [SerializeField] private Animator animator;
@@ -198,10 +205,8 @@ public class RobotBehavior : EnemyBehavior
                offset.y >= -boundaryY && offset.y <= boundaryY;
     }
 
-    private void PatrolMove()
+    private void GunModeBehavior()
     {
-        if (mode != RobotMode.GunMode || targetPoints.Count == 0) return;
-
         // 更新朝向玩家
         if (playerTransform != null && gunTransform != null)
         {
@@ -318,7 +323,6 @@ public class RobotBehavior : EnemyBehavior
         if (animator == null) return;
 
         // 處理移動
-        PatrolMove();
 
         switch (mode)
         {
@@ -327,6 +331,7 @@ public class RobotBehavior : EnemyBehavior
                 break;
             case RobotMode.GunMode:
                 HandleGunMode();
+                GunModeBehavior();
                 break;
             case RobotMode.SwordMode:
                 HandleSwordMode();
@@ -340,19 +345,43 @@ public class RobotBehavior : EnemyBehavior
     private void HandleIdleMode()
     {
         AnimatorStateInfo IdleLayer = animator.GetCurrentAnimatorStateInfo(0);
-        if (IdleLayer.IsName("Idle"))
+        
+        // 檢查是否在 Idle 狀態且動畫播放超過一半
+        if (IdleLayer.IsName("Idle") && IdleLayer.normalizedTime >= 0.5f)
         {
-            // 平滑地回到初始旋轉
-            transform.rotation = Quaternion.Lerp(transform.rotation, initialRotation, turnSpeed * Time.deltaTime);
-            
-            // 如果已經非常接近初始旋轉，就直接設為初始旋轉
-            if (Quaternion.Angle(transform.rotation, initialRotation) < 0.1f)
+            mode = RobotMode.SwordMode;
+            Debug.Log("Idle動畫播放超過一半，切換到SwordMode");
+            return;
+        }
+
+        if (playerTransform != null)
+        {
+            // 計算看向玩家的方向
+            Vector3 targetPosition;
+            if (playerRenderer != null)
             {
-                transform.rotation = initialRotation;
+                targetPosition = playerRenderer.bounds.center;
+            }
+            else
+            {
+                targetPosition = playerTransform.position;
             }
 
-            ResetState();
+            // 計算方向，但只在水平面上（Y軸）旋轉
+            Vector3 directionToPlayer = targetPosition - transform.position;
+            directionToPlayer.y = 0; // 保持垂直方向不變
+
+            if (directionToPlayer != Vector3.zero)
+            {
+                // 創建一個只在 Y 軸上的旋轉
+                Quaternion targetRotation = Quaternion.LookRotation(directionToPlayer, Vector3.up);
+                
+                // 平滑轉向
+                transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
+            }
         }
+
+        ResetState();
     }
 
     private void HandleGunMode()
@@ -361,7 +390,7 @@ public class RobotBehavior : EnemyBehavior
         {
             animator.SetBool("DrawingGun", false);
             sheathbool = false;
-            mode = 0;
+            mode = RobotMode.Idle;
         }
         else if (!animator.GetBool("DrawingGun"))
         {
@@ -373,38 +402,102 @@ public class RobotBehavior : EnemyBehavior
     {
         AnimatorStateInfo SlashLayer = animator.GetCurrentAnimatorStateInfo(1);
 
-        if (drawshootbool && !slashing)
+        // 如果正在返回原位
+        if (isReturning)
         {
-            animator.SetTrigger("DrawAndShoot");
-            drawshootbool = false;
-            drawshooting = true;
-        }
-        else if (drawshooting)
-        {
-            if (SlashLayer.normalizedTime >= 1f)
+            // 計算到原始位置的方向和距離
+            Vector3 directionToStart = initialPosition - transform.position;
+            directionToStart.y = 0;  // 保持在同一平面
+            float distanceToStart = directionToStart.magnitude;
+
+            Debug.Log($"正在返回原位，距離原點: {distanceToStart:F2}");
+
+            if (distanceToStart > 0.1f)
             {
-                drawshooting = false;
+                // 移動向原點，但不改變朝向
+                transform.position += directionToStart.normalized * returnSpeed * Time.deltaTime;
+            }
+            else
+            {
+                // 到達原點
+                transform.position = new Vector3(initialPosition.x, transform.position.y, initialPosition.z);
+                isReturning = false;
+                mode = RobotMode.Idle;  // 回到idle狀態
+                Debug.Log("已返回原位，切換到Idle模式");
+            }
+            return;
+        }
+
+        // 檢查動畫狀態是否準備完成
+        if (animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f)
+        {
+            if (playerTransform != null && !isReturning && swordTransform != null)
+            {
+                // 計算目標位置（玩家前方固定距離）
+                Vector3 targetPosition = playerRenderer != null ? 
+                    playerRenderer.bounds.center : 
+                    playerTransform.position;
+
+                // 計算劍需要到達的目標點（在玩家前方slashDistance距離）
+                Vector3 desiredSwordPosition = new Vector3(targetPosition.x + slashDistance.x, targetPosition.y + slashDistance.y, targetPosition.z + slashDistance.z);
+                
+                // 計算劍到目標點的方向和距離
+                Vector3 swordToTarget = desiredSwordPosition - swordTransform.position;
+                float swordDistanceToTarget = swordToTarget.magnitude;
+                Vector3 swordDirection = swordToTarget.normalized;
+
+                // 持續打印距離和方向資訊
+                Debug.Log($"劍的目標位置: {desiredSwordPosition}");
+                Debug.Log($"劍當前位置: {swordTransform.position}, 距離: {swordDistanceToTarget:F2}");
+                Debug.Log($"移動方向: {swordDirection}");
+
+                // 始終讓機器人看向玩家
+                Vector3 directionToPlayer = targetPosition - transform.position;
+                directionToPlayer.y = 0; // 保持垂直方向不變
+                if (directionToPlayer != Vector3.zero)
+                {
+                    Quaternion targetRotation = Quaternion.LookRotation(directionToPlayer, Vector3.up);
+                    transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
+                }
+
+                // 只有在不是斬擊狀態時才移動
+                if (!slashing && !slashbool)
+                {
+                    // 根據劍到目標的方向移動機器人，但不改變朝向
+                    transform.position += swordDirection * swordMoveSpeed * Time.deltaTime;
+                }
+
+                // 檢查劍是否到達目標位置
+                if (swordDistanceToTarget <= 0.1f && !slashing)
+                {
+                    if(!isReturning && !slashing) slashbool = true;
+                    Debug.Log($"劍到達目標位置！距離: {swordDistanceToTarget:F2}");
+                }
             }
         }
 
         if (SlashLayer.IsName("Slash"))
         {
             slashing = true;
+            Debug.Log("開始斬擊動作，停止移動");
         }
         else if (slashing)
         {
             slashing = false;
+            Debug.Log("斬擊結束");
         }
         else if (slashbool && !drawshooting)
         {
             animator.SetTrigger("Slash");
             slashbool = false;
+            isReturning = true;  // 觸發斬擊時就開始返回
+            Debug.Log("觸發斬擊，開始返回");
         }
         else if (sheathbool)
         {
             animator.SetBool("DrawingSword", false);
             sheathbool = false;
-            mode = 0;
+            mode = RobotMode.Idle;
         }
         else if (!animator.GetBool("DrawingSword"))
         {
