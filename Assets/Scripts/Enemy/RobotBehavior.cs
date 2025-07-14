@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 
 public class RobotBehavior : EnemyBehavior
 {
@@ -63,8 +64,12 @@ public class RobotBehavior : EnemyBehavior
     private int currentTargetIndex = 0;
     private Vector3 moveDirection;       // 當前移動方向
     private Vector3 targetDirection;     // 目標移動方向
+    private bool hasUpdatedMidway = false;
+    private Vector3 swordStartPosition;
+    private float swordStartToTargetDistance;
 
     // ──────────────────────────────────────────────────────────────
+    private RobotMode lastAttackMode = RobotMode.SwordMode; // 新增：記錄上一次攻擊模式，預設為劍
     #region Init
     public override void Init(EnemyController controller)
     {
@@ -336,15 +341,25 @@ public class RobotBehavior : EnemyBehavior
 
     // ──────────────────────────────────────────────────────────────
     #region Mode Handlers
+    
     private void HandleIdleMode()
     {
         AnimatorStateInfo IdleLayer = animator.GetCurrentAnimatorStateInfo(0);
         
         // 檢查是否在 Idle 狀態且動畫播放超過一半
-        if (IdleLayer.IsName("Idle") && IdleLayer.normalizedTime >= 0.5f)
+        if (IdleLayer.IsName("Idle") && IdleLayer.normalizedTime >= 0.25f)
         {
-            mode = RobotMode.SwordMode;
-            Debug.Log("Idle動畫播放超過一半，切換到SwordMode");
+            // 輪替模式：上次是劍就這次槍，上次是槍就這次劍
+            if (lastAttackMode == RobotMode.SwordMode)
+            {
+                mode = RobotMode.GunMode;
+                lastAttackMode = RobotMode.GunMode;
+            }
+            else
+            {
+                mode = RobotMode.SwordMode;
+                lastAttackMode = RobotMode.SwordMode;
+            }
             return;
         }
 
@@ -418,12 +433,17 @@ public class RobotBehavior : EnemyBehavior
                 // 移動向原點，但不改變朝向
                 transform.position += directionToStart.normalized * returnSpeed * Time.deltaTime;
             }
-            else
+            else if( !animator.GetCurrentAnimatorStateInfo(0).IsName("TakeSwordShoot") )
             {
                 // 到達原點
                 transform.position = new Vector3(initialPosition.x, transform.position.y, initialPosition.z);
                 isReturning = false;
-                mode = RobotMode.Idle;  // 回到idle狀態
+                if(Random.value < 0.5f)  
+                {
+                    animator.SetBool("DrawingSword", false);
+                    mode = RobotMode.Idle;
+                }
+                ResetState();
                 Debug.Log("已返回原位，切換到Idle模式");
             }
 
@@ -443,12 +463,30 @@ public class RobotBehavior : EnemyBehavior
                 {
                     desiredSwordPosition = new Vector3(targetPosition.x + slashDistance.x, targetPosition.y + slashDistance.y, targetPosition.z + slashDistance.z);
                     hasCalculatedSwordPosition = true;
+                    hasUpdatedMidway = false; // 重設中途更新flag
+                    swordStartPosition = swordTransform.position;
+                    swordStartToTargetDistance = (desiredSwordPosition - swordStartPosition).magnitude;
                 }
 
                 // 計算劍到目標點的方向和距離
                 Vector3 swordToTarget = desiredSwordPosition - swordTransform.position;
                 float swordDistanceToTarget = swordToTarget.magnitude;
                 Vector3 swordDirection = swordToTarget.normalized;
+
+                // --- 新增：移動到一半時再更新一次目標 ---
+                if (!hasUpdatedMidway && swordStartToTargetDistance > 0f && swordDistanceToTarget <= swordStartToTargetDistance / 2f)
+                {
+                    // 重新計算目標
+                    Vector3 newTargetPosition = playerTransform.position;
+                    desiredSwordPosition = new Vector3(
+                        newTargetPosition.x + slashDistance.x,
+                        newTargetPosition.y + slashDistance.y,
+                        newTargetPosition.z + slashDistance.z
+                    );
+                    hasUpdatedMidway = true;
+                    Debug.Log("斬擊移動到一半，已更新目標位置！");
+                    // 重新計算新的總距離（可選，或只用一次）
+                }
 
                 // 持續打印距離和方向資訊
                 Debug.Log($"劍的目標位置: {desiredSwordPosition}");
@@ -512,6 +550,7 @@ public class RobotBehavior : EnemyBehavior
             hasCalculatedSwordPosition = false; // 斬擊結束後重設
             drawshootbool = true; // 開始返回時設為 true
             Debug.Log("斬擊結束，開始返回原位");
+            hasUpdatedMidway = false; // 斬擊結束時重設中途更新flag
         }
         else if (slashbool && !drawshooting && !hasSlashed)
         {

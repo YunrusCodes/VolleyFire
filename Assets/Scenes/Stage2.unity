@@ -8488,7 +8488,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84cf3aab5c995b445a609e12c6a25905, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mode: 2
+  mode: 0
   moveSpeed: 20
   moveDistance: 20
   targetPointCount: 3
