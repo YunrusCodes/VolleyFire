@@ -47,6 +47,7 @@ public class RobotBehavior : EnemyBehavior
     private Transform playerTransform;  // 玩家的 Transform
     [SerializeField] private Transform gunTransform;  // 槍的 Transform
     private Renderer playerRenderer;    // 玩家的 Renderer 組件
+    [SerializeField] private Transform pistolTransform; // 手槍的 Transform
 
     bool hasCalculatedSwordPosition = false;
     private Vector3 desiredSwordPosition;
@@ -188,7 +189,6 @@ public class RobotBehavior : EnemyBehavior
         GameObject marker = GameObject.CreatePrimitive(PrimitiveType.Cube);
         marker.transform.position = position;
         marker.transform.localScale = Vector3.one * markerSize;
-        
         // 設置材質和顏色
         var renderer = marker.GetComponent<Renderer>();
         if (renderer != null)
@@ -196,7 +196,6 @@ public class RobotBehavior : EnemyBehavior
             renderer.material = new Material(Shader.Find("Standard"));
             renderer.material.color = markerColor;
         }
-
         // 添加編號
         marker.name = $"TargetMarker_{index}";
         targetMarkers.Add(marker);
@@ -216,18 +215,8 @@ public class RobotBehavior : EnemyBehavior
         if (playerTransform != null && gunTransform != null)
         {
             Vector3 targetPosition;
-            if (playerRenderer != null)
-            {
-                // 使用 Renderer 的 bounds 中心點
-                targetPosition = playerRenderer.bounds.center;
-                Debug.Log($"瞄準位置(使用Renderer中心): {targetPosition}, Bounds大小: {playerRenderer.bounds.size}");
-            }
-            else
-            {
-                // 如果沒有 Renderer，就使用 Transform 的位置
-                targetPosition = playerTransform.position;
-                Debug.Log($"瞄準位置(使用Transform): {targetPosition}");
-            }
+            targetPosition = playerTransform.position;
+            Debug.Log($"瞄準位置(使用Transform): {targetPosition}");
 
             // 將目標位置轉換到機器人的本地空間
             Vector3 localTargetPosition = transform.InverseTransformPoint(targetPosition);
@@ -363,14 +352,7 @@ public class RobotBehavior : EnemyBehavior
         {
             // 計算看向玩家的方向
             Vector3 targetPosition;
-            if (playerRenderer != null)
-            {
-                targetPosition = playerRenderer.bounds.center;
-            }
-            else
-            {
-                targetPosition = playerTransform.position;
-            }
+            targetPosition = playerTransform.position;
 
             // 計算方向，但只在水平面上（Y軸）旋轉
             Vector3 directionToPlayer = targetPosition - transform.position;
@@ -430,7 +412,7 @@ public class RobotBehavior : EnemyBehavior
             float distanceToStart = directionToStart.magnitude;
 
             Debug.Log($"正在返回原位，距離原點: {distanceToStart:F2}");
-
+            TargetLock();
             if (distanceToStart > 0.1f)
             {
                 // 移動向原點，但不改變朝向
@@ -444,6 +426,7 @@ public class RobotBehavior : EnemyBehavior
                 mode = RobotMode.Idle;  // 回到idle狀態
                 Debug.Log("已返回原位，切換到Idle模式");
             }
+
             return;
         }
 
@@ -453,9 +436,7 @@ public class RobotBehavior : EnemyBehavior
             if (playerTransform != null && !isReturning && swordTransform != null)
             {
                 // 計算目標位置（玩家前方固定距離）
-                Vector3 targetPosition = playerRenderer != null ? 
-                    playerRenderer.bounds.center : 
-                    playerTransform.position;
+                Vector3 targetPosition = playerTransform.position;
 
                 // 只在第一次進來時計算
                 if (!hasCalculatedSwordPosition)
@@ -496,6 +477,26 @@ public class RobotBehavior : EnemyBehavior
                     if(!isReturning && !slashing) slashbool = true;
                     Debug.Log($"劍到達目標位置！距離: {swordDistanceToTarget:F2}");
                 }
+            }
+
+
+            if (animator.GetCurrentAnimatorStateInfo(0).IsName("TakeSwordShoot"))
+            {
+                Debug.Log("fixing");
+                Vector3 targetPosition = playerTransform.position;
+
+                // 計算本地空間的目標位置
+                Vector3 localTargetPosition = transform.InverseTransformPoint(targetPosition);
+                Vector3 localPistolPosition = transform.InverseTransformPoint(pistolTransform.position);
+
+                Vector3 localDirectionToPlayer = localTargetPosition - localPistolPosition;
+
+                float yaw = Mathf.Atan2(localDirectionToPlayer.x, localDirectionToPlayer.z) * Mathf.Rad2Deg;
+                float pitch = -Mathf.Atan2(localDirectionToPlayer.y, new Vector2(localDirectionToPlayer.x, localDirectionToPlayer.z).magnitude) * Mathf.Rad2Deg;
+
+                Quaternion targetRotation = transform.rotation * Quaternion.Euler(pitch, yaw, 0);
+
+                pistolTransform.rotation = Quaternion.Lerp(pistolTransform.rotation, targetRotation, turnSpeed * Time.deltaTime);
             }
         }
 
@@ -539,5 +540,30 @@ public class RobotBehavior : EnemyBehavior
             // 在槍口位置生成子彈
             GameObject bullet = Instantiate(gunBulletPrefab, gunTransform.position, gunTransform.rotation);
         }
+    }
+    void TargetLock()
+    {
+        Debug.Log("TargetLock");
+        if (playerTransform == null || pistolTransform == null) { Debug.Log("PLAYER OR PISTOL IS NULL"); return; }
+        Vector3 targetPosition = playerTransform.position;
+
+        // 1. 計算手槍到玩家的世界方向
+        Vector3 pistolToPlayer = targetPosition - pistolTransform.position;
+        if (pistolToPlayer == Vector3.zero) return;
+
+        // 2. 計算本體需要的旋轉，讓手槍 forward 指向玩家
+        // 取得手槍在本體下的 local 方向
+        Vector3 localPistolPos = transform.InverseTransformPoint(pistolTransform.position);
+        Vector3 localTargetPos = transform.InverseTransformPoint(targetPosition);
+        Vector3 localDir = (localTargetPos - localPistolPos).normalized;
+
+        // 3. 用 LookRotation 產生本體的 local 旋轉
+        Quaternion localTargetRot = Quaternion.LookRotation(localDir, Vector3.up);
+
+        // 4. 轉回世界空間
+        Quaternion worldTargetRot = transform.rotation * localTargetRot;
+
+        // 5. 平滑旋轉本體
+        transform.rotation = Quaternion.Lerp(transform.rotation, worldTargetRot, 0.25f);
     }
 }
