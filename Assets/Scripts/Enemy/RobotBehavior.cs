@@ -52,6 +52,8 @@ public class RobotBehavior : EnemyBehavior
     public bool sheathbool = false;
     public bool drawshootbool = false;
 
+    private bool hasSlashed = false; // 只斬擊一次
+
     // 巡邏相關變數
     private List<Vector3> targetPoints = new List<Vector3>();
     private List<GameObject> targetMarkers = new List<GameObject>();
@@ -97,6 +99,7 @@ public class RobotBehavior : EnemyBehavior
         drawshootbool = false;
         currentTargetIndex = 0;
         bulletsFired = 0;  // 重置子彈計數
+        hasSlashed = false; // 重置斬擊旗標
 
         // 清除所有標記
         ClearMarkers();
@@ -461,7 +464,7 @@ public class RobotBehavior : EnemyBehavior
                 }
 
                 // 只有在不是斬擊狀態時才移動
-                if (!slashing && !slashbool)
+                if (!slashing && !slashbool && !isReturning)
                 {
                     // 根據劍到目標的方向移動機器人，但不改變朝向
                     transform.position += swordDirection * swordMoveSpeed * Time.deltaTime;
@@ -484,14 +487,15 @@ public class RobotBehavior : EnemyBehavior
         else if (slashing)
         {
             slashing = false;
-            Debug.Log("斬擊結束");
+            isReturning = true; // 斬擊結束才開始返回
+            Debug.Log("斬擊結束，開始返回原位");
         }
-        else if (slashbool && !drawshooting)
+        else if (slashbool && !drawshooting && !hasSlashed)
         {
             animator.SetTrigger("Slash");
             slashbool = false;
-            isReturning = true;  // 觸發斬擊時就開始返回
-            Debug.Log("觸發斬擊，開始返回");
+            hasSlashed = true; // 斬擊過後設為 true
+            Debug.Log("觸發斬擊，等待動畫結束再返回");
         }
         else if (sheathbool)
         {

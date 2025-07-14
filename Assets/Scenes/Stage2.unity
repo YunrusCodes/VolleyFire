@@ -7855,7 +7855,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1604726787
 Transform:
   m_ObjectHideFlags: 0
@@ -8240,7 +8240,7 @@ Transform:
   m_GameObject: {fileID: 1766748642}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: -1.2, y: 11.9, z: 22.4}
+  m_LocalPosition: {x: -1.2, y: 11.8, z: 16.1}
   m_LocalScale: {x: 11.049766, y: 11.049766, z: 11.049766}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -8266,13 +8266,13 @@ MonoBehaviour:
   turnSpeed: 5
   markerColor: {r: 1, g: 0, b: 0, a: 1}
   markerSize: 0.3
-  boundaryX: 30
+  boundaryX: 20
   boundaryY: 15
   gunBulletPrefab: {fileID: 7555402867869293541, guid: 11548ec74589a1840a46b6ee62504086, type: 3}
   fireRate: 10
-  slashDistance: {x: 10, y: 10, z: 15}
-  swordMoveSpeed: 30
-  returnSpeed: 1
+  slashDistance: {x: 0, y: -6, z: 15}
+  swordMoveSpeed: 20
+  returnSpeed: 20
   isReturning: 0
   swordTransform: {fileID: 1604726787}
   animator: {fileID: 2030954609}
@@ -8292,6 +8292,7 @@ GameObject:
   - component: {fileID: 1776806695}
   - component: {fileID: 1776806694}
   - component: {fileID: 1776806693}
+  - component: {fileID: 1776806696}
   m_Layer: 0
   m_Name: Capsule
   m_TagString: Untagged
@@ -8308,8 +8309,8 @@ Transform:
   m_GameObject: {fileID: 1776806691}
   serializedVersion: 2
   m_LocalRotation: {x: 0.00000011362125, y: 0.0000005923206, z: 0.6691566, w: 0.7431214}
-  m_LocalPosition: {x: -0.554, y: 0.175, z: 0.012}
-  m_LocalScale: {x: 0.04025918, y: 0.6141347, z: 0.04025917}
+  m_LocalPosition: {x: -0.875, y: 0.2, z: 0.01}
+  m_LocalScale: {x: 0.04025918, y: 1.1175058, z: 0.04025917}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1604726787}
@@ -8390,6 +8391,33 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1776806691}
   m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!54 &1776806696
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1776806691}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 126
+  m_CollisionDetection: 0
 --- !u!1 &1811825587
 GameObject:
   m_ObjectHideFlags: 0
@@ -13870,7 +13898,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2212678057939376234, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3979411327566914285, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
       propertyPath: volume
@@ -13916,6 +13944,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6584434281239183452, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
+      propertyPath: m_Convex
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6643417292323480715, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -13923,6 +13955,10 @@ PrefabInstance:
     - target: {fileID: 8357126842894378493, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
       propertyPath: m_Name
       value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 8421408657212676151, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
+      propertyPath: m_Constraints
+      value: 126
       objectReference: {fileID: 0}
     - target: {fileID: 8788129085363427088, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
       propertyPath: m_AdditionalShaderChannelsFlag
