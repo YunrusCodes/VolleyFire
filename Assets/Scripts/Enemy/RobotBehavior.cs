@@ -27,6 +27,8 @@ public class RobotBehavior : EnemyBehavior
     [SerializeField] private GameObject gunBulletPrefab;  // 子彈預製體
     [SerializeField] private float fireRate = 1f;         // 每秒發射次數
     private float nextFireTime;                           // 下次發射時間
+    private int bulletsFired = 0;                         // 已發射子彈數
+    private const int MAX_BULLETS = 100;                   // 最大發射子彈數
 
     // ──────────────────────────────────────────────────────────────
     private EnemyController controller;
@@ -34,8 +36,10 @@ public class RobotBehavior : EnemyBehavior
     private bool slashing = false;
     private bool drawshooting = false;
     private Vector3 initialPosition;    // 儲存初始位置
+    private Quaternion initialRotation; // 儲存初始旋轉
     private Transform playerTransform;  // 玩家的 Transform
     [SerializeField] private Transform gunTransform;  // 槍的 Transform
+    private Renderer playerRenderer;    // 玩家的 Renderer 組件
 
     public bool slashbool = false;
     public bool sheathbool = false;
@@ -54,8 +58,22 @@ public class RobotBehavior : EnemyBehavior
     {
         this.controller = controller;
         initialPosition = transform.position;  // 儲存初始位置
+        initialRotation = transform.rotation;  // 儲存初始旋轉
         playerTransform = GameObject.FindGameObjectWithTag("Player")?.transform;
-        if (playerTransform == null)
+        if (playerTransform != null)
+        {
+            playerRenderer = playerTransform.GetComponent<Renderer>();
+            if (playerRenderer == null)
+            {
+                // 如果沒有找到 Renderer，嘗試在子物件中尋找
+                playerRenderer = playerTransform.GetComponentInChildren<Renderer>();
+            }
+            if (playerRenderer == null)
+            {
+                Debug.LogWarning("找不到玩家的 Renderer 組件！");
+            }
+        }
+        else
         {
             Debug.LogWarning("找不到標記為 'Player' 的物件！");
         }
@@ -71,6 +89,7 @@ public class RobotBehavior : EnemyBehavior
         sheathbool = false;
         drawshootbool = false;
         currentTargetIndex = 0;
+        bulletsFired = 0;  // 重置子彈計數
 
         // 清除所有標記
         ClearMarkers();
@@ -186,24 +205,56 @@ public class RobotBehavior : EnemyBehavior
         // 更新朝向玩家
         if (playerTransform != null && gunTransform != null)
         {
-            // 計算從槍到玩家的方向
-            Vector3 directionToPlayer = playerTransform.position - gunTransform.position;
+            Vector3 targetPosition;
+            if (playerRenderer != null)
+            {
+                // 使用 Renderer 的 bounds 中心點
+                targetPosition = playerRenderer.bounds.center;
+                Debug.Log($"瞄準位置(使用Renderer中心): {targetPosition}, Bounds大小: {playerRenderer.bounds.size}");
+            }
+            else
+            {
+                // 如果沒有 Renderer，就使用 Transform 的位置
+                targetPosition = playerTransform.position;
+                Debug.Log($"瞄準位置(使用Transform): {targetPosition}");
+            }
+
+            // 將目標位置轉換到機器人的本地空間
+            Vector3 localTargetPosition = transform.InverseTransformPoint(targetPosition);
+            Vector3 localGunPosition = transform.InverseTransformPoint(gunTransform.position);
             
-            // 計算需要的旋轉角度
-            float yaw = Mathf.Atan2(directionToPlayer.x, directionToPlayer.z) * Mathf.Rad2Deg;
-            float pitch = -Mathf.Atan2(directionToPlayer.y, new Vector2(directionToPlayer.x, directionToPlayer.z).magnitude) * Mathf.Rad2Deg;
+            // 在本地空間計算從槍到目標的方向
+            Vector3 localDirectionToPlayer = localTargetPosition - localGunPosition;
+            
+            Debug.Log($"本地空間 - 槍位置: {localGunPosition}, 目標位置: {localTargetPosition}, 方向: {localDirectionToPlayer.normalized}");
+
+            // 計算需要的旋轉角度（在本地空間）
+            float yaw = Mathf.Atan2(localDirectionToPlayer.x, localDirectionToPlayer.z) * Mathf.Rad2Deg;
+            float pitch = -Mathf.Atan2(localDirectionToPlayer.y, new Vector2(localDirectionToPlayer.x, localDirectionToPlayer.z).magnitude) * Mathf.Rad2Deg;
+
+            Debug.Log($"旋轉角度 - Pitch: {pitch:F2}°, Yaw: {yaw:F2}°");
 
             // 創建目標旋轉（只使用 pitch 和 yaw）
-            Quaternion targetRotation = Quaternion.Euler(pitch, yaw, 0);
+            Quaternion targetRotation = transform.rotation * Quaternion.Euler(pitch, yaw, 0);
             
             // 平滑轉向
             transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
-
+            Debug.Log($"Animator State Info: {animator.GetCurrentAnimatorStateInfo(0).normalizedTime}");
             // 檢查是否可以發射
-            if (Time.time >= nextFireTime)
+            if (Time.time >= nextFireTime && bulletsFired < MAX_BULLETS && animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f)
             {
                 FireBullet();
                 nextFireTime = Time.time + 1f / fireRate;  // 設置下次發射時間
+                bulletsFired++;
+                Debug.Log($"已發射子彈數: {bulletsFired}/{MAX_BULLETS}");
+
+                // 檢查是否達到最大發射數
+                if (bulletsFired >= MAX_BULLETS)
+                {
+                    Debug.Log("達到最大發射數，切換回idle模式");
+                    sheathbool = true;
+                    bulletsFired = 0;  // 重置子彈計數
+                }
             }
         }
 
@@ -291,6 +342,15 @@ public class RobotBehavior : EnemyBehavior
         AnimatorStateInfo IdleLayer = animator.GetCurrentAnimatorStateInfo(0);
         if (IdleLayer.IsName("Idle"))
         {
+            // 平滑地回到初始旋轉
+            transform.rotation = Quaternion.Lerp(transform.rotation, initialRotation, turnSpeed * Time.deltaTime);
+            
+            // 如果已經非常接近初始旋轉，就直接設為初始旋轉
+            if (Quaternion.Angle(transform.rotation, initialRotation) < 0.1f)
+            {
+                transform.rotation = initialRotation;
+            }
+
             ResetState();
         }
     }

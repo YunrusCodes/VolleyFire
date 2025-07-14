@@ -139,12 +139,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHealth: 10
   currentHealth: 0
-  volume: {fileID: 0}
   healthSlider: {fileID: 7483354940673993099}
   fillImage: {fileID: 3404703002731725447}
   fullHealthColor: {r: 0, g: 1, b: 0, a: 1}
   lowHealthColor: {r: 1, g: 0, b: 0, a: 1}
   lowHealthPercent: 0.8
+  onPlayerDeath:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!54 &8421408657212676151
 Rigidbody:
   m_ObjectHideFlags: 0
