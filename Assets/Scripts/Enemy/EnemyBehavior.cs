@@ -9,4 +9,4 @@ public abstract class EnemyBehavior : MonoBehaviour
     public virtual void OnWaveMove() { }
     // 波次開始行動階段，可由子類覆寫
     public virtual void OnWaveStart() { }
-} 
+}
