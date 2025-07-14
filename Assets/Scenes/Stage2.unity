@@ -8271,8 +8271,8 @@ MonoBehaviour:
   gunBulletPrefab: {fileID: 7555402867869293541, guid: 11548ec74589a1840a46b6ee62504086, type: 3}
   fireRate: 10
   slashDistance: {x: 0, y: -6, z: 15}
-  swordMoveSpeed: 20
-  returnSpeed: 20
+  swordMoveSpeed: 30
+  returnSpeed: 30
   isReturning: 0
   swordTransform: {fileID: 1604726787}
   animator: {fileID: 2030954609}

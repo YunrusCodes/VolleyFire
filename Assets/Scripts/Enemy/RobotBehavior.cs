@@ -48,6 +48,8 @@ public class RobotBehavior : EnemyBehavior
     [SerializeField] private Transform gunTransform;  // 槍的 Transform
     private Renderer playerRenderer;    // 玩家的 Renderer 組件
 
+    bool hasCalculatedSwordPosition = false;
+    private Vector3 desiredSwordPosition;
     public bool slashbool = false;
     public bool sheathbool = false;
     public bool drawshootbool = false;
@@ -404,6 +406,20 @@ public class RobotBehavior : EnemyBehavior
     private void HandleSwordMode()
     {
         AnimatorStateInfo SlashLayer = animator.GetCurrentAnimatorStateInfo(1);
+        
+        if (drawshootbool && !slashing)
+        {
+            animator.SetTrigger("DrawAndShoot");
+            drawshootbool = false;
+            drawshooting = true;
+        }
+        else if (drawshooting)
+        {
+            if (SlashLayer.normalizedTime >= 1f)
+            {
+                drawshooting = false;
+            }
+        }
 
         // 如果正在返回原位
         if (isReturning)
@@ -441,9 +457,13 @@ public class RobotBehavior : EnemyBehavior
                     playerRenderer.bounds.center : 
                     playerTransform.position;
 
-                // 計算劍需要到達的目標點（在玩家前方slashDistance距離）
-                Vector3 desiredSwordPosition = new Vector3(targetPosition.x + slashDistance.x, targetPosition.y + slashDistance.y, targetPosition.z + slashDistance.z);
-                
+                // 只在第一次進來時計算
+                if (!hasCalculatedSwordPosition)
+                {
+                    desiredSwordPosition = new Vector3(targetPosition.x + slashDistance.x, targetPosition.y + slashDistance.y, targetPosition.z + slashDistance.z);
+                    hasCalculatedSwordPosition = true;
+                }
+
                 // 計算劍到目標點的方向和距離
                 Vector3 swordToTarget = desiredSwordPosition - swordTransform.position;
                 float swordDistanceToTarget = swordToTarget.magnitude;
@@ -488,6 +508,8 @@ public class RobotBehavior : EnemyBehavior
         {
             slashing = false;
             isReturning = true; // 斬擊結束才開始返回
+            hasCalculatedSwordPosition = false; // 斬擊結束後重設
+            drawshootbool = true; // 開始返回時設為 true
             Debug.Log("斬擊結束，開始返回原位");
         }
         else if (slashbool && !drawshooting && !hasSlashed)
