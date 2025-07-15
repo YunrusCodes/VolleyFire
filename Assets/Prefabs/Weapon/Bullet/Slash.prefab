@@ -123,12 +123,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 0
-  lifetime: 1
+  lifetime: 0.1
   useRigidbody: 0
   explosionPrefab: {fileID: 0}
   targetTag: Player
   damage: 5
-  lifeTime: 1
 --- !u!1 &7876997809504047185
 GameObject:
   m_ObjectHideFlags: 0

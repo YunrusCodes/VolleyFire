@@ -2,12 +2,14 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
+using UnityEditor.SearchService;
+using UnityEditor;
 
 public class RobotBehavior : EnemyBehavior
 {
     #region Enums & Constants
     public enum RobotMode { Idle = 0, GunMode = 1, SwordMode = 2 }
-    private const int MAX_BULLETS = 100;
+    private const int MAX_BULLETS = 10;
     #endregion
 
     #region Serialized Fields
@@ -42,6 +44,8 @@ public class RobotBehavior : EnemyBehavior
     [SerializeField] private Transform gunTransform;
     [SerializeField] private Transform pistolTransform;
     [SerializeField] private Animator animator;
+    [Header("巡邏點距離限制")]
+    public float minTargetPointDistance = 2f;
     #endregion
 
     #region Private Fields
@@ -53,7 +57,6 @@ public class RobotBehavior : EnemyBehavior
     private Vector3 initialPosition;
     private Quaternion initialRotation;
     private Transform playerTransform;
-    private Renderer playerRenderer;
     private bool hasCalculatedSwordPosition = false;
     private Vector3 desiredSwordPosition;
     private bool hasSlashed = false;
@@ -89,15 +92,7 @@ public class RobotBehavior : EnemyBehavior
     private void SetupPlayerReferences()
     {
         playerTransform = GameObject.FindGameObjectWithTag("Player")?.transform;
-        if (playerTransform != null)
-        {
-            playerRenderer = playerTransform.GetComponent<Renderer>() ?? playerTransform.GetComponentInChildren<Renderer>();
-            if (playerRenderer == null)
-            {
-                Debug.LogWarning("找不到玩家的 Renderer 組件！");
-            }
-        }
-        else
+        if (playerTransform == null)
         {
             Debug.LogWarning("找不到標記為 'Player' 的物件！");
         }
@@ -140,48 +135,51 @@ public class RobotBehavior : EnemyBehavior
         targetPoints.Clear();
         ClearMarkers();
 
-        Vector3 currentPos = transform.position;
-        int attempts = 0;
-        const int MAX_ATTEMPTS = 20;
+        // 產生起點（機器人當前位置）
+        Vector3 start = transform.position;
+        targetPoints.Add(start);
 
-        while (targetPoints.Count < targetPointCount && attempts < MAX_ATTEMPTS)
+        // 產生第一個目標點
+        Vector3 next = GenerateNewPatrolPoint(start);
+        targetPoints.Add(next);
+
+        if (targetPoints.Count > 1)
         {
-            float randomAngle = Random.Range(0f, 360f);
-            float randomRadian = randomAngle * Mathf.Deg2Rad;
-            
-            Vector3 direction = new Vector3(
-                Mathf.Cos(randomRadian),
-                Mathf.Sin(randomRadian),
-                0f
-            ).normalized;
-
-            // 在世界座標系中隨機生成點
-            float randomX = Random.Range(boundaryX.y, boundaryX.x);
-            float randomY = Random.Range(boundaryY.y, boundaryY.x);
-            Vector3 newTarget = new Vector3(randomX, randomY, currentPos.z);
-
-            if (IsWithinBoundary(newTarget))
-            {
-                targetPoints.Add(newTarget);
-                CreateTargetMarker(newTarget, targetPoints.Count);
-                currentPos = newTarget;
-            }
-
-            attempts++;
-        }
-
-        while (targetPoints.Count < targetPointCount && targetPoints.Count > 0)
-        {
-            Vector3 lastPoint = targetPoints[targetPoints.Count - 1];
-            targetPoints.Add(lastPoint);
-            CreateTargetMarker(lastPoint, targetPoints.Count);
-        }
-
-        if (targetPoints.Count > 0)
-        {
-            targetDirection = (targetPoints[0] - transform.position).normalized;
+            targetDirection = (targetPoints[1] - targetPoints[0]).normalized;
             moveDirection = targetDirection;
         }
+    }
+
+    private Vector3 GenerateNewPatrolPoint(Vector3 from)
+    {
+        for (int i = 0; i < 30; i++) // 最多嘗試30次
+        {
+            float angle = Random.Range(0f, 360f);
+            float rad = angle * Mathf.Deg2Rad;
+
+            // 計算該方向下，from到邊界的最大距離
+            float maxDist = float.MaxValue;
+            // X方向
+            if (Mathf.Cos(rad) > 0)
+                maxDist = Mathf.Min(maxDist, (boundaryX.x - from.x) / Mathf.Cos(rad));
+            else if (Mathf.Cos(rad) < 0)
+                maxDist = Mathf.Min(maxDist, (boundaryX.y - from.x) / Mathf.Cos(rad));
+            // Y方向
+            if (Mathf.Sin(rad) > 0)
+                maxDist = Mathf.Min(maxDist, (boundaryY.x - from.y) / Mathf.Sin(rad));
+            else if (Mathf.Sin(rad) < 0)
+                maxDist = Mathf.Min(maxDist, (boundaryY.y - from.y) / Mathf.Sin(rad));
+
+            float minDist = minTargetPointDistance;
+            if (maxDist < minDist) continue;
+            float dist = Random.Range(minDist, maxDist);
+            Vector3 offset = new Vector3(Mathf.Cos(rad), Mathf.Sin(rad), 0f) * dist;
+            Vector3 candidate = from + offset;
+            if (IsWithinBoundary(candidate))
+                return candidate;
+        }
+        // 如果找不到，直接回傳原點
+        return from;
     }
 
     private void CreateTargetMarker(Vector3 position, int index)
@@ -217,7 +215,7 @@ public class RobotBehavior : EnemyBehavior
                 var renderer = targetMarkers[i].GetComponent<Renderer>();
                 if (renderer != null)
                 {
-                    renderer.material.color = (i == currentTargetIndex) ? Color.red : markerColor;
+                    renderer.material.color = (i == 0) ? Color.red : markerColor; // 第一個點是紅色
                 }
             }
         }
@@ -230,25 +228,42 @@ public class RobotBehavior : EnemyBehavior
         if (gunBulletPrefab != null && gunTransform != null)
         {
             Instantiate(gunBulletPrefab, gunTransform.position, gunTransform.rotation);
+            // Debug繪製z軸正方向線條
+            Debug.DrawLine(gunTransform.position, gunTransform.position + gunTransform.forward * 500f, Color.red, 1.0f);
+            // EditorApplication.isPaused = true;
         }
     }
 
-    private void TargetLock()
+    private void TargetLock(Transform weaponTransform, Vector3? offset = null)
     {
-        if (playerTransform == null || pistolTransform == null) return;
-        
-        Vector3 targetPosition = playerTransform.position;
-        Vector3 pistolToPlayer = targetPosition - pistolTransform.position;
-        if (pistolToPlayer == Vector3.zero) return;
+        if (playerTransform == null || weaponTransform == null) return;
+        Vector3 realOffset = offset ?? Vector3.zero;
+        Vector3 lockPoint = playerTransform.position + realOffset;
+        // Step 1: 槍口指向玩家的方向（世界座標）
+        Vector3 toTarget = lockPoint - weaponTransform.position;
+        if (toTarget == Vector3.zero) return;
 
-        Vector3 localPistolPos = transform.InverseTransformPoint(pistolTransform.position);
-        Vector3 localTargetPos = transform.InverseTransformPoint(targetPosition);
-        Vector3 localDir = (localTargetPos - localPistolPos).normalized;
+        // Step 2: 指定一個你要「頭朝上的方向」 → 使用世界 Y 軸
+        Vector3 stableUp = Vector3.up;
 
-        Quaternion localTargetRot = Quaternion.LookRotation(localDir, Vector3.up);
-        Quaternion worldTargetRot = transform.rotation * localTargetRot;
-        transform.rotation = Quaternion.Lerp(transform.rotation, worldTargetRot, 0.25f);
+        // Step 3: 使用 LookRotation(forward, up) → 算出讓 weapon 對準玩家的旋轉
+        Quaternion desiredWeaponRotation = Quaternion.LookRotation(toTarget.normalized, stableUp);
+
+        // Step 4: 計算旋轉差 → 槍應該怎麼轉 → 套用到父物件（AI 機器人）
+        Quaternion rotationDelta = desiredWeaponRotation * Quaternion.Inverse(weaponTransform.rotation);
+
+        // Step 5: 更新 AI 本體（transform）的旋轉
+        transform.rotation = Quaternion.Lerp( transform.rotation, desiredWeaponRotation, 0.25f);
+
+        // --- Debug 用 ---
+        Debug.DrawRay(weaponTransform.position, weaponTransform.forward * 5f, Color.red);   // 槍口方向
+        Debug.DrawLine(weaponTransform.position, lockPoint, Color.green);    // 瞄準線
     }
+
+
+
+
+
     #endregion
 
     #region Mode Behaviors
@@ -256,52 +271,51 @@ public class RobotBehavior : EnemyBehavior
     {
         if (playerTransform != null && gunTransform != null)
         {
-            Vector3 targetPosition = playerTransform.position;
-            Vector3 localTargetPosition = transform.InverseTransformPoint(targetPosition);
-            Vector3 localGunPosition = transform.InverseTransformPoint(gunTransform.position);
-            Vector3 localDirectionToPlayer = localTargetPosition - localGunPosition;
-            
-            float yaw = Mathf.Atan2(localDirectionToPlayer.x, localDirectionToPlayer.z) * Mathf.Rad2Deg;
-            float pitch = -Mathf.Atan2(localDirectionToPlayer.y, new Vector2(localDirectionToPlayer.x, localDirectionToPlayer.z).magnitude) * Mathf.Rad2Deg;
+            // 射擊前，先以抵達點為基準做TargetLock
+            Vector3 originalPosition = transform.position;
+            transform.position = targetPoints[1];
+            TargetLock(gunTransform, new Vector3(4,-3,1));
+            transform.position = originalPosition;
+        }
 
-            Quaternion targetRotation = transform.rotation * Quaternion.Euler(pitch, yaw, 0);
-            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
+        if (targetPoints.Count < 2) return;
+        Vector3 toTarget = targetPoints[1] - transform.position;
+        float totalDistance = Vector3.Distance(targetPoints[0], targetPoints[1]);
+        float fromStart = Vector3.Distance(transform.position, targetPoints[0]);
 
-            if (Time.time >= nextFireTime && bulletsFired < MAX_BULLETS && animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f)
+        // 抵達
+        if (fromStart >= totalDistance * 0.9f)
+        {
+            transform.position = targetPoints[1];
+            // 射擊
+            if (bulletsFired < MAX_BULLETS && animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f)
             {
                 FireBullet();
-                nextFireTime = Time.time + 1f / fireRate;
                 bulletsFired++;
-
                 if (bulletsFired >= MAX_BULLETS)
                 {
                     sheathbool = true;
                     bulletsFired = 0;
                 }
             }
-        }
-
-        Vector3 toTarget = targetPoints[currentTargetIndex] - transform.position;
-        float distanceToTarget = toTarget.magnitude;
-
-        if (distanceToTarget < 0.1f)
-        {
-            currentTargetIndex = (currentTargetIndex + 1) % targetPoints.Count;
-
-            if (currentTargetIndex == 0)
-            {
-                GenerateTargetPoints();
-                return;
-            }
-
-            toTarget = targetPoints[currentTargetIndex] - transform.position;
+            // 到達目標點，移除
+            targetPoints.RemoveAt(0);
+            // 以剩下的點為基準產生新點
+            Vector3 last = targetPoints[0];
+            Vector3 newPoint = GenerateNewPatrolPoint(last);
+            targetPoints.Add(newPoint);
+            // 更新方向
+            targetDirection = (targetPoints[1] - targetPoints[0]).normalized;
+            moveDirection = targetDirection;
             UpdateMarkersColor();
+            return;
         }
 
-        targetDirection = toTarget.normalized;
+        targetDirection = (targetPoints[1] - targetPoints[0]).normalized;
         moveDirection = Vector3.Lerp(moveDirection, targetDirection, turnSpeed * Time.deltaTime);
         moveDirection.Normalize();
-        transform.position += moveDirection * moveSpeed * Time.deltaTime;
+        // 用Lerp方式移動到目標點
+        transform.position = Vector3.Lerp(transform.position, targetPoints[1], moveSpeed * Time.deltaTime);
     }
 
     private void HandleIdleMode()
@@ -379,7 +393,7 @@ public class RobotBehavior : EnemyBehavior
         directionToStart.y = 0;
         float distanceToStart = directionToStart.magnitude;
 
-        TargetLock();
+        TargetLock(pistolTransform);
         
         if (distanceToStart > 0.1f)
         {
@@ -514,5 +528,38 @@ public class RobotBehavior : EnemyBehavior
         }
     }
     #endregion
+
+#if UNITY_EDITOR
+    private void OnDrawGizmos()
+    {
+        // 畫出巡邏邊界
+        Vector3 min = new Vector3(boundaryX.y, boundaryY.y, transform.position.z);
+        Vector3 max = new Vector3(boundaryX.x, boundaryY.x, transform.position.z);
+        Vector3 p1 = new Vector3(min.x, min.y, min.z);
+        Vector3 p2 = new Vector3(max.x, min.y, min.z);
+        Vector3 p3 = new Vector3(max.x, max.y, min.z);
+        Vector3 p4 = new Vector3(min.x, max.y, min.z);
+        Color color = Color.yellow;
+        Debug.DrawLine(p1, p2, color);
+        Debug.DrawLine(p2, p3, color);
+        Debug.DrawLine(p3, p4, color);
+        Debug.DrawLine(p4, p1, color);
+
+        // 畫出三個巡邏點的正三角形
+        if (targetPoints != null && targetPoints.Count == 2)
+        {
+            Debug.DrawLine(targetPoints[0], targetPoints[1], color);
+        }
+
+        // 畫出巡邏路徑
+        if (targetPoints != null && targetPoints.Count >= 2)
+        {
+            for (int i = 0; i < targetPoints.Count - 1; i++)
+            {
+                Debug.DrawLine(targetPoints[i], targetPoints[i + 1], color);
+            }
+        }
+    }
+#endif
 }
 

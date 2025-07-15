@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4876373127551625369}
   - component: {fileID: -8635248622531693620}
-  - component: {fileID: 4396269883150243646}
+  - component: {fileID: 1765126509262869483}
   m_Layer: 0
   m_Name: RobotGunBullet
   m_TagString: Untagged
@@ -61,7 +61,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
---- !u!114 &4396269883150243646
+--- !u!114 &1765126509262869483
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -73,12 +73,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f379cee114abd28418bd257afc3117cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 100
+  speed: 60
   lifetime: 5
   useRigidbody: 0
   explosionPrefab: {fileID: 8640070007292392689, guid: 539d3e8bcd283bc4a86413eedc0801af, type: 3}
   targetTag: Player
-  damage: 0.1
+  damage: 1
 --- !u!1 &8489065275879920191
 GameObject:
   m_ObjectHideFlags: 0
@@ -108,7 +108,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.08547508, y: 0.48761764, z: 0.08547508}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4876373127551625369}
