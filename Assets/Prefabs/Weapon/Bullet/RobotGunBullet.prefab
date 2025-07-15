@@ -76,7 +76,7 @@ MonoBehaviour:
   speed: 100
   lifetime: 5
   useRigidbody: 0
-  explosionPrefab: {fileID: 8640070007292392689, guid: 1db44c370478b7146823784ef4dd7cc2, type: 3}
+  explosionPrefab: {fileID: 8640070007292392689, guid: 539d3e8bcd283bc4a86413eedc0801af, type: 3}
   targetTag: Player
   damage: 0.1
 --- !u!1 &8489065275879920191

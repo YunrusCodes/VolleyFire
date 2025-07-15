@@ -156,7 +156,6 @@ public class PlayerController : MonoBehaviour
         foreach (var hit in hits)
         {
             // 忽略非敵方物件
-            if (hit.collider.gameObject.tag != "Enemy") Debug.Log(hit.collider.gameObject.name);
             if (hit.collider.gameObject.tag != "Enemy") continue;
 
             // 撞到其他物件（敵人、障礙物等）

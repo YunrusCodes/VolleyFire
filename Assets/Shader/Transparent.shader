@@ -1,4 +1,4 @@
-Shader "Custom/URP_Transparent_Emission"
+Shader "Custom/URP_Transparent_Emission" 
 {
     Properties
     {
@@ -15,13 +15,15 @@ Shader "Custom/URP_Transparent_Emission"
 
         Pass
         {
-        Blend SrcAlpha OneMinusSrcAlpha
-        ZWrite Off
+            Blend SrcAlpha OneMinusSrcAlpha
+            ZWrite Off
             Cull Off
 
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma shader_feature _EMISSION
+
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
             struct Attributes
@@ -39,7 +41,7 @@ Shader "Custom/URP_Transparent_Emission"
             sampler2D _BaseMap;
             float4 _BaseMap_ST;
             float4 _Color;
-        float _Alpha;
+            float _Alpha;
             float4 _EmissionColor;
             float _EmissionStrength;
 
@@ -55,8 +57,13 @@ Shader "Custom/URP_Transparent_Emission"
             {
                 half4 c = tex2D(_BaseMap, i.uv) * _Color;
                 c.a *= _Alpha;
-                half3 emission = _EmissionColor.rgb * _EmissionStrength;
+
+                // HDR Emission output
+                float3 emission = _EmissionColor.rgb * _EmissionStrength;
+
+                // Add emission to final RGB
                 c.rgb += emission;
+
                 return c;
             }
             ENDHLSL
