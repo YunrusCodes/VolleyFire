@@ -182,23 +182,6 @@ public class RobotBehavior : EnemyBehavior
         return from;
     }
 
-    private void CreateTargetMarker(Vector3 position, int index)
-    {
-        GameObject marker = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        marker.transform.position = position;
-        marker.transform.localScale = Vector3.one * markerSize;
-        
-        var renderer = marker.GetComponent<Renderer>();
-        if (renderer != null)
-        {
-            renderer.material = new Material(Shader.Find("Standard"));
-            renderer.material.color = markerColor;
-        }
-        
-        marker.name = $"TargetMarker_{index}";
-        targetMarkers.Add(marker);
-    }
-
     private bool IsWithinBoundary(Vector3 position)
     {
         // 直接使用世界座標檢查邊界
@@ -206,20 +189,6 @@ public class RobotBehavior : EnemyBehavior
                position.y >= boundaryY.y && position.y <= boundaryY.x;
     }
 
-    private void UpdateMarkersColor()
-    {
-        for (int i = 0; i < targetMarkers.Count; i++)
-        {
-            if (targetMarkers[i] != null)
-            {
-                var renderer = targetMarkers[i].GetComponent<Renderer>();
-                if (renderer != null)
-                {
-                    renderer.material.color = (i == 0) ? Color.red : markerColor; // 第一個點是紅色
-                }
-            }
-        }
-    }
     #endregion
 
     #region Combat System
@@ -307,7 +276,6 @@ public class RobotBehavior : EnemyBehavior
             // 更新方向
             targetDirection = (targetPoints[1] - targetPoints[0]).normalized;
             moveDirection = targetDirection;
-            UpdateMarkersColor();
             return;
         }
 
@@ -346,11 +314,23 @@ public class RobotBehavior : EnemyBehavior
 
     private void HandleGunMode()
     {
+        // 進入槍模式時如果沒有巡邏點就產生
+        if (mode == RobotMode.GunMode && targetPoints.Count < 2)
+        {
+            GenerateTargetPoints();
+        }
         if (sheathbool)
         {
             animator.SetBool("DrawingGun", false);
             sheathbool = false;
             mode = RobotMode.Idle;
+            // 離開槍模式時清空巡邏點與標記
+            targetPoints.Clear();
+            foreach (var marker in targetMarkers)
+            {
+                if (marker != null) Destroy(marker);
+            }
+            targetMarkers.Clear();
         }
         else if (!animator.GetBool("DrawingGun"))
         {
