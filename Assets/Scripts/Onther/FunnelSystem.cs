@@ -85,6 +85,7 @@ public class FunnelSystem : MonoBehaviour
                 {
                     _funnelHealths[funnel] = health;
                 }
+                funnel.gameObject.SetActive(false);
             }
         }
     }
@@ -389,7 +390,8 @@ public class FunnelSystem : MonoBehaviour
         // 計算目標位置（世界座標）
         Vector3 targetPosition = GetRandomPositionOnPlane(WorldZOffset, funnel);
         
-        funnel.transform.SetParent(null);
+        if(!funnel.gameObject.activeSelf)  funnel.gameObject.SetActive(true);
+        if(funnel.parent != null) funnel.transform.SetParent(null);
         // 移動到目標位置
         yield return StartCoroutine(MoveToPositionFacingDirection(funnel, targetPosition));
 
