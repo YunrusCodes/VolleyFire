@@ -65,6 +65,7 @@ public class FunnelSystem : MonoBehaviour
     private Dictionary<Transform, float> _funnelLastShootTime = new Dictionary<Transform, float>();
     private Dictionary<Transform, GameObject> _funnelAimMarkers = new Dictionary<Transform, GameObject>(); // 新增：儲存每個Funnel的瞄準標記
     private Dictionary<Transform, Vector3> _funnelLastPositions = new Dictionary<Transform, Vector3>(); // 新增：記錄每個 Funnel 的上次位置
+    private Dictionary<Transform, BaseHealth> _funnelHealths = new Dictionary<Transform, BaseHealth>(); // 新增：儲存每個Funnel的BaseHealth
 
     void Start()
     {
@@ -72,6 +73,53 @@ public class FunnelSystem : MonoBehaviour
         if (WorldCenterPoint == Vector3.zero)
         {
             WorldCenterPoint = transform.position;
+        }
+        // 嘗試取得每個Funnel的BaseHealth
+        _funnelHealths.Clear();
+        foreach (var funnel in Funnels)
+        {
+            if (funnel != null)
+            {
+                var health = funnel.GetComponent<BaseHealth>();
+                if (health != null)
+                {
+                    _funnelHealths[funnel] = health;
+                }
+            }
+        }
+    }
+
+    void Update()
+    {
+        // 檢查Funnels的BaseHealth
+        List<Transform> toRemove = new List<Transform>();
+        foreach (var pair in _funnelHealths)
+        {
+            var funnel = pair.Key;
+            var health = pair.Value;
+            if (health == null || health.GetCurrentHealth() <= 0)
+            {
+                // 標記要移除的funnel
+                toRemove.Add(funnel);
+            }
+        }
+        foreach (var funnel in toRemove)
+        {
+            // 從所有相關容器移除
+            Funnels.Remove(funnel);
+            _funnelHealths.Remove(funnel);
+            if (_funnelLastShootTime.ContainsKey(funnel))
+                _funnelLastShootTime.Remove(funnel);
+            if (_funnelAimMarkers.ContainsKey(funnel))
+            {
+                var marker = _funnelAimMarkers[funnel];
+                if (marker != null)
+                    Destroy(marker);
+                _funnelAimMarkers.Remove(funnel);
+            }
+            if (_funnelLastPositions.ContainsKey(funnel))
+                _funnelLastPositions.Remove(funnel);
+            Destroy(funnel.gameObject);
         }
     }
 
@@ -309,7 +357,7 @@ public class FunnelSystem : MonoBehaviour
             if (funnel != null)
             {
                 _activeCoroutineCount++;
-                var coroutine = StartCoroutine(MoveToStandByCoroutine(funnel, i * 0.2f));
+                var coroutine = StartCoroutine(MoveToStandByCoroutine(funnel, i * 0.1f));
                 _attackCoroutines.Add(coroutine);
             }
         }
