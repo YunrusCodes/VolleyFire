@@ -78,6 +78,8 @@ public class RobotBehavior : EnemyBehavior
     private float swordStartToTargetDistance;
     #endregion
 
+    public FunnelSystem funnelSystem;
+
     #region Initialization
     public override void Init(EnemyController controller)
     {
@@ -383,11 +385,8 @@ public class RobotBehavior : EnemyBehavior
         {
             transform.position = new Vector3(initialPosition.x, transform.position.y, initialPosition.z);
             isReturning = false;
-            if (Random.value < 0.5f)
-            {
-                animator.SetBool("DrawingSword", false);
-                mode = RobotMode.Idle;
-            }
+            animator.SetBool("DrawingSword", false);
+            mode = RobotMode.Idle;
             ResetState();
         }
     }
@@ -492,6 +491,7 @@ public class RobotBehavior : EnemyBehavior
     public override void Tick()
     {
         if (animator == null) return;
+        if(controller.GetHealth().GetCurrentHealth() <= 500) funnelSystem.SetEnableAction(true);
 
         switch (mode)
         {
