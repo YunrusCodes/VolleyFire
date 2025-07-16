@@ -57,6 +57,8 @@ public class FunnelSystem : MonoBehaviour
     public float RotationSpeed = 180f;
     public Material RayMaterial; // 新增：射線的材質
 
+    [Header("音效設定")]
+    public AudioClip funnelMove; // Funnel 移動音效
     public float StandByRaycastDistance = 400f; // 射線檢測距離
     public float StandByShootCooldown = 1.5f; // 射擊冷卻時間
 
@@ -66,6 +68,7 @@ public class FunnelSystem : MonoBehaviour
     private Dictionary<Transform, GameObject> _funnelAimMarkers = new Dictionary<Transform, GameObject>(); // 新增：儲存每個Funnel的瞄準標記
     private Dictionary<Transform, Vector3> _funnelLastPositions = new Dictionary<Transform, Vector3>(); // 新增：記錄每個 Funnel 的上次位置
     private Dictionary<Transform, BaseHealth> _funnelHealths = new Dictionary<Transform, BaseHealth>(); // 新增：儲存每個Funnel的BaseHealth
+    private Dictionary<Transform, AudioSource> _funnelAudioSources = new Dictionary<Transform, AudioSource>(); // 新增：儲存每個Funnel的AudioSource
 
     void Start()
     {
@@ -76,6 +79,7 @@ public class FunnelSystem : MonoBehaviour
         }
         // 嘗試取得每個Funnel的BaseHealth
         _funnelHealths.Clear();
+        _funnelAudioSources.Clear();
         foreach (var funnel in Funnels)
         {
             if (funnel != null)
@@ -85,6 +89,13 @@ public class FunnelSystem : MonoBehaviour
                 {
                     _funnelHealths[funnel] = health;
                 }
+                // 取得或新增AudioSource
+                var audioSource = funnel.GetComponent<AudioSource>();
+                if (audioSource == null)
+                    audioSource = funnel.gameObject.AddComponent<AudioSource>();
+                if (funnelMove != null)
+                    audioSource.clip = funnelMove;
+                _funnelAudioSources[funnel] = audioSource;
                 funnel.gameObject.SetActive(false);
             }
         }
@@ -206,6 +217,7 @@ public class FunnelSystem : MonoBehaviour
 
     IEnumerator MoveToPositionWithRotationLerp(Transform funnel, Vector3 targetPosition, bool isAimingAtPlayer)
     {
+        PlayFunnelMoveSound(funnel);
         Debug.DrawLine(funnel.position, targetPosition, Color.red);
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player == null && isAimingAtPlayer) yield break;
@@ -328,6 +340,7 @@ public class FunnelSystem : MonoBehaviour
 
     IEnumerator MoveToPositionFacingDirection(Transform funnel, Vector3 targetPosition)
     {
+        PlayFunnelMoveSound(funnel);
         while (Vector3.Distance(funnel.position, targetPosition) > 0.1f)
         {
             // 計算移動方向
@@ -387,6 +400,7 @@ public class FunnelSystem : MonoBehaviour
     IEnumerator MoveToStandByCoroutine(Transform funnel, float startDelay)
     {
         yield return new WaitForSeconds(startDelay);
+        PlayFunnelMoveSound(funnel);
         // 計算目標位置（世界座標）
         Vector3 targetPosition = GetRandomPositionOnPlane(WorldZOffset, funnel);
         
@@ -550,5 +564,17 @@ public class FunnelSystem : MonoBehaviour
         // 畫出平面（使用線條形成網格）
         Gizmos.DrawLine(corners[0], corners[2]); // 對角線
         Gizmos.DrawLine(corners[1], corners[3]); // 對角線
+    }
+
+    // 播放 funnelMove 音效
+    private void PlayFunnelMoveSound(Transform funnel)
+    {
+        if (_funnelAudioSources.ContainsKey(funnel) && funnelMove != null)
+        {
+            var audioSource = _funnelAudioSources[funnel];
+            audioSource.Stop();
+            audioSource.clip = funnelMove;
+            audioSource.Play();
+        }
     }
 } 

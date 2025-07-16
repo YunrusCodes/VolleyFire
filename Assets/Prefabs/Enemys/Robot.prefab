@@ -536,6 +536,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slashPrefab: {fileID: 7832137661492785870}
   spawnPoint: {fileID: 8659150875085321058}
+  drawSword: {fileID: 0}
+  slash: {fileID: 0}
 --- !u!114 &4349951054928613277
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -574,6 +576,7 @@ MonoBehaviour:
   MovementSpeed: 100
   RotationSpeed: 180
   RayMaterial: {fileID: 0}
+  funnelMove: {fileID: 0}
   StandByRaycastDistance: 400
   StandByShootCooldown: 1.5
 --- !u!1 &1132361886490391479
