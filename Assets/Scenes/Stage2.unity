@@ -322,12 +322,13 @@ MonoBehaviour:
     enablePlayerFire: 1
     BGMToSwitch: {fileID: 0}
   waveAttackBeforeDialogues:
-    dialogues: []
+    dialogues:
+    - 
     enabled: 1
     autoRead: 0
     autoReadSpeed: 3
     enablePlayerFire: 1
-    BGMToSwitch: {fileID: 0}
+    BGMToSwitch: {fileID: 8300000, guid: 97687fff1fe998042909a1a3504388ec, type: 3}
   waveProcessTimeDialogues: []
   enemyHealthDialogues: []
 --- !u!4 &175308302
@@ -1565,6 +1566,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3024147086297521903, guid: 86f2400349ca3f8488fb1347d61c09c5, type: 3}
+      propertyPath: maxHealth
+      value: 500
+      objectReference: {fileID: 0}
     - target: {fileID: 4349951054928613277, guid: 86f2400349ca3f8488fb1347d61c09c5, type: 3}
       propertyPath: funnelMove
       value: 
@@ -1580,6 +1585,14 @@ PrefabInstance:
     - target: {fileID: 6211538245154602888, guid: 86f2400349ca3f8488fb1347d61c09c5, type: 3}
       propertyPath: m_Name
       value: Robot
+      objectReference: {fileID: 0}
+    - target: {fileID: 6601407859453369246, guid: 86f2400349ca3f8488fb1347d61c09c5, type: 3}
+      propertyPath: MAX_BULLETS
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6601407859453369246, guid: 86f2400349ca3f8488fb1347d61c09c5, type: 3}
+      propertyPath: SummonFunnelHealth
+      value: 250
       objectReference: {fileID: 0}
     - target: {fileID: 7473942369574073979, guid: 86f2400349ca3f8488fb1347d61c09c5, type: 3}
       propertyPath: m_LocalPosition.x
