@@ -13,9 +13,10 @@ GameObject:
   - component: {fileID: 3265147444067231568}
   - component: {fileID: 4339682622986420541}
   - component: {fileID: 8206828026429253520}
+  - component: {fileID: 3464819300170853657}
   m_Layer: 0
   m_Name: Collider
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -137,6 +138,33 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 7810371007003685382, guid: 7afc1167c06c77a4c8a6495b0c64f8d9, type: 3}
+--- !u!54 &3464819300170853657
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 825261456962198146}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 126
+  m_CollisionDetection: 0
 --- !u!1 &859096250957815952
 GameObject:
   m_ObjectHideFlags: 0
@@ -178,8 +206,6 @@ GameObject:
   m_Component:
   - component: {fileID: 5533274148140480604}
   - component: {fileID: 5368876600169254665}
-  - component: {fileID: 3979411327566914285}
-  - component: {fileID: 8421408657212676151}
   m_Layer: 0
   m_Name: UFO
   m_TagString: Player
@@ -214,55 +240,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1934161969222129532}
   m_Mesh: {fileID: 7810371007003685382, guid: 7afc1167c06c77a4c8a6495b0c64f8d9, type: 3}
---- !u!114 &3979411327566914285
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1934161969222129532}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4440106f657ab7942941c235a9b888d3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxHealth: 10
-  currentHealth: 0
-  healthSlider: {fileID: 7483354940673993099}
-  fillImage: {fileID: 3404703002731725447}
-  fullHealthColor: {r: 0, g: 1, b: 0, a: 1}
-  lowHealthColor: {r: 1, g: 0, b: 0, a: 1}
-  lowHealthPercent: 0.8
-  onPlayerDeath:
-    m_PersistentCalls:
-      m_Calls: []
---- !u!54 &8421408657212676151
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1934161969222129532}
-  serializedVersion: 4
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 0
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 126
-  m_CollisionDetection: 0
 --- !u!1 &1978755119561635033
 GameObject:
   m_ObjectHideFlags: 0
@@ -310,7 +287,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6df2bde1f31c90c4285ec4890aa649a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerHealth: {fileID: 3979411327566914285}
+  playerHealth: {fileID: 4339682622986420541}
   moveSpeed: 15
   maxSpeed: 25
   acceleration: 50

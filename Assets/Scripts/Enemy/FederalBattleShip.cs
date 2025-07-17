@@ -72,6 +72,10 @@ public class FederalBattleShip : EnemyBehavior
         if (controller.GetHealth().IsDead())
         {
             Debug.Log("戰艦已被擊毀");
+            foreach(var cannon in cannonRaySpawnPoints)
+            {
+                cannon.gameObject.SetActive(false);
+            }
             gameObject.SetActive(false);
             return;
         }

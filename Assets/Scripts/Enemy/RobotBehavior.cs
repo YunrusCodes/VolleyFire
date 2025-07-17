@@ -9,7 +9,8 @@ public class RobotBehavior : EnemyBehavior
 {
     #region Enums & Constants
     public enum RobotMode { Idle = 0, GunMode = 1, SwordMode = 2 }
-    private const int MAX_BULLETS = 10;
+    public int MAX_BULLETS = 10;
+    public float SummonFunnelHealth = 500f;
     #endregion
 
     #region Serialized Fields
@@ -491,7 +492,7 @@ public class RobotBehavior : EnemyBehavior
     public override void Tick()
     {
         if (animator == null) return;
-        if(controller.GetHealth().GetCurrentHealth() <= 500) funnelSystem.SetEnableAction(true);
+        if(controller.GetHealth().GetCurrentHealth() <= SummonFunnelHealth) funnelSystem.SetEnableAction(true);
 
         switch (mode)
         {
