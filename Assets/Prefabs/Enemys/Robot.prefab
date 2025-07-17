@@ -551,34 +551,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enableAction: 0
-  Funnels:
-  - {fileID: 2785477361619434075}
-  - {fileID: 1993796640374471520}
-  - {fileID: 7878620507802915197}
-  - {fileID: 6823917577081623001}
-  - {fileID: 4007365906925744457}
-  - {fileID: 3286224424528117055}
-  - {fileID: 3270606247247151755}
-  - {fileID: 6398541981026048052}
-  - {fileID: 1398679105120845205}
-  - {fileID: 5232924327512520244}
-  - {fileID: 1895645722348829930}
-  Mode: 2
-  LookAtPlaneOffset: 2
   WorldXRange: {x: -45, y: 45}
   WorldYRange: {x: -5, y: 35}
-  WorldZOffset: 17.2
+  worldZOffset: 1
   WorldCenterPoint: {x: 0, y: 0, z: 0}
   MinScale: 0.779
   MaxScale: 1
   MinFunnelDistance: 2
   BulletPrefab: {fileID: 7555402867869293541, guid: 11548ec74589a1840a46b6ee62504086, type: 3}
-  MovementSpeed: 100
-  RotationSpeed: 180
-  RayMaterial: {fileID: 0}
+  movementSpeed: 5
+  rotationSpeed: 180
   funnelMove: {fileID: 0}
-  StandByRaycastDistance: 400
-  StandByShootCooldown: 1.5
+  standByRaycastDistance: 400
+  standByShootCooldown: 1.5
+  funnelTransforms: []
 --- !u!1 &1132361886490391479
 GameObject:
   m_ObjectHideFlags: 0

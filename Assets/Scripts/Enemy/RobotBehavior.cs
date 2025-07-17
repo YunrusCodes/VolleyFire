@@ -4,6 +4,7 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEditor.SearchService;
 using UnityEditor;
+using VolleyFire.Funnel;
 
 public class RobotBehavior : EnemyBehavior
 {
@@ -15,6 +16,9 @@ public class RobotBehavior : EnemyBehavior
     #region Serialized Fields
     [Header("Mode Settings")]
     public RobotMode mode = RobotMode.GunMode;
+
+    [Header("Funnel 設定")]
+    [SerializeField] private float SummonFunnelHealth = 500f;
 
     [Header("移動參數")]
     public float moveSpeed = 5f;
@@ -491,7 +495,7 @@ public class RobotBehavior : EnemyBehavior
     public override void Tick()
     {
         if (animator == null) return;
-        if(controller.GetHealth().GetCurrentHealth() <= 500) funnelSystem.SetEnableAction(true);
+        if(controller.GetHealth().GetCurrentHealth() <= SummonFunnelHealth) funnelSystem.SetEnableAction(true);
 
         switch (mode)
         {
