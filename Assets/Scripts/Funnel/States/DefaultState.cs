@@ -8,6 +8,7 @@ namespace VolleyFire.Funnel.States
         {
             foreach (var funnel in context.GetFunnels())
             {
+                if (funnel.Health == null || funnel.Health.IsDead()) continue;
                 funnel.Transform.gameObject.SetActive(false);
             }
         }

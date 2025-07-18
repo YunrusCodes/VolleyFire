@@ -1011,10 +1011,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   waves:
-  - {fileID: 175308301}
   - {fileID: 495601958}
   - {fileID: 25530401}
   - {fileID: 1574113459}
+  - {fileID: 175308301}
   - {fileID: 389702296}
   NextStageSceneName: Stage1
   volume: {fileID: 832575518}
@@ -1717,7 +1717,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6601407859453369246, guid: 86f2400349ca3f8488fb1347d61c09c5, type: 3}
       propertyPath: SummonFunnelHealth
-      value: 500
+      value: 250
       objectReference: {fileID: 0}
     - target: {fileID: 7473942369574073979, guid: 86f2400349ca3f8488fb1347d61c09c5, type: 3}
       propertyPath: m_LocalPosition.x

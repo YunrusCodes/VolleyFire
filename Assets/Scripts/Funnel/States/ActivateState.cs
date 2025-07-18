@@ -4,9 +4,9 @@ using System.Collections.Generic;
 
 namespace VolleyFire.Funnel.States
 {
-    public class AttackPatternState : IFunnelState
+    public class ActivateState : IFunnelState
     {
-        private List<Coroutine> attackCoroutines = new List<Coroutine>();
+        private List<Coroutine> activateCoroutines = new List<Coroutine>();
         private int completedAttackCount = 0;
         private int destroyedDuringAttackCount = 0;
         private int totalAttackCount = 0;
@@ -16,20 +16,20 @@ namespace VolleyFire.Funnel.States
 
         public void EnterState(FunnelSystem context)
         {
-            completedAttackCount = 0;
-            destroyedDuringAttackCount = 0;
-            runningCoroutineCount = 0;
-            attackCoroutines.Clear();
+            activateCoroutines.Clear();
 
             var funnels = context.GetFunnels();
+            completedAttackCount = 0;
+            destroyedDuringAttackCount = 0;
             totalAttackCount = funnels.Count;
+            runningCoroutineCount = 0;
             for (int i = 0; i < funnels.Count; i++)
             {
                 var funnel = funnels[i];
-                if (funnel != null)
+                if (funnel != null && funnel.Health != null && !funnel.Health.IsDead())
                 {
-                    var coroutine = context.StartCoroutine(AttackPatternCoroutine(context, funnel, i * 0.75f));
-                    attackCoroutines.Add(coroutine);
+                    var coroutine = context.StartCoroutine(ActivatePatternCoroutine(context, funnel, i * 0.75f));
+                    activateCoroutines.Add(coroutine);
                 }
             }
         }
@@ -44,17 +44,17 @@ namespace VolleyFire.Funnel.States
 
         public void ExitState(FunnelSystem context)
         {
-            foreach (var coroutine in attackCoroutines)
+            foreach (var coroutine in activateCoroutines)
             {
                 if (coroutine != null)
                 {
                     context.StopCoroutine(coroutine);
                 }
             }
-            attackCoroutines.Clear();
+            activateCoroutines.Clear();
         }
 
-        private IEnumerator AttackPatternCoroutine(FunnelSystem context, Funnel funnel, float startDelay)
+        private IEnumerator ActivatePatternCoroutine(FunnelSystem context, Funnel funnel, float startDelay)
         {
             runningCoroutineCount++;
             bool destroyed = false;
@@ -62,6 +62,8 @@ namespace VolleyFire.Funnel.States
             try
             {
                 yield return new WaitForSeconds(startDelay);
+                if(funnel.Transform.parent != null) funnel.Transform.SetParent(null);
+                if(!funnel.Transform.gameObject.activeSelf) funnel.Transform.gameObject.SetActive(true);
 
                 if (funnel.Health == null || funnel.Health.IsDead()) { destroyed = true; yield break; }
                 // Step 1: 移動到主平面 (Z=0)
@@ -84,13 +86,9 @@ namespace VolleyFire.Funnel.States
                 completedAttackCount++;
 
                 // 之後的動作不影響計數
-                masterZTarget = context.GetRandomPositionOnPlane(0, funnel);
-                yield return context.StartCoroutine(funnel.MoveToPositionWithRotation(masterZTarget, false));
-
-                if (funnel.Health == null || funnel.Health.IsDead()) yield break;
                 masterZTarget = context.GetRandomPositionOnPlane(context.WorldZOffset, funnel);
                 yield return context.StartCoroutine(funnel.MoveToPosition(masterZTarget));
-                
+
                 if (funnel.Health == null || funnel.Health.IsDead()) yield break;
                 Vector3 apex = context.CalculatePyramidApex();
                 Quaternion lookApex = Quaternion.LookRotation((apex - funnel.Transform.position).normalized);

@@ -127,7 +127,7 @@ MonoBehaviour:
   useRigidbody: 0
   explosionPrefab: {fileID: 0}
   targetTag: Player
-  damage: 5
+  damage: 3
 --- !u!1 &7876997809504047185
 GameObject:
   m_ObjectHideFlags: 0

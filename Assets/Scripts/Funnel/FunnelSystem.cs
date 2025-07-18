@@ -8,7 +8,7 @@ namespace VolleyFire.Funnel
 {
     public class FunnelSystem : MonoBehaviour
     {
-        public enum FunnelMode { Default, AttackPattern, StandBy }
+        public enum FunnelMode { Default, AttackPattern, StandBy, Activate }
 
         [Header("功能設定")]
         public bool enableAction = false;
@@ -91,7 +91,9 @@ namespace VolleyFire.Funnel
             {
                 { FunnelMode.Default, new DefaultState() },
                 { FunnelMode.AttackPattern, new AttackPatternState() },
-                { FunnelMode.StandBy, new StandByState() }
+                { FunnelMode.StandBy, new StandByState() },
+                // 新增 Activate 狀態
+                { FunnelMode.Activate, new ActivateState() }
             };
         }
 
@@ -116,21 +118,31 @@ namespace VolleyFire.Funnel
 
         private void RemoveDestroyedFunnels()
         {
-            funnels.RemoveAll(f => f.Health == null || f.Health.GetCurrentHealth() <= 0);
+            funnels.RemoveAll(f => f.Health == null || f.Health.IsDead());
         }
 
         public void SetEnableAction(bool value)
         {
             if (value == enableAction) return;
             enableAction = value;
-            ApplyMode(FunnelMode.StandBy);
+            ApplyMode(FunnelMode.Activate);
         }
 
         public void Attack()
         {
             Debug.Log("Attack");
             Debug.Log(Mode);
-            if (!enableAction || Mode == FunnelMode.AttackPattern) return;
+            if (!enableAction || Mode != FunnelMode.StandBy) return;
+
+            // 取得目前的 StandByState
+            if (currentState is StandByState standByState)
+            {
+                if (!standByState.IsReadyToAttack)
+                {
+                    Debug.LogWarning($"StandBy 尚未準備好攻擊");
+                    return;
+                }
+            }
             ApplyMode(FunnelMode.AttackPattern);
         }
 
@@ -184,7 +196,8 @@ namespace VolleyFire.Funnel
                 bool tooClose = false;
                 foreach (var kv in funnelLastPositions)
                 {
-                    if (funnel == null || funnel.Transform == null || !funnel.Transform) continue;
+                    // funnel == null || funnel.Transform == null || !funnel.Transform 改為 funnel.Health.IsDead()
+                    if (funnel == null || funnel.Health == null || funnel.Health.IsDead()) continue;
                     if (kv.Key == funnel.Transform) continue;
                     if (Vector3.Distance(pos, kv.Value) < MinFunnelDistance)
                     {
@@ -196,7 +209,7 @@ namespace VolleyFire.Funnel
 
                 if (!tooClose)
                 {
-                    if (funnel != null && funnel.Transform != null && funnel.Transform)
+                    if (funnel != null && funnel.Health != null && !funnel.Health.IsDead())
                         funnelLastPositions[funnel.Transform] = pos;
                     return pos;
                 }
@@ -208,7 +221,7 @@ namespace VolleyFire.Funnel
             float fallbackZ = WorldCenterPoint.z + zOffset;
             Vector3 fallbackPos = new Vector3(fallbackX, fallbackY, fallbackZ);
 
-            if (funnel != null && funnel.Transform != null && funnel.Transform)
+            if (funnel != null && funnel.Health != null && !funnel.Health.IsDead())
                 funnelLastPositions[funnel.Transform] = fallbackPos;
             return fallbackPos;
         }
@@ -222,6 +235,13 @@ namespace VolleyFire.Funnel
             float apexZ = WorldCenterPoint.z - distanceToApex;
 
             return new Vector3(WorldCenterPoint.x, WorldCenterPoint.y, apexZ);
+        }
+
+        // 新增方法：切換到 Activate 狀態
+        public void ActivateOnce()
+        {
+            // 999 代表 Activate 狀態
+            ApplyMode((FunnelMode)999);
         }
     }
 }
