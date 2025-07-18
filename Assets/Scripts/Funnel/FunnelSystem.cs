@@ -121,7 +121,6 @@ namespace VolleyFire.Funnel
 
         public void SetEnableAction(bool value)
         {
-            Debug.Log("SetEnableAction: " + value);
             if (value == enableAction) return;
             enableAction = value;
             ApplyMode(FunnelMode.StandBy);
@@ -130,6 +129,7 @@ namespace VolleyFire.Funnel
         public void Attack()
         {
             Debug.Log("Attack");
+            Debug.Log(Mode);
             if (!enableAction || Mode == FunnelMode.AttackPattern) return;
             ApplyMode(FunnelMode.AttackPattern);
         }
@@ -184,6 +184,7 @@ namespace VolleyFire.Funnel
                 bool tooClose = false;
                 foreach (var kv in funnelLastPositions)
                 {
+                    if (funnel == null || funnel.Transform == null || !funnel.Transform) continue;
                     if (kv.Key == funnel.Transform) continue;
                     if (Vector3.Distance(pos, kv.Value) < MinFunnelDistance)
                     {
@@ -195,7 +196,8 @@ namespace VolleyFire.Funnel
 
                 if (!tooClose)
                 {
-                    funnelLastPositions[funnel.Transform] = pos;
+                    if (funnel != null && funnel.Transform != null && funnel.Transform)
+                        funnelLastPositions[funnel.Transform] = pos;
                     return pos;
                 }
             }
@@ -206,7 +208,8 @@ namespace VolleyFire.Funnel
             float fallbackZ = WorldCenterPoint.z + zOffset;
             Vector3 fallbackPos = new Vector3(fallbackX, fallbackY, fallbackZ);
 
-            funnelLastPositions[funnel.Transform] = fallbackPos;
+            if (funnel != null && funnel.Transform != null && funnel.Transform)
+                funnelLastPositions[funnel.Transform] = fallbackPos;
             return fallbackPos;
         }
 

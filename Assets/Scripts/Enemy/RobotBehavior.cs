@@ -10,15 +10,13 @@ public class RobotBehavior : EnemyBehavior
 {
     #region Enums & Constants
     public enum RobotMode { Idle = 0, GunMode = 1, SwordMode = 2 }
-    private const int MAX_BULLETS = 10;
+    public int MAX_BULLETS = 10;
+    public float SummonFunnelHealth = 500f;
     #endregion
 
     #region Serialized Fields
     [Header("Mode Settings")]
     public RobotMode mode = RobotMode.GunMode;
-
-    [Header("Funnel 設定")]
-    [SerializeField] private float SummonFunnelHealth = 500f;
 
     [Header("移動參數")]
     public float moveSpeed = 5f;

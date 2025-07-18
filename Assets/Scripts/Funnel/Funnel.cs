@@ -32,7 +32,7 @@ namespace VolleyFire.Funnel
         {
             PlaySound();
             
-            while (Vector3.Distance(Transform.position, targetPosition) > 0.1f)
+            while (Transform != null && Transform && Vector3.Distance(Transform.position, targetPosition) > 0.1f)
             {
                 Vector3 dir = (targetPosition - Transform.position).normalized;
                 Transform.position = Vector3.MoveTowards(Transform.position, targetPosition, movementSpeed * Time.deltaTime);
@@ -59,7 +59,7 @@ namespace VolleyFire.Funnel
             float distance = Vector3.Distance(startPos, targetPosition);
             float startTime = Time.time;
 
-            while (Vector3.Distance(Transform.position, targetPosition) > 0.1f)
+            while (Transform != null && Transform && Vector3.Distance(Transform.position, targetPosition) > 0.1f)
             {
                 float elapsed = (Time.time - startTime) * movementSpeed;
                 float t = Mathf.Clamp01(elapsed / distance);
@@ -75,6 +75,8 @@ namespace VolleyFire.Funnel
 
                 yield return null;
             }
+
+            if (Transform == null || !Transform) yield break;
 
             if (isAimingAtPlayer && player != null)
             {
@@ -98,6 +100,7 @@ namespace VolleyFire.Funnel
 
         public void Shoot()
         {
+            if (Transform == null || !Transform) return;
             if (bulletPrefab != null)
             {
                 Object.Instantiate(bulletPrefab, Transform.position, Transform.rotation);

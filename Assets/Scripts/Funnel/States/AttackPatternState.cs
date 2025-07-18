@@ -29,6 +29,7 @@ namespace VolleyFire.Funnel.States
 
         public void UpdateState(FunnelSystem context)
         {
+            Debug.Log(activeCoroutineCount);
             if (activeCoroutineCount == 0)
             {
                 context.StandBy();
@@ -49,42 +50,53 @@ namespace VolleyFire.Funnel.States
 
         private IEnumerator AttackPatternCoroutine(FunnelSystem context, Funnel funnel, float startDelay)
         {
-            yield return new WaitForSeconds(startDelay);
-
-            // Step 1: 移動到主平面 (Z=0)
-            Vector3 masterZTarget = context.GetRandomPositionOnPlane(0, funnel);
-            yield return context.StartCoroutine(funnel.MoveToPosition(masterZTarget));
-
-            // Step 2: 移動至 +Z 平面並轉向玩家
-            Vector3 positiveZTarget = context.GetRandomPositionOnPlane(-context.WorldZOffset, funnel);
-            yield return context.StartCoroutine(funnel.MoveToPositionWithRotation(positiveZTarget, true));
-
-            // Step 3: 等待並發射子彈
-            yield return new WaitForSeconds(0.1f);
-            funnel.Shoot();
-
-            // Step 4: 返回主平面
-            masterZTarget = context.GetRandomPositionOnPlane(0, funnel);
-            yield return context.StartCoroutine(funnel.MoveToPositionWithRotation(masterZTarget, false));
-
-            // Step 4: 返回主平面
-            masterZTarget = context.GetRandomPositionOnPlane(context.WorldZOffset, funnel);
-            yield return context.StartCoroutine(funnel.MoveToPosition(masterZTarget));
-            
-            Vector3 apex = context.CalculatePyramidApex();
-            Quaternion lookApex = Quaternion.LookRotation((apex - funnel.Transform.position).normalized);
-
-            while (Quaternion.Angle(funnel.Transform.rotation, lookApex) > 0.1f)
+            try
             {
-                funnel.Transform.rotation = Quaternion.RotateTowards(
-                    funnel.Transform.rotation,
-                    lookApex,
-                    context.RotationSpeed * Time.deltaTime
-                );
-                yield return null;
-            }
+                yield return new WaitForSeconds(startDelay);
 
-            activeCoroutineCount--;
+                if (funnel.Transform == null || !funnel.Transform) yield break;
+                // Step 1: 移動到主平面 (Z=0)
+                Vector3 masterZTarget = context.GetRandomPositionOnPlane(0, funnel);
+                yield return context.StartCoroutine(funnel.MoveToPosition(masterZTarget));
+
+                if (funnel.Transform == null || !funnel.Transform) yield break;
+                // Step 2: 移動至 +Z 平面並轉向玩家
+                Vector3 positiveZTarget = context.GetRandomPositionOnPlane(-context.WorldZOffset, funnel);
+                yield return context.StartCoroutine(funnel.MoveToPositionWithRotation(positiveZTarget, true));
+
+                if (funnel.Transform == null || !funnel.Transform) yield break;
+                // Step 3: 等待並發射子彈
+                yield return new WaitForSeconds(0.1f);
+                funnel.Shoot();
+
+                if (funnel.Transform == null || !funnel.Transform) yield break;
+                // Step 4: 返回主平面
+                masterZTarget = context.GetRandomPositionOnPlane(0, funnel);
+                yield return context.StartCoroutine(funnel.MoveToPositionWithRotation(masterZTarget, false));
+
+                if (funnel.Transform == null || !funnel.Transform) yield break;
+                // Step 4: 返回主平面
+                masterZTarget = context.GetRandomPositionOnPlane(context.WorldZOffset, funnel);
+                yield return context.StartCoroutine(funnel.MoveToPosition(masterZTarget));
+                
+                if (funnel.Transform == null || !funnel.Transform) yield break;
+                Vector3 apex = context.CalculatePyramidApex();
+                Quaternion lookApex = Quaternion.LookRotation((apex - funnel.Transform.position).normalized);
+
+                while (funnel.Transform != null && funnel.Transform && Quaternion.Angle(funnel.Transform.rotation, lookApex) > 0.1f)
+                {
+                    funnel.Transform.rotation = Quaternion.RotateTowards(
+                        funnel.Transform.rotation,
+                        lookApex,
+                        context.RotationSpeed * Time.deltaTime
+                    );
+                    yield return null;
+                }
+            }
+            finally
+            {
+                activeCoroutineCount--;
+            }
         }
     }
 } 

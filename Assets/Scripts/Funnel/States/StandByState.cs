@@ -48,24 +48,29 @@ namespace VolleyFire.Funnel.States
         {
             yield return new WaitForSeconds(startDelay);
 
+            if (funnel.Transform == null || !funnel.Transform) yield break;
             Vector3 targetPos = context.GetRandomPositionOnPlane(context.WorldZOffset, funnel);
 
+            if (funnel.Transform == null || !funnel.Transform) yield break;
             if (!funnel.Transform.gameObject.activeSelf)
             {
                 funnel.Transform.gameObject.SetActive(true);
             }
 
+            if (funnel.Transform == null || !funnel.Transform) yield break;
             if (funnel.Transform.parent != null)
             {
                 funnel.Transform.SetParent(null);
             }
 
+            if (funnel.Transform == null || !funnel.Transform) yield break;
             yield return context.StartCoroutine(funnel.MoveToPosition(targetPos));
 
+            if (funnel.Transform == null || !funnel.Transform) yield break;
             Vector3 apex = context.CalculatePyramidApex();
             Quaternion lookApex = Quaternion.LookRotation((apex - funnel.Transform.position).normalized);
 
-            while (Quaternion.Angle(funnel.Transform.rotation, lookApex) > 0.1f)
+            while (funnel.Transform != null && funnel.Transform && Quaternion.Angle(funnel.Transform.rotation, lookApex) > 0.1f)
             {
                 funnel.Transform.rotation = Quaternion.RotateTowards(
                     funnel.Transform.rotation,
@@ -75,6 +80,7 @@ namespace VolleyFire.Funnel.States
                 yield return null;
             }
 
+            if (funnel.Transform == null || !funnel.Transform) yield break;
             context.StartCoroutine(StandByRaycastCoroutine(context, funnel));
             activeCoroutineCount--;
         }
@@ -83,6 +89,7 @@ namespace VolleyFire.Funnel.States
         {
             while (context.Mode == FunnelSystem.FunnelMode.StandBy)
             {
+                if (funnel.Transform == null || !funnel.Transform) yield break;
                 if (Physics.Raycast(funnel.Transform.position, funnel.Transform.forward, out RaycastHit hit, context.StandByRaycastDistance))
                 {
                     if (hit.collider.CompareTag("Player") && funnel.CanShoot(context.StandByShootCooldown))
