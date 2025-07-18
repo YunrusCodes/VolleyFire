@@ -177,7 +177,7 @@ MonoBehaviour:
   waveProcessTimeDialogues:
   - triggerTime: 0
     dialogues:
-    - Wave1_2
+    - Wave1_1
     enabled: 1
     autoRead: 1
     autoReadSpeed: 3
@@ -2104,6 +2104,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4339682622986420541, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
+      propertyPath: maxHealth
+      value: 99999
+      objectReference: {fileID: 0}
     - target: {fileID: 5593117490783122087, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
