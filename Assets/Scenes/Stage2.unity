@@ -153,19 +153,18 @@ MonoBehaviour:
   targetPosition: {fileID: 999589439}
   moveSpeed: 100
   waveMoveBeforeDialogues:
-    dialogues:
-    - Wave1_1
+    dialogues: []
     enabled: 0
     autoRead: 1
-    autoReadSpeed: 2
+    autoReadSpeed: 3
     enablePlayerFire: 0
     BGMToSwitch: {fileID: 0}
   waveMoveDuringDialogues:
     dialogues:
-    - Wave1_1
-    enabled: 1
+    - 
+    enabled: 0
     autoRead: 1
-    autoReadSpeed: 2
+    autoReadSpeed: 3
     enablePlayerFire: 0
     BGMToSwitch: {fileID: 0}
   waveAttackBeforeDialogues:
@@ -1400,17 +1399,17 @@ MonoBehaviour:
     enablePlayerFire: 1
     BGMToSwitch: {fileID: 0}
   waveAttackBeforeDialogues:
-    dialogues: []
-    enabled: 0
+    dialogues:
+    - Wave2_1
+    enabled: 1
     autoRead: 1
     autoReadSpeed: 3
     enablePlayerFire: 1
     BGMToSwitch: {fileID: 0}
   waveProcessTimeDialogues:
   - triggerTime: 0
-    dialogues:
-    - Wave2_2
-    enabled: 1
+    dialogues: []
+    enabled: 0
     autoRead: 1
     autoReadSpeed: 3
     enablePlayerFire: 1
@@ -1449,6 +1448,10 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1479665009144375997, guid: d0b4ab92739fe804cb7103b46349b346, type: 3}
+      propertyPath: yarnProject
+      value: 
+      objectReference: {fileID: 7545569452688597077, guid: f63bcc1bde135d44d849b2a04b43b401, type: 3}
     - target: {fileID: 2139030102766459327, guid: d0b4ab92739fe804cb7103b46349b346, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
