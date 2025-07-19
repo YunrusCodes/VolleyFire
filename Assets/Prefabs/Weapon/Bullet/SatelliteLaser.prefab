@@ -201,7 +201,7 @@ MonoBehaviour:
   targetTag: Player
   damage: 5
   chargeSfx: {fileID: 0}
-  releaseSfx: {fileID: 8300000, guid: 4676394d91de9f549abba142141469f5, type: 3}
+  releaseSfx: {fileID: 8300000, guid: 0fbc75872e0642641ba04b415287531e, type: 3}
 --- !u!54 &3271993973453179900
 Rigidbody:
   m_ObjectHideFlags: 0
