@@ -72,6 +72,10 @@ public class FederalBattleShip : EnemyBehavior
         if (controller.GetHealth().IsDead())
         {
             Debug.Log("戰艦已被擊毀");
+            foreach(var cannon in cannonRaySpawnPoints)
+            {
+                cannon.gameObject.SetActive(false);
+            }
             gameObject.SetActive(false);
             return;
         }
@@ -101,10 +105,10 @@ public class FederalBattleShip : EnemyBehavior
                 return;
             }
             alignTimer += Time.deltaTime;
-            if (alignTimer < alignDuration )
-            {
-                alignTargetPos = GetPlayerAlignPos(); // 前1/4持續修正
-            }
+            // if (alignTimer < alignDuration*0.25f )
+            // {
+            //     alignTargetPos = GetPlayerAlignPos(); // 前1/4持續修正
+            // }
             // 後半段不再修正 alignTargetPos
             MoveToAlignWithPlayer();
             cannonFireTimer += Time.deltaTime;

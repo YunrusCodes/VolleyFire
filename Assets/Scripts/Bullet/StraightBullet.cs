@@ -6,7 +6,7 @@ using UnityEngine;
 public class StraightBullet : BulletBehavior
 {
     [SerializeField] private string targetTag;
-    [SerializeField] private int damage = 1;
+    [SerializeField] private float damage = 1f;
 
     protected override void BehaviorOnStart()
     {
@@ -31,7 +31,7 @@ public class StraightBullet : BulletBehavior
     protected void OnCollisionEnter(Collision collision)
     {
         Debug.Log("targetTag: " + targetTag);
-        if (collision.gameObject.CompareTag(targetTag))
+        if (collision.gameObject.CompareTag(targetTag) || collision.gameObject.CompareTag("Obstacle"))
         {
             var targetHealth = collision.gameObject.GetComponent<BaseHealth>();
             if (targetHealth != null)

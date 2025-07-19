@@ -65,6 +65,7 @@ public class CannonRay : BulletBehavior
     protected override void Move()
     {
         // 如果有發射點，更新位置和旋轉
+        if(!spawnPoint.gameObject.activeSelf) Destroy(gameObject);
         if (spawnPoint != null)
         {
             transform.position = spawnPoint.position;
@@ -152,7 +153,6 @@ public class CannonRay : BulletBehavior
     {
         if (!isActive) return; // 只在作用階段造成傷害
         if (!collision.collider.CompareTag(targetTag)) return;
-
         damageTimer += Time.deltaTime;
         if (damageTimer >= damageInterval)
         {
