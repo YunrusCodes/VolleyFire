@@ -830,6 +830,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: StarSparrow1
       objectReference: {fileID: 0}
+    - target: {fileID: 7146138644659522454, guid: cbdbe60c361b21e4fb05bdaa6c1e4b94, type: 3}
+      propertyPath: m_Convex
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7146138644659522454, guid: cbdbe60c361b21e4fb05bdaa6c1e4b94, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -11266,14 +11274,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: StarSparrow10
       objectReference: {fileID: 0}
-    - target: {fileID: 3709381824866779465, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
-      propertyPath: fireInterval
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 3709381824866779465, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
-      propertyPath: missileFireInterval
-      value: 3
-      objectReference: {fileID: 0}
     - target: {fileID: 6005448995833186671, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -11313,10 +11313,6 @@ PrefabInstance:
     - target: {fileID: 6005448995833186671, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7755458984054806178, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
-      propertyPath: maxHealth
-      value: 500
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -11,7 +11,7 @@ public struct FirePoint
     public AudioSource audioSource;    // 音效來源
     [Min(0.01f)] public float firePeriod;        // **各自射速 (秒/發)**
     public float projectileSpeed;      // 若 BulletBehavior 需要，可傳此值
-    public Vector3? PointedTarget;     // 指向性子彈的目標位置（可為 null）
+    public Transform PointedTarget;    // 指向性子彈的目標 Transform（可為 null）
 }
 
 #endregion
@@ -30,27 +30,14 @@ public class WeaponSystem : MonoBehaviour
 
     #endregion
 
-    private ObjectPool[] projectilePools; // 對應各 FirePoint 的物件池
     private float[]       nextFireTimes;   // 個別冷卻計時
     private bool          canFire = true;  // 全局開火開關
 
     private void Awake()
     {
-        InitializeProjectilePools();
+        // 移除物件池初始化
+        // InitializeProjectilePools();
         nextFireTimes = new float[firePoints.Length];
-    }
-
-    /// <summary>
-    /// 建立物件池 (每 FirePoint 一池)。
-    /// </summary>
-    private void InitializeProjectilePools()
-    {
-        projectilePools = new ObjectPool[firePoints.Length];
-        for (int i = 0; i < firePoints.Length; i++)
-        {
-            projectilePools[i] = new ObjectPool(firePoints[i].bulletPrefab,
-                                                maxProjectiles, transform);
-        }
     }
 
     /// <summary>
@@ -76,11 +63,8 @@ public class WeaponSystem : MonoBehaviour
     /// </summary>
     private void SpawnProjectile(int idx)
     {
-        GameObject proj = projectilePools[idx].GetObject();
-
-        // 位置與旋轉
-        proj.transform.SetPositionAndRotation(firePoints[idx].transform.position,
-                                              firePoints[idx].transform.rotation);
+        // 直接 Instantiate 子彈
+        GameObject proj = Object.Instantiate(firePoints[idx].bulletPrefab, firePoints[idx].transform.position, firePoints[idx].transform.rotation);
 
         // 初始化子彈行為
         var bullet = proj.GetComponent<BulletBehavior>();
@@ -107,7 +91,7 @@ public class WeaponSystem : MonoBehaviour
         firePoints[index].firePeriod = Mathf.Max(0.01f, newRate);
     }
 
-    public void SetPointerTarget(Vector3 target)
+    public void SetPointerTarget(Transform target)
     {
         for (int i = 0; i < firePoints.Length; i++)
         {
@@ -117,43 +101,3 @@ public class WeaponSystem : MonoBehaviour
 
     #endregion
 }
-
-#region ObjectPool
-
-public class ObjectPool
-{
-    private readonly GameObject[] pool;
-    private int current;
-
-    public ObjectPool(GameObject prefab, int size, Transform parent)
-    {
-        pool = new GameObject[size];
-        for (int i = 0; i < size; i++)
-        {
-            pool[i] = Object.Instantiate(prefab, parent);
-            pool[i].SetActive(false);
-        }
-    }
-
-    public GameObject GetObject()
-    {
-        // 找未啟用物件
-        for (int i = 0; i < pool.Length; i++)
-        {
-            int idx = (current + i) % pool.Length;
-            if (!pool[idx].activeInHierarchy)
-            {
-                current = (idx + 1) % pool.Length;
-                pool[idx].SetActive(true);
-                return pool[idx];
-            }
-        }
-
-        // 全滿 → 覆蓋 current
-        pool[current].SetActive(true);
-        current = (current + 1) % pool.Length;
-        return pool[(current + pool.Length - 1) % pool.Length];
-    }
-}
-
-#endregion

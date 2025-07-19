@@ -12,8 +12,6 @@ GameObject:
   - component: {fileID: 8419914287952449407}
   - component: {fileID: 4363314318471365332}
   - component: {fileID: 245151729848917143}
-  - component: {fileID: 6714965944657357475}
-  - component: {fileID: 3951347615118160081}
   - component: {fileID: 6382829951615993606}
   m_Layer: 0
   m_Name: Flying Insect
@@ -108,49 +106,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   behavior: {fileID: 6382829951615993606}
-  health: {fileID: 6714965944657357475}
-  enemyDeathDialogues: []
---- !u!114 &6714965944657357475
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1169881441641357300}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 720595bbfcaf692428fb0a0a59037d14, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxHealth: 10
-  currentHealth: 0
---- !u!54 &3951347615118160081
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1169881441641357300}
-  serializedVersion: 4
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 0
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 126
-  m_CollisionDetection: 0
+  health: {fileID: 6347387763205651895}
 --- !u!114 &6382829951615993606
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -357,6 +313,8 @@ GameObject:
   m_Component:
   - component: {fileID: 4952852000152230553}
   - component: {fileID: 1612356884404978078}
+  - component: {fileID: 6347387763205651895}
+  - component: {fileID: 4511385992908729131}
   m_Layer: 0
   m_Name: Collider (4)
   m_TagString: Enemy
@@ -400,6 +358,47 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 3.4422107, y: 4.307641, z: 5.2912674}
   m_Center: {x: 0, y: -1.0875955, z: -0.41413307}
+--- !u!114 &6347387763205651895
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7205028985854418157}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 720595bbfcaf692428fb0a0a59037d14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHealth: 10
+  currentHealth: 0
+--- !u!54 &4511385992908729131
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7205028985854418157}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 126
+  m_CollisionDetection: 0
 --- !u!1 &8184873985767425949
 GameObject:
   m_ObjectHideFlags: 0

@@ -132,7 +132,7 @@ public class CannonRay : BulletBehavior
         }
     }
 
-    private void HandleShrinking()
+    public void HandleShrinking()
     {
         if (laserObject)
         {
@@ -151,6 +151,8 @@ public class CannonRay : BulletBehavior
 
     private void OnCollisionStay(Collision collision)
     {
+        Debug.Log(collision.collider.tag);
+        Debug.Log(isActive);
         if (!isActive) return; // 只在作用階段造成傷害
         if (!collision.collider.CompareTag(targetTag)) return;
         damageTimer += Time.deltaTime;

@@ -6,6 +6,7 @@ public class PointableBullet : BulletBehavior
     [SerializeField] private int damage = 1;
     private Vector3 targetPosition;
     private bool initialized = false;
+    private GameObject m_Effect = null;
 
     protected override void BehaviorOnStart()
     {
@@ -15,15 +16,17 @@ public class PointableBullet : BulletBehavior
         // 預設往前方
         targetPosition = transform.position + transform.forward * 100f;
         direction = transform.forward;
+        m_Effect = this.explosionPrefab;
+        this.explosionPrefab = null;
         
     }
 
     public override void Initialize(FirePoint firePoint)
     {
         base.Initialize(firePoint);
-        if (firePoint.PointedTarget.HasValue)
+        if (firePoint.PointedTarget != null)
         {
-            targetPosition = firePoint.PointedTarget.Value;
+            targetPosition = firePoint.PointedTarget.position;
             direction = (targetPosition - transform.position).normalized;
         }
         initialized = true;
@@ -31,17 +34,42 @@ public class PointableBullet : BulletBehavior
 
     protected override void Move()
     {
-        if (!useRigidbody)
+        if (firePoint.PointedTarget != null)
         {
+            Vector3 toTarget = firePoint.PointedTarget.position - transform.position;
+            float distToTarget = toTarget.magnitude;
+            float moveDist = speed * Time.deltaTime;
+            // 若已經抵達目標點，不再 LookAt
+            if (distToTarget == 0f)
+            {
+                // 可選：抵達目標後保持靜止
+                // return;
+                // 或保持原方向前進（什麼都不做）
+            }
+            else if (moveDist < distToTarget)
+            {
+                // 只有移動距離小於目標距離時才追蹤 LookAt
+                direction = toTarget.normalized;
+                transform.position += direction * moveDist;
+            }
+            else
+            {
+                // 如果本幀移動距離大於等於到目標距離，直接移動到目標點
+                transform.position = firePoint.PointedTarget.position;
+            }
+        }
+        else
+        {
+            // 沒有目標就直線前進
             transform.position += direction * speed * Time.deltaTime;
         }
-        // 如果使用Rigidbody，移動邏輯已在Initialize中設置
     }
 
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag(targetTag))
         {
+            this.explosionPrefab = m_Effect;
             var targetHealth = collision.gameObject.GetComponent<BaseHealth>();
             if (targetHealth != null)
             {

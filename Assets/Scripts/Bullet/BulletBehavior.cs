@@ -42,8 +42,8 @@ public abstract class BulletBehavior : MonoBehaviour
     
     protected virtual void Update()
     {
-        // 檢查存活時間
-        if (Time.time - spawnTime > lifetime)
+        // 檢查存活時間，-1 視為無限壽命
+        if (lifetime >= 0f && Time.time - spawnTime > lifetime)
         {
             DestroyBullet();
             return;
@@ -137,13 +137,8 @@ public abstract class BulletBehavior : MonoBehaviour
                 myExplosionEffect.transform.rotation = Quaternion.identity;
                 myExplosionEffect.SetActive(true);
             }
-
-            var effectBehavior = myExplosionEffect.GetComponent<EffectBehavior>();
-            if (effectBehavior != null)
-                effectBehavior.DestroySelf();
         }
-
-        // 回收自己
-        gameObject.SetActive(false);
+        // 直接銷毀自己
+        Destroy(gameObject);
     }
 } 

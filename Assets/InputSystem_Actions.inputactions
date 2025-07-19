@@ -33,6 +33,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "SubAttack",
+                    "type": "Button",
+                    "id": "c865ee81-0f68-4398-aca0-8ba4d24723a0",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Interact",
                     "type": "Button",
                     "id": "852140f2-7766-474d-8707-702459ba45f3",
@@ -81,15 +90,6 @@
                     "name": "Sprint",
                     "type": "Button",
                     "id": "641cd816-40e6-41b4-8c3d-04687c349290",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Lock",
-                    "type": "Button",
-                    "id": "c865ee81-0f68-4398-aca0-8ba4d24723a0",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -489,7 +489,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
-                    "action": "Lock",
+                    "action": "SubAttack",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
