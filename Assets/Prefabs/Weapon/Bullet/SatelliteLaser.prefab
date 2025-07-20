@@ -153,7 +153,7 @@ GameObject:
   - component: {fileID: 3271993973453179900}
   m_Layer: 0
   m_Name: SatelliteLaser
-  m_TagString: Untagged
+  m_TagString: Beam
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

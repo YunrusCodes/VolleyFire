@@ -64,9 +64,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private GameObject crashEffect;
     
     [Header("特殊武器設定")]
-    public GameObject ufoBeamPrefab;
+    public GameObject playerBeamPrefab;
     [SerializeField] public Transform beamPoint;
-    private GameObject currentUfoBeam;
+    private GameObject currentPlayerBeam;
     
     public enum WeaponState { Normal, SubWeapon, Disabled }
     private WeaponState weaponState = WeaponState.Normal;
@@ -172,10 +172,13 @@ public class PlayerController : MonoBehaviour
         Transform targetFind = null;
         foreach (var hit in hits)
         {
-            // 忽略非敵方物件
-            if (hit.collider.gameObject.tag != "Enemy") continue;
+            // 忽略 Player 與 Beam
+            string tag = hit.collider.gameObject.tag;
+            if (tag == "Player" || tag == "Beam") continue;
+            // 只偵測敵人
+            if (tag != "Enemy") continue;
 
-            // 撞到其他物件（敵人、障礙物等）
+            // 撞到敵人
             hitTarget = true;
             targetFind = hit.transform;      
             drawDistance = hit.distance;
@@ -403,10 +406,10 @@ public class PlayerController : MonoBehaviour
         // 狀態機控制副武器與主武器切換
         if (!globalFireEnabled)
         {
-            if (currentUfoBeam != null)
+            if (currentPlayerBeam != null)
             {
                 beamPoint?.gameObject.SetActive(false);
-                currentUfoBeam = null;
+                currentPlayerBeam = null;
             }
             weaponState = WeaponState.Disabled;
             return;
@@ -416,17 +419,17 @@ public class PlayerController : MonoBehaviour
         {            
             beamPoint.gameObject.SetActive(true);
             weaponState = WeaponState.SubWeapon;
-            if (ufoBeamPrefab != null && currentUfoBeam == null)
+            if (playerBeamPrefab != null && currentPlayerBeam == null)
             {
-                currentUfoBeam = Instantiate(ufoBeamPrefab);
-                // 設定 beamPoint 為 UfoBeam 的發射點
-                var cannonRay = currentUfoBeam.GetComponent<CannonRay>();
-                if (cannonRay != null)
-                    cannonRay.SetSpawnPoint(beamPoint);
+                currentPlayerBeam = Instantiate(playerBeamPrefab);
+                // 設定 beamPoint 為 PlayerBeam 的發射點
+                var playerBeam = currentPlayerBeam.GetComponent<PlayerBeam>();
+                if (playerBeam != null)
+                    playerBeam.SetSpawnPoint(beamPoint);
             }
         }
         // 按住右鍵期間
-        if (subAttackAction.IsPressed() && currentUfoBeam != null && beamPoint != null)
+        if (subAttackAction.IsPressed() && currentPlayerBeam != null && beamPoint != null)
         {
             Ray ray = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
             Vector3 lookPoint;
@@ -444,10 +447,10 @@ public class PlayerController : MonoBehaviour
             beamPoint.LookAt(lookPoint);
         }
         // 放開右鍵時
-        if (subAttackAction.WasReleasedThisFrame() && currentUfoBeam != null)
+        if (subAttackAction.WasReleasedThisFrame() && currentPlayerBeam != null)
         {
             beamPoint.gameObject.SetActive(false);
-            currentUfoBeam = null;
+            currentPlayerBeam = null;
             // 放開副武器時，根據 globalFireEnabled 狀態切回主武器或禁用
             weaponState = globalFireEnabled ? WeaponState.Normal : WeaponState.Disabled;
         }

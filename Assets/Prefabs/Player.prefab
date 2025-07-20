@@ -340,7 +340,7 @@ MonoBehaviour:
   crosshairRayDistance: 500
   lockedTarget: {fileID: 0}
   crashEffect: {fileID: 6161368121920136876}
-  ufoBeamPrefab: {fileID: 1876921289776003243, guid: da7474bf06c96c848814e2a6c91749c9, type: 3}
+  playerBeamPrefab: {fileID: 1876921289776003243, guid: da7474bf06c96c848814e2a6c91749c9, type: 3}
   beamPoint: {fileID: 8877435616893546239}
 --- !u!114 &340001365465766110
 MonoBehaviour:

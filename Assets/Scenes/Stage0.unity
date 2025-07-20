@@ -11961,6 +11961,10 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7720245402069381931, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
+      propertyPath: firePoints.Array.data[0].firePeriod
+      value: 0.1
+      objectReference: {fileID: 0}
     - target: {fileID: 8357126842894378493, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
       propertyPath: m_Name
       value: Player
