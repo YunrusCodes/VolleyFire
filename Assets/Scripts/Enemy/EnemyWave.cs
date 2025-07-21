@@ -26,14 +26,6 @@ public class EnemyWave : MonoBehaviour
     {
         // 使用協程串接對話與移動流程
         StartCoroutine(WaveDialogueAndMoveFlow());
-        
-        // 初始化波次進行時間對話（如果列表為空）
-        if (waveProcessTimeDialogues.Count == 0)
-        {
-            // 可以添加一些預設的時間對話
-            // AddWaveProcessTimeDialogue(5f, new List<string>{"EarlyWarning_Dialogue"});
-            // AddWaveProcessTimeDialogue(15f, new List<string>{"MidWarning_Dialogue"});
-        }
     }
 
     private IEnumerator WaveDialogueAndMoveFlow()
@@ -108,7 +100,7 @@ public class EnemyWave : MonoBehaviour
             foreach (var enemy in enemies)
             {
                 enemy.WaveProcessing();
-                waveClear = waveClear && enemy.GetHealth().IsDead();
+                waveClear = waveClear && enemy.IsLeaving();
             }
             if (waveClear)
             {

@@ -76,7 +76,7 @@ public class FederalBattleShip : EnemyBehavior
             {
                 cannon.gameObject.SetActive(false);
             }
-            gameObject.SetActive(false);
+            OnHealthDeath();
             return;
         }
 
@@ -293,4 +293,5 @@ public class FederalBattleShip : EnemyBehavior
             Debug.LogWarning("FederalBattleShip: 請設置雷射發射點！");
         }
     }
+    
 } 

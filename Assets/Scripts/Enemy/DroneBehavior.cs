@@ -28,6 +28,7 @@ public class DroneBehavior : EnemyBehavior
 
     public override void Init(EnemyController controller)
     {
+        base.Init(controller);
         this.controller = controller;
         audioSource = GetComponent<AudioSource>();
         useRandomSwing = true; // 初始為隨機方向
@@ -41,8 +42,7 @@ public class DroneBehavior : EnemyBehavior
     {
         if (controller.GetHealth().IsDead())
         {
-            Debug.Log("is dead");
-            gameObject.SetActive(false);
+            OnHealthDeath();
             return;
         }
 
@@ -158,4 +158,5 @@ public class DroneBehavior : EnemyBehavior
     {
         // 波次開始行動階段，可加初始化或特效
     }
+
 }

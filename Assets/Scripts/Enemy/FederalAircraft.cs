@@ -47,7 +47,7 @@ public class FederalAircraft : EnemyBehavior
     {
         if (controller != null && controller.GetHealth().IsDead())
         {
-            gameObject.SetActive(false);
+            OnHealthDeath();
             return;
         }
         MoveToCirclePosition();
@@ -130,4 +130,10 @@ public class FederalAircraft : EnemyBehavior
 
     public override void OnWaveMove() { }
     public override void OnWaveStart() { }
+
+    public override void OnHealthDeath()
+    {
+        isLeaving = true;
+        base.OnHealthDeath();
+    }
 } 

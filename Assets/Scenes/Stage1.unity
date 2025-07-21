@@ -254,12 +254,12 @@ MonoBehaviour:
   moveSpeed: 50
   waveMoveBeforeDialogues:
     dialogues:
-    - Wave4_1
-    enabled: 0
+    - End
+    enabled: 1
     autoRead: 1
     autoReadSpeed: 3
     enablePlayerFire: 0
-    BGMToSwitch: {fileID: 0}
+    BGMToSwitch: {fileID: 8300000, guid: fe71f9770b6b61242a041e0b755f30d5, type: 3}
   waveMoveDuringDialogues:
     dialogues: []
     enabled: 0
@@ -830,14 +830,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: StarSparrow1
       objectReference: {fileID: 0}
-    - target: {fileID: 7146138644659522454, guid: cbdbe60c361b21e4fb05bdaa6c1e4b94, type: 3}
-      propertyPath: m_Convex
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7146138644659522454, guid: cbdbe60c361b21e4fb05bdaa6c1e4b94, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -961,7 +953,7 @@ MonoBehaviour:
     - Wave3_5
     enabled: 1
     autoRead: 1
-    autoReadSpeed: 1.5
+    autoReadSpeed: 3
     enablePlayerFire: 0
     BGMToSwitch: {fileID: 0}
 --- !u!4 &1045033824
@@ -11262,6 +11254,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6005448995833186671, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
   m_PrefabInstance: {fileID: 5367582699877975873}
   m_PrefabAsset: {fileID: 0}
+--- !u!95 &5017003703181273407 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 3045520594685541152, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+  m_PrefabInstance: {fileID: 5367582699877975873}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &5367582699877975873
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11274,6 +11271,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: StarSparrow10
       objectReference: {fileID: 0}
+    - target: {fileID: 2896960243075978021, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3709381824866779465, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: animator
+      value: 
+      objectReference: {fileID: 5017003703181273407}
     - target: {fileID: 6005448995833186671, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -11313,6 +11318,14 @@ PrefabInstance:
     - target: {fileID: 6005448995833186671, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6390162882636415317, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8217711749429910917, guid: c1043d626a1e9354b9f23667389f2312, type: 3}
+      propertyPath: m_Drag
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -125,7 +125,8 @@ namespace VolleyFire.Funnel
         {
             if (value == enableAction) return;
             enableAction = value;
-            ApplyMode(FunnelMode.Activate);
+            if(enableAction) ApplyMode(FunnelMode.Activate);
+            else ApplyMode(FunnelMode.Default);
         }
 
         public void Attack()

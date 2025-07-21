@@ -304,12 +304,14 @@ public class PlayerController : MonoBehaviour
             {
                 // 嘗試找最近擊中的敵人
                 Ray ray = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
-                RaycastHit hit;
-                if (Physics.Raycast(ray, out hit, crosshairRayDistance))
+                RaycastHit[] hits = Physics.RaycastAll(ray, crosshairRayDistance);
+                foreach (var hit in hits)
                 {
+                    if (hit.collider.CompareTag("Beam")) continue;
                     if (hit.collider.CompareTag("Enemy"))
                     {
                         pointerTarget = hit.transform;
+                        break;
                     }
                 }
             }

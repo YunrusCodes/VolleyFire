@@ -38,4 +38,5 @@ public class EnemyController : MonoBehaviour
     
     public BaseHealth GetHealth() => health;
     public EnemyBehavior GetBehavior() => behavior;
+    public bool IsLeaving() => behavior != null && behavior.IsLeaving();
 }

@@ -45,7 +45,6 @@ public class RobotBehavior : EnemyBehavior
     [SerializeField] private Transform swordTransform;
     [SerializeField] private Transform gunTransform;
     [SerializeField] private Transform pistolTransform;
-    [SerializeField] private Animator animator;
     [Header("巡邏點距離限制")]
     public float minTargetPointDistance = 2f;
     #endregion
@@ -494,6 +493,12 @@ public class RobotBehavior : EnemyBehavior
     {
         if (animator == null) return;
         if(controller.GetHealth().GetCurrentHealth() <= SummonFunnelHealth) funnelSystem.SetEnableAction(true);
+        if(controller.GetHealth().IsDead())
+        {
+            OnHealthDeath();
+            funnelSystem.SetEnableAction(false);
+            return;
+        }
 
         switch (mode)
         {

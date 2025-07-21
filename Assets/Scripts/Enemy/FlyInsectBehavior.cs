@@ -29,9 +29,11 @@ public class FlyInsectBehavior : EnemyBehavior
     private Vector2 swingDir;
     private Vector2 swingTarget;
     public float swingSpeed = 5f; // 可調整
+    private bool isDead = false;
 
     public override void Init(EnemyController controller)
     {
+        base.Init(controller);
         this.controller = controller;
         baseCenter = transform.position;
         // Swing 狀態初始化
@@ -52,7 +54,7 @@ public class FlyInsectBehavior : EnemyBehavior
     {
         if (controller.GetHealth().IsDead())
         {
-            gameObject.SetActive(false);
+            OnHealthDeath();
             return;
         }
 
@@ -202,4 +204,5 @@ public class FlyInsectBehavior : EnemyBehavior
     {
         // 波次開始行動階段，可加初始化或特效
     }
+
 } 

@@ -4,21 +4,19 @@ public class PointableBullet : BulletBehavior
 {
     [SerializeField] private string targetTag;
     [SerializeField] private int damage = 1;
-    private Vector3 targetPosition;
+    private Transform targetTransform;
+    private EnemyBehavior targetEnemy;  // 新增：存取目標的 EnemyBehavior
     private bool initialized = false;
     private GameObject m_Effect = null;
 
     protected override void BehaviorOnStart()
     {
-        // 初始化基本設定
         initialized = false;
-        
-        // 預設往前方
-        targetPosition = transform.position + transform.forward * 100f;
+        targetTransform = null;
+        targetEnemy = null;  // 初始化
         direction = transform.forward;
         m_Effect = this.explosionPrefab;
         this.explosionPrefab = null;
-        
     }
 
     public override void Initialize(FirePoint firePoint)
@@ -26,36 +24,42 @@ public class PointableBullet : BulletBehavior
         base.Initialize(firePoint);
         if (firePoint.PointedTarget != null)
         {
-            targetPosition = firePoint.PointedTarget.position;
-            direction = (targetPosition - transform.position).normalized;
+            targetTransform = firePoint.PointedTarget;
+            targetEnemy = targetTransform.GetComponent<EnemyBehavior>();  // 取得 EnemyBehavior
+            direction = (targetTransform.position - transform.position).normalized;
         }
         initialized = true;
     }
 
     protected override void Move()
     {
-        if (firePoint.PointedTarget != null)
+        // 檢查目標是否已經離開（被擊敗）
+        if (targetEnemy != null && targetEnemy.IsLeaving())
         {
-            Vector3 toTarget = firePoint.PointedTarget.position - transform.position;
+            // 目標已離開，直線前進
+            transform.position += direction * speed * Time.deltaTime;
+            return;
+        }
+
+        if (targetTransform != null)
+        {
+            Vector3 toTarget = targetTransform.position - transform.position;
             float distToTarget = toTarget.magnitude;
             float moveDist = speed * Time.deltaTime;
-            // 若已經抵達目標點，不再 LookAt
+
             if (distToTarget == 0f)
             {
-                // 可選：抵達目標後保持靜止
-                // return;
-                // 或保持原方向前進（什麼都不做）
+                DestroyBullet();
+                return;
             }
             else if (moveDist < distToTarget)
             {
-                // 只有移動距離小於目標距離時才追蹤 LookAt
                 direction = toTarget.normalized;
                 transform.position += direction * moveDist;
             }
             else
             {
-                // 如果本幀移動距離大於等於到目標距離，直接移動到目標點
-                transform.position = firePoint.PointedTarget.position;
+                transform.position = targetTransform.position;
             }
         }
         else
