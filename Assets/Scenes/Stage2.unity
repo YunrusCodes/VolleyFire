@@ -157,6 +157,12 @@ MonoBehaviour:
   - {fileID: 1293794281}
   targetPosition: {fileID: 999589439}
   moveSpeed: 100
+  OnWaveStart:
+    m_PersistentCalls:
+      m_Calls: []
+  OnWaveClear:
+    m_PersistentCalls:
+      m_Calls: []
   waveMoveBeforeDialogues:
     dialogues: []
     enabled: 0
@@ -675,6 +681,24 @@ MonoBehaviour:
   - {fileID: 1766748643}
   targetPosition: {fileID: 999589439}
   moveSpeed: 100
+  OnWaveStart:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1462923222}
+        m_TargetAssemblyTypeName: SatelliteSystem, Assembly-CSharp
+        m_MethodName: SetAttackState
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnWaveClear:
+    m_PersistentCalls:
+      m_Calls: []
   waveMoveBeforeDialogues:
     dialogues: []
     enabled: 0
@@ -1168,6 +1192,12 @@ MonoBehaviour:
   enemies: []
   targetPosition: {fileID: 999589439}
   moveSpeed: 50
+  OnWaveStart:
+    m_PersistentCalls:
+      m_Calls: []
+  OnWaveClear:
+    m_PersistentCalls:
+      m_Calls: []
   waveMoveBeforeDialogues:
     dialogues:
     - Wave4_1
@@ -1376,6 +1406,12 @@ MonoBehaviour:
   enemies: []
   targetPosition: {fileID: 999589439}
   moveSpeed: 100
+  OnWaveStart:
+    m_PersistentCalls:
+      m_Calls: []
+  OnWaveClear:
+    m_PersistentCalls:
+      m_Calls: []
   waveMoveBeforeDialogues:
     dialogues:
     - Wave0_1
@@ -2295,10 +2331,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   waves:
-  - {fileID: 175308301}
   - {fileID: 495601958}
   - {fileID: 25530401}
   - {fileID: 2017132698}
+  - {fileID: 175308301}
   - {fileID: 389702296}
   NextStageSceneName: Stage1
   volume: {fileID: 832575518}
@@ -2487,6 +2523,7 @@ MonoBehaviour:
   moveSpeed: 10
   OpenBeamZ: 50
   beam: {fileID: 1876921289776003243, guid: fb660ccec56c0e246b52a2c64457c607, type: 3}
+  canAttack: 1
 --- !u!4 &1462923223
 Transform:
   m_ObjectHideFlags: 0
@@ -3235,6 +3272,12 @@ MonoBehaviour:
   - {fileID: 1294468286}
   targetPosition: {fileID: 999589439}
   moveSpeed: 100
+  OnWaveStart:
+    m_PersistentCalls:
+      m_Calls: []
+  OnWaveClear:
+    m_PersistentCalls:
+      m_Calls: []
   waveMoveBeforeDialogues:
     dialogues: []
     enabled: 0
@@ -3404,7 +3447,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3024147086297521903, guid: 86f2400349ca3f8488fb1347d61c09c5, type: 3}
       propertyPath: maxHealth
-      value: 10
+      value: 500
       objectReference: {fileID: 0}
     - target: {fileID: 4349951054928613277, guid: 86f2400349ca3f8488fb1347d61c09c5, type: 3}
       propertyPath: funnelMove
@@ -3503,8 +3546,20 @@ PrefabInstance:
       value: Robot
       objectReference: {fileID: 0}
     - target: {fileID: 6601407859453369246, guid: 86f2400349ca3f8488fb1347d61c09c5, type: 3}
+      propertyPath: moveSpeed
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 6601407859453369246, guid: 86f2400349ca3f8488fb1347d61c09c5, type: 3}
       propertyPath: MAX_BULLETS
-      value: 5
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6601407859453369246, guid: 86f2400349ca3f8488fb1347d61c09c5, type: 3}
+      propertyPath: returnSpeed
+      value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 6601407859453369246, guid: 86f2400349ca3f8488fb1347d61c09c5, type: 3}
+      propertyPath: swordMoveSpeed
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 6601407859453369246, guid: 86f2400349ca3f8488fb1347d61c09c5, type: 3}
       propertyPath: SummonFunnelHealth

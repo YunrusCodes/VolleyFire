@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+using UnityEngine.Events;
 
 public class EnemyWave : MonoBehaviour
 {
@@ -9,6 +10,10 @@ public class EnemyWave : MonoBehaviour
     [Header("目標位置")]
     public Transform targetPosition;
     public float moveSpeed = 5f;
+
+    [Header("事件")]
+    public UnityEvent OnWaveStart = new UnityEvent();
+    public UnityEvent OnWaveClear = new UnityEvent();
 
     [Header("對話系統")]
     public WaveDialogueData waveMoveBeforeDialogues = new WaveDialogueData();    // 波次移動前
@@ -29,7 +34,8 @@ public class EnemyWave : MonoBehaviour
     }
 
     private IEnumerator WaveDialogueAndMoveFlow()
-    {
+    {    
+        OnWaveStart?.Invoke();
         // 1. 等待移動前對話結束
         waveMoveBeforeDialogues.TriggerDialoguesAndWait();
         while (isWaitingForDialogue) yield return null;
@@ -106,6 +112,7 @@ public class EnemyWave : MonoBehaviour
             {
                 Debug.Log("Wave cleared!");
                 isWaveClear = true;
+                OnWaveClear?.Invoke();
             }
         }
         else

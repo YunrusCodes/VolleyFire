@@ -12,6 +12,7 @@ public class SatelliteSystem : MonoBehaviour
 
     public float OpenBeamZ;
     public GameObject beam;
+    public bool canAttack = true;    // 控制是否可以攻擊
 
     private List<GameObject> satellites = new List<GameObject>();
     private HashSet<GameObject> beamsSpawned = new HashSet<GameObject>();
@@ -161,7 +162,7 @@ public class SatelliteSystem : MonoBehaviour
             if (!beamsSpawned.Contains(sat))
             {
                 float dist = Mathf.Abs(sat.transform.position.z - this.transform.position.z);
-                if (dist <= OpenBeamZ)
+                if (dist <= OpenBeamZ && canAttack)  // 檢查是否可以攻擊
                 {
                     GameObject b = Instantiate(beam, sat.transform.position, sat.transform.rotation, sat.transform);
                     b.transform.localRotation = Quaternion.identity;
@@ -190,5 +191,32 @@ public class SatelliteSystem : MonoBehaviour
         Gizmos.DrawLine(p2, p3);
         Gizmos.DrawLine(p3, p4);
         Gizmos.DrawLine(p4, p1);
+    }
+
+    /// <summary>
+    /// 設置衛星系統的攻擊狀態
+    /// </summary>
+    /// <param name="state">true 為可以攻擊，false 為停止攻擊</param>
+    public void SetAttackState(bool state)
+    {
+        canAttack = state;
+        
+        // 如果設置為 false，清除所有已存在的光束
+        if (!state)
+        {
+            foreach (GameObject sat in satellites)
+            {
+                if (sat != null)
+                {
+                    // 找到並銷毀所有子物件中的光束
+                    CannonRay[] rays = sat.GetComponentsInChildren<CannonRay>();
+                    foreach (CannonRay ray in rays)
+                    {
+                        Destroy(ray.gameObject);
+                    }
+                }
+            }
+            beamsSpawned.Clear();
+        }
     }
 }
