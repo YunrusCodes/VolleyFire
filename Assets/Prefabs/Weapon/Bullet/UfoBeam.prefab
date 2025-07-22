@@ -221,7 +221,7 @@ MonoBehaviour:
   useRigidbody: 1
   explosionPrefab: {fileID: 8640070007292392689, guid: 5c6162666bd8e2c4c9d25134dfd7a4ce, type: 3}
   laserObject: {fileID: 1876921289776003243}
-  expandSpeed: 150
+  expandSpeed: 75
   shrinkSpeed: 8
   maxLength: 100
   targetTag: Enemy

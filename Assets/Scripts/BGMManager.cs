@@ -32,6 +32,11 @@ public class BGMManager : MonoBehaviour
     /// </summary>
     public void SwitchBGM(AudioClip newBgm)
     {
+        // 若新舊BGM相同則不切換
+        if (currentBgm.clip == newBgm)
+        {
+            return;
+        }
         if (currentBgm.isPlaying)
         {
             currentBgm.Stop();

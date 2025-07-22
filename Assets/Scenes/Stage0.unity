@@ -220,6 +220,11 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!1 &133515391 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6892061727126208123, guid: f39c5a7fe8c520e499e4c866c4d54df1, type: 3}
+  m_PrefabInstance: {fileID: 1585361980240329433}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &138794502
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -298,7 +303,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4021051841120710330, guid: f39c5a7fe8c520e499e4c866c4d54df1, type: 3}
   m_PrefabInstance: {fileID: 1585361980240329433}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 133515391}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 97aca0a1325db8a4ca48f3e2aca59904, type: 3}
@@ -309,6 +314,20 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1426033605689576976, guid: f39c5a7fe8c520e499e4c866c4d54df1, type: 3}
   m_PrefabInstance: {fileID: 1585361980240329433}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &195157093
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 133515391}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 720595bbfcaf692428fb0a0a59037d14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHealth: 100
+  currentHealth: 0
 --- !u!1001 &271079938
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -449,6 +468,12 @@ MonoBehaviour:
   - {fileID: 930958845}
   targetPosition: {fileID: 999589439}
   moveSpeed: 50
+  OnWaveStart:
+    m_PersistentCalls:
+      m_Calls: []
+  OnWaveClear:
+    m_PersistentCalls:
+      m_Calls: []
   waveMoveBeforeDialogues:
     dialogues: []
     enabled: 1
@@ -505,6 +530,12 @@ MonoBehaviour:
   enemies: []
   targetPosition: {fileID: 999589439}
   moveSpeed: 50
+  OnWaveStart:
+    m_PersistentCalls:
+      m_Calls: []
+  OnWaveClear:
+    m_PersistentCalls:
+      m_Calls: []
   waveMoveBeforeDialogues:
     dialogues:
     - Wave4_1
@@ -724,6 +755,12 @@ MonoBehaviour:
   enemies: []
   targetPosition: {fileID: 999589439}
   moveSpeed: 50
+  OnWaveStart:
+    m_PersistentCalls:
+      m_Calls: []
+  OnWaveClear:
+    m_PersistentCalls:
+      m_Calls: []
   waveMoveBeforeDialogues:
     dialogues:
     - Wave0_1
@@ -731,7 +768,7 @@ MonoBehaviour:
     autoRead: 1
     autoReadSpeed: 3
     enablePlayerFire: 0
-    BGMToSwitch: {fileID: 0}
+    BGMToSwitch: {fileID: 8300000, guid: fe71f9770b6b61242a041e0b755f30d5, type: 3}
   waveMoveDuringDialogues:
     dialogues: []
     enabled: 0
@@ -895,7 +932,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: -0.592
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 4511385992908729131, guid: f94cb77818b8e4f4499d2b166d692a54, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -1000,6 +1038,12 @@ MonoBehaviour:
   - {fileID: 822069448}
   targetPosition: {fileID: 999589439}
   moveSpeed: 50
+  OnWaveStart:
+    m_PersistentCalls:
+      m_Calls: []
+  OnWaveClear:
+    m_PersistentCalls:
+      m_Calls: []
   waveMoveBeforeDialogues:
     dialogues:
     - Wave1_1
@@ -1261,6 +1305,12 @@ MonoBehaviour:
   - {fileID: 195157080}
   targetPosition: {fileID: 999589439}
   moveSpeed: 50
+  OnWaveStart:
+    m_PersistentCalls:
+      m_Calls: []
+  OnWaveClear:
+    m_PersistentCalls:
+      m_Calls: []
   waveMoveBeforeDialogues:
     dialogues: []
     enabled: 0
@@ -1409,7 +1459,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e529e3feb047e474b9e08677df52b771, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  StartBgm: {fileID: 8300000, guid: fe71f9770b6b61242a041e0b755f30d5, type: 3}
+  StartBgm: {fileID: 8300000, guid: 34a863218b6ab3e46a1f1b50bfb0ef86, type: 3}
 --- !u!114 &1304675289
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1631,7 +1681,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: -0.592
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 4511385992908729131, guid: f94cb77818b8e4f4499d2b166d692a54, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -6798,10 +6849,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: Flying Insect
       objectReference: {fileID: 0}
+    - target: {fileID: 9173650594194855296, guid: f39c5a7fe8c520e499e4c866c4d54df1, type: 3}
+      propertyPath: m_Constraints
+      value: 126
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 291665180523870987, guid: f39c5a7fe8c520e499e4c866c4d54df1, type: 3}
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6892061727126208123, guid: f39c5a7fe8c520e499e4c866c4d54df1, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 195157093}
   m_SourcePrefab: {fileID: 100100000, guid: f39c5a7fe8c520e499e4c866c4d54df1, type: 3}
 --- !u!1 &1949000670388983565
 GameObject:
@@ -11952,10 +12011,6 @@ PrefabInstance:
     - target: {fileID: 6643417292323480715, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7720245402069381931, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
-      propertyPath: firePoints.Array.data[0].firePeriod
-      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 8357126842894378493, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
       propertyPath: m_Name
