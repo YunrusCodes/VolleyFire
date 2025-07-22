@@ -13,6 +13,14 @@ PrefabInstance:
       value: 40
       objectReference: {fileID: 0}
     - target: {fileID: 92328960279310452, guid: b514d6f6b79edc249afcdfc6df831ebf, type: 3}
+      propertyPath: rotationMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 92328960279310452, guid: b514d6f6b79edc249afcdfc6df831ebf, type: 3}
+      propertyPath: circularInitMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 92328960279310452, guid: b514d6f6b79edc249afcdfc6df831ebf, type: 3}
       propertyPath: shrinkRadiusMode
       value: 1
       objectReference: {fileID: 0}

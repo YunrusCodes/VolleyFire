@@ -2214,14 +2214,15 @@ MonoBehaviour:
   moveDistance: 20
   targetPointCount: 3
   turnSpeed: 50
+  slashTriggerDistance: 0.5
   markerColor: {r: 1, g: 0, b: 0, a: 1}
   markerSize: 0.3
   boundaryX: {x: 34.9, y: -39.8}
   boundaryY: {x: 19.4, y: -14.3}
   gunBulletPrefab: {fileID: 7555402867869293541, guid: 11548ec74589a1840a46b6ee62504086, type: 3}
   fireRate: 10
-  slashDistance: {x: 0, y: -7, z: 15}
-  swordMoveSpeed: 80
+  slashDistance: {x: 0, y: -10, z: 15}
+  swordMoveSpeed: 10
   returnSpeed: 60
   isReturning: 0
   swordTransform: {fileID: 5006859066344003070}
@@ -2746,6 +2747,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 6624309755713604136}
     m_Modifications:
+    - target: {fileID: 7486444396643893047, guid: 91a6c197b51f638458a028acf609dbcb, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7826896194103873707, guid: 91a6c197b51f638458a028acf609dbcb, type: 3}
+      propertyPath: m_Name
+      value: SlashCollider
+      objectReference: {fileID: 0}
     - target: {fileID: 7876997809504047185, guid: 91a6c197b51f638458a028acf609dbcb, type: 3}
       propertyPath: m_Name
       value: Slash

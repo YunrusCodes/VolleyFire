@@ -14757,16 +14757,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animator: {fileID: 3415504464694422045}
   isLeaving: 0
+  xRange: {x: -10, y: 10}
+  yRange: {x: -10, y: 10}
   bulletPrefab: {fileID: 7555402867869293541, guid: 11548ec74589a1840a46b6ee62504086, type: 3}
-  fireInterval: 1.75
-  bulletSpeed: 15
+  fireInterval: 1
+  bulletSpeed: 30
   r: 25
   siblingIndex: 0
   lerpSpeed: 1
   xOffset: 0
   yOffset: 0
   shrinkRadiusMode: 0
+  rotationMode: 0
+  translationMode: 1
+  circularInitMode: 0
   minRadius: 20
+  rotationSpeed: 1
+  parentMoveSpeed: 2
+  moveInterval: 2
 --- !u!114 &1432690057399008548
 MonoBehaviour:
   m_ObjectHideFlags: 0
