@@ -23,6 +23,7 @@ public class RobotBehavior : EnemyBehavior
     public float moveDistance = 3f;
     public int targetPointCount = 3;
     public float turnSpeed = 5f;
+    public float slashTriggerDistance = 0.5f;  // 新增：觸發斬擊的距離閾值
 
     [Header("標記設置")]
     public Color markerColor = Color.red;
@@ -268,16 +269,16 @@ public class RobotBehavior : EnemyBehavior
         float fromStart = Vector3.Distance(transform.position, targetPoints[0]);
 
         // 抵達
-        if (fromStart >= totalDistance * 0.99f)
+        if (fromStart >= totalDistance * 0.9f)
         {
-            transform.position = targetPoints[1];
+            // transform.position = targetPoints[1];
             // 射擊
             if (bulletsFired < MAX_BULLETS && animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f)
             {
                 FireBullet();
                 bulletsFired++;
                 isPostShootWaiting = true; // 新增：啟動等待
-                postShootWaitTimer = 0.01f; // 新增：設定等待0.5秒
+                postShootWaitTimer = 0.1f; // 新增：設定等待0.5秒
                 if (bulletsFired >= MAX_BULLETS)
                 {
                     sheathbool = true;
@@ -449,11 +450,15 @@ public class RobotBehavior : EnemyBehavior
         {
             // 使用 Lerp 實現平滑移動
             transform.position = Vector3.Lerp(transform.position, desiredRobotPosition, swordMoveSpeed * Time.deltaTime);
-        }
 
-        if (swordDistanceToTarget <= 0.1f && !slashing)
-        {
-            if (!isReturning && !slashing) slashbool = true;
+            // 計算機器人到目標位置的距離
+            float distanceToDesiredPosition = Vector3.Distance(transform.position, desiredRobotPosition);
+            
+            // 當距離小於閾值時觸發斬擊
+            if (distanceToDesiredPosition <= slashTriggerDistance && !isReturning && !slashing)
+            {
+                slashbool = true;
+            }
         }
 
         if (animator.GetCurrentAnimatorStateInfo(0).IsName("TakeSwordShoot"))
