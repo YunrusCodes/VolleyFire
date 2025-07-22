@@ -77,6 +77,8 @@ public class RobotBehavior : EnemyBehavior
     private bool hasUpdatedMidway = false;
     private Vector3 swordStartPosition;
     private float swordStartToTargetDistance;
+    private float postShootWaitTimer = 0f; // 新增：射擊後等待計時器
+    private bool isPostShootWaiting = false; // 新增：是否正在等待
     #endregion
 
     public FunnelSystem funnelSystem;
@@ -241,12 +243,22 @@ public class RobotBehavior : EnemyBehavior
     #region Mode Behaviors
     private void GunModeBehavior()
     {
+        if (isPostShootWaiting)
+        {
+            postShootWaitTimer -= Time.deltaTime;
+            if (postShootWaitTimer <= 0f)
+            {
+                isPostShootWaiting = false;
+            }
+            return; // 等待期間不移動不轉動
+        }
+
         if (playerTransform != null && gunTransform != null)
         {
             // 射擊前，先以抵達點為基準做TargetLock
             Vector3 originalPosition = transform.position;
             transform.position = targetPoints[1];
-            TargetLock(gunTransform, new Vector3(4,-3,1));
+            TargetLock(gunTransform, new Vector3(8,-3,1));
             transform.position = originalPosition;
         }
 
@@ -256,7 +268,7 @@ public class RobotBehavior : EnemyBehavior
         float fromStart = Vector3.Distance(transform.position, targetPoints[0]);
 
         // 抵達
-        if (fromStart >= totalDistance * 0.9f)
+        if (fromStart >= totalDistance * 0.99f)
         {
             transform.position = targetPoints[1];
             // 射擊
@@ -264,6 +276,8 @@ public class RobotBehavior : EnemyBehavior
             {
                 FireBullet();
                 bulletsFired++;
+                isPostShootWaiting = true; // 新增：啟動等待
+                postShootWaitTimer = 0.1f; // 新增：設定等待0.5秒
                 if (bulletsFired >= MAX_BULLETS)
                 {
                     sheathbool = true;
@@ -545,6 +559,12 @@ public class RobotBehavior : EnemyBehavior
             {
                 Debug.DrawLine(targetPoints[i], targetPoints[i + 1], color);
             }
+        }
+        // 畫出劍模式移動路線
+        if (mode == RobotMode.SwordMode && swordTransform != null && hasCalculatedSwordPosition)
+        {
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawLine(transform.position, desiredSwordPosition);
         }
     }
 #endif

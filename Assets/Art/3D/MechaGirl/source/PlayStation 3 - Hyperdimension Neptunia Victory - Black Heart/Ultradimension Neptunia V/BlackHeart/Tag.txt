@@ -1,0 +1,6 @@
+Game: Ultradimension Neptunia V
+Subject: Black Heart
+Copyright: Idea Factory, Compile Heart
+Model Ripper: Random Talking Bush
+Hosting Permissions: The Models Resource
+Notes: Special thanks to howfie for the model importing script.
