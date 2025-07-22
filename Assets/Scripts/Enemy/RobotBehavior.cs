@@ -277,7 +277,7 @@ public class RobotBehavior : EnemyBehavior
                 FireBullet();
                 bulletsFired++;
                 isPostShootWaiting = true; // 新增：啟動等待
-                postShootWaitTimer = 0.1f; // 新增：設定等待0.5秒
+                postShootWaitTimer = 0.01f; // 新增：設定等待0.5秒
                 if (bulletsFired >= MAX_BULLETS)
                 {
                     sheathbool = true;
@@ -431,6 +431,11 @@ public class RobotBehavior : EnemyBehavior
             hasUpdatedMidway = true;
         }
 
+        // 計算劍和機器人本體的相對位置偏移
+        Vector3 swordOffset = swordTransform.position - transform.position;
+        // 從劍的目標位置反推機器人本體應該在的位置
+        Vector3 desiredRobotPosition = desiredSwordPosition - swordOffset;
+        
         Vector3 directionToPlayer = targetPosition - transform.position;
         directionToPlayer.y = 0;
         
@@ -442,7 +447,8 @@ public class RobotBehavior : EnemyBehavior
 
         if (!slashing && !slashbool && !isReturning)
         {
-            transform.position += swordDirection * swordMoveSpeed * Time.deltaTime;
+            // 使用 Lerp 實現平滑移動
+            transform.position = Vector3.Lerp(transform.position, desiredRobotPosition, swordMoveSpeed * Time.deltaTime);
         }
 
         if (swordDistanceToTarget <= 0.1f && !slashing)

@@ -1324,10 +1324,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   waves:
-  - {fileID: 175308301}
   - {fileID: 495601958}
   - {fileID: 25530401}
   - {fileID: 2017132698}
+  - {fileID: 175308301}
   - {fileID: 389702296}
   NextStageSceneName: Stage1
   volume: {fileID: 832575518}
@@ -2201,9 +2201,29 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 175308302}
     m_Modifications:
+    - target: {fileID: 2604361432428683435, guid: 86f2400349ca3f8488fb1347d61c09c5, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6211538245154602888, guid: 86f2400349ca3f8488fb1347d61c09c5, type: 3}
       propertyPath: m_Name
       value: Robot
+      objectReference: {fileID: 0}
+    - target: {fileID: 6601407859453369246, guid: 86f2400349ca3f8488fb1347d61c09c5, type: 3}
+      propertyPath: swordMoveSpeed
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6601407859453369246, guid: 86f2400349ca3f8488fb1347d61c09c5, type: 3}
+      propertyPath: slashDistance.y
+      value: -10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6770976067323458756, guid: 86f2400349ca3f8488fb1347d61c09c5, type: 3}
+      propertyPath: speed
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7351231326564162984, guid: 86f2400349ca3f8488fb1347d61c09c5, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7473942369574073979, guid: 86f2400349ca3f8488fb1347d61c09c5, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2244,6 +2264,14 @@ PrefabInstance:
     - target: {fileID: 7473942369574073979, guid: 86f2400349ca3f8488fb1347d61c09c5, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7492418806865959441, guid: 86f2400349ca3f8488fb1347d61c09c5, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7890122844058923572, guid: 86f2400349ca3f8488fb1347d61c09c5, type: 3}
+      propertyPath: m_Name
+      value: SlashCollider
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

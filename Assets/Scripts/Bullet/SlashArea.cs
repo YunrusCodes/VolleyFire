@@ -15,17 +15,28 @@ public class SlashArea : BulletBehavior
         // 劍痕的移動
     }
 
-    protected void OnCollisionEnter(Collision collision)
+    protected void OnTriggerEnter(Collider other)
     {
         Debug.Log("targetTag: " + targetTag);
-        if (collision.gameObject.CompareTag(targetTag))
+        if (other.CompareTag(targetTag))
         {
-            var targetHealth = collision.gameObject.GetComponent<BaseHealth>();
+            var targetHealth = other.GetComponent<BaseHealth>();
+            Debug.Log("targetHealth: " + targetHealth);
             if (targetHealth != null)
             {
+                Debug.Log("targetHealth is not null : " + other.name);
                 targetHealth.TakeDamage(damage);
+            }
+            else
+            {
+                Debug.Log("targetHealth is null : " + other.name);
             }
             DestroyBullet();
         }
+        else
+        {
+            Debug.Log("targetTag is not " + targetTag + " : " + other.tag);
+        }
     }
+
 }
