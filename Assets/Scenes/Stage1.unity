@@ -189,6 +189,12 @@ MonoBehaviour:
   - {fileID: 1536825173}
   targetPosition: {fileID: 999589439}
   moveSpeed: 50
+  OnWaveStart:
+    m_PersistentCalls:
+      m_Calls: []
+  OnWaveClear:
+    m_PersistentCalls:
+      m_Calls: []
   waveMoveBeforeDialogues:
     dialogues: []
     enabled: 0
@@ -252,6 +258,12 @@ MonoBehaviour:
   enemies: []
   targetPosition: {fileID: 999589439}
   moveSpeed: 50
+  OnWaveStart:
+    m_PersistentCalls:
+      m_Calls: []
+  OnWaveClear:
+    m_PersistentCalls:
+      m_Calls: []
   waveMoveBeforeDialogues:
     dialogues:
     - End
@@ -455,6 +467,12 @@ MonoBehaviour:
   enemies: []
   targetPosition: {fileID: 999589439}
   moveSpeed: 100
+  OnWaveStart:
+    m_PersistentCalls:
+      m_Calls: []
+  OnWaveClear:
+    m_PersistentCalls:
+      m_Calls: []
   waveMoveBeforeDialogues:
     dialogues:
     - Wave0_1
@@ -707,6 +725,12 @@ MonoBehaviour:
   - {fileID: 1104543761}
   targetPosition: {fileID: 999589439}
   moveSpeed: 100
+  OnWaveStart:
+    m_PersistentCalls:
+      m_Calls: []
+  OnWaveClear:
+    m_PersistentCalls:
+      m_Calls: []
   waveMoveBeforeDialogues:
     dialogues:
     - Wave1_1
@@ -904,6 +928,12 @@ MonoBehaviour:
   - {fileID: 2050138921}
   targetPosition: {fileID: 999589439}
   moveSpeed: 50
+  OnWaveStart:
+    m_PersistentCalls:
+      m_Calls: []
+  OnWaveClear:
+    m_PersistentCalls:
+      m_Calls: []
   waveMoveBeforeDialogues:
     dialogues: []
     enabled: 0
@@ -923,7 +953,7 @@ MonoBehaviour:
     dialogues:
     - Wave3_2
     enabled: 1
-    autoRead: 0
+    autoRead: 1
     autoReadSpeed: 3
     enablePlayerFire: 1
     BGMToSwitch: {fileID: 0}
@@ -1049,10 +1079,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   waves:
+  - {fileID: 1045033823}
   - {fileID: 495601958}
   - {fileID: 905350715}
   - {fileID: 305109111}
-  - {fileID: 1045033823}
   - {fileID: 389702296}
   NextStageSceneName: Stage2
   volume: {fileID: 832575518}
