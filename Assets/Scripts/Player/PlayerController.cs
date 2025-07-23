@@ -34,15 +34,10 @@ public class PlayerController : MonoBehaviour
     [Header("輸入設定")]
     [SerializeField] private string moveActionName = "Player/Move";     // 移動動作名稱（Action 路徑）
     [SerializeField] private string attackActionName = "Player/Attack"; // 攻擊動作名稱（Action 路徑）
-    [SerializeField] private string subAttackActionName = "Player/SubAttack"; // 副攻擊動作名稱（Action 路徑）
     [SerializeField] private PlayerInput playerInput;                     // PlayerInput（由 Inspector 指定）
 
     [Header("準心設定")]
     public Image crosshairImage;
-    public Color crosshairNormalColor = Color.green;
-    public Color crosshairTargetColor = Color.red;
-    public Color crosshairLockColor = Color.blue;    // 新增：鎖定狀態的顏色
-
     [SerializeField] private float crosshairRayDistance = 100f; // 射線距離可在 Inspector 設定
 
     // ------- 私有狀態 -------
@@ -51,11 +46,7 @@ public class PlayerController : MonoBehaviour
     private Camera mainCamera;           // 主攝影機
     private InputAction moveAction;      // Move Action 參考
     private InputAction attackAction;    // Attack Action 參考
-    private InputAction subAttackAction; // SubAttack Action 參考
-    private Vector3 targetPosition;       // 新增：目前準心指向的目標世界座標
-    [SerializeField] private Transform lockedTarget;       // 鎖定的目標
-    private bool isLocked;              // 是否處於鎖定狀態
-
+    private Transform currentTarget;     // 目前瞄準的目標
     
     // 全域射擊控制
     private static bool globalFireEnabled = true;
@@ -63,12 +54,7 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] private GameObject crashEffect;
     
-    [Header("特殊武器設定")]
-    public GameObject playerBeamPrefab;
-    [SerializeField] public Transform beamPoint;
-    private GameObject currentPlayerBeam;
-    
-    public enum WeaponState { Normal, SubWeapon, Disabled }
+    public enum WeaponState { Normal, Disabled }
     private WeaponState weaponState = WeaponState.Normal;
     
     #endregion
@@ -107,7 +93,6 @@ public class PlayerController : MonoBehaviour
         // 停用輸入 Action，避免記憶體洩漏
         moveAction?.Disable();
         attackAction?.Disable();
-        subAttackAction?.Disable();
     }
     
     private void Update()
@@ -128,7 +113,6 @@ public class PlayerController : MonoBehaviour
         HandleMovement();  // 直接位移
         ClampPosition();   // 限制邊界
         UpdateCrosshairAndRay();
-        HandleUfoBeam();   // 處理UfoBeam
     }
 
     private void UpdateCrosshairAndRay()
@@ -142,77 +126,17 @@ public class PlayerController : MonoBehaviour
         Ray ray = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
         RaycastHit[] hits = Physics.RaycastAll(ray, crosshairRayDistance);
 
-        bool hitTarget = false;
-        float drawDistance = crosshairRayDistance;
-        targetPosition = ray.origin + ray.direction * crosshairRayDistance; // 預設為極限距離
+        currentTarget = null;  // 重置目標
 
-        // 處理鎖定功能
-        if (subAttackAction != null)
-        {
-            // 當按下副攻擊鍵時
-            if (subAttackAction.WasPressedThisFrame() && lockedTarget == null)
-            {
-                foreach (var hit in hits)
-                {
-                    if (hit.collider.gameObject.tag != "Enemy") Debug.Log(hit.collider.gameObject.name);
-                    if (hit.collider.gameObject.tag != "Enemy") continue;
-                    lockedTarget = hit.transform;
-                    isLocked = true;
-                    break;
-                }
-            }
-            // 當放開副攻擊鍵時
-            else if (subAttackAction.WasReleasedThisFrame())
-            {
-                isLocked = false;
-                lockedTarget = null;
-            }
-        }
-        
-        Transform targetFind = null;
         foreach (var hit in hits)
         {
             // 忽略 Player 與 Beam
-            string tag = hit.collider.gameObject.tag;
-            if (tag == "Player" || tag == "Beam") continue;
+            if (hit.collider.CompareTag("Player") || hit.collider.CompareTag("Beam")) continue;
             // 只偵測敵人
-            if (tag != "Enemy") continue;
-
-            // 撞到敵人
-            hitTarget = true;
-            targetFind = hit.transform;      
-            drawDistance = hit.distance;
-            break;
-        }
-
-        // 根據鎖定狀態設定目標位置
-        if (isLocked)
-        {
-            if (lockedTarget == null)
-                lockedTarget = targetFind;
+            if (!hit.collider.CompareTag("Enemy")) continue;
             
-            // 計算射線與Z平面的交點
-            float t = (lockedTarget.position.z - ray.origin.z) / ray.direction.z;
-            targetPosition = ray.origin + ray.direction * t;
-            Debug.Log(targetPosition.z);
-        }
-        else if (targetFind != null)
-        {
-            lockedTarget = null;
-            targetPosition = targetFind.position;
-        }
-
-        if (hitTarget)
-        {
-            Debug.DrawRay(ray.origin, ray.direction * drawDistance, Color.red, 0f, false);
-            // 根據鎖定狀態決定準心顏色
-            crosshairImage.color = isLocked ? crosshairLockColor : crosshairTargetColor;
-        }
-        else
-        {
-            Debug.DrawRay(ray.origin, ray.direction * crosshairRayDistance, Color.green, 0f, false);
-            // 根據鎖定狀態決定準心顏色
-            crosshairImage.color = isLocked ? crosshairLockColor : crosshairNormalColor;
+            currentTarget = hit.transform;
+            break;
         }
     }
 
@@ -233,14 +157,11 @@ public class PlayerController : MonoBehaviour
 
         moveAction = playerInput.actions.FindAction(moveActionName);
         attackAction = playerInput.actions.FindAction(attackActionName);
-        subAttackAction = playerInput.actions.FindAction(subAttackActionName);
 
         if (moveAction == null)
             Debug.LogError($"找不到移動動作：{moveActionName}");
         if (attackAction == null)
             Debug.LogError($"找不到攻擊動作：{attackActionName}");
-        if (subAttackAction == null)
-            Debug.LogError($"找不到副攻擊動作：{subAttackActionName}");
     }
 
     /// <summary>
@@ -294,37 +215,20 @@ public class PlayerController : MonoBehaviour
         }
         if (attackAction != null && attackAction.IsPressed())
         {
-            // 依據目前狀態決定傳遞 Transform
-            Transform pointerTarget = null;
-            if (isLocked && lockedTarget != null)
-            {
-                pointerTarget = lockedTarget;
-            }
-            else if (!isLocked && lockedTarget == null)
-            {
-                // 嘗試找最近擊中的敵人
-                Ray ray = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
-                RaycastHit[] hits = Physics.RaycastAll(ray, crosshairRayDistance);
-                foreach (var hit in hits)
-                {
-                    if (hit.collider.CompareTag("Beam")) continue;
-                    if (hit.collider.CompareTag("Enemy"))
-                    {
-                        pointerTarget = hit.transform;
-                        break;
-                    }
-                }
-            }
+            Transform pointerTarget = currentTarget;
+            
             // 若沒有目標，建立一個臨時目標在射線終點
             if (pointerTarget == null)
             {
-                Vector3 endPoint = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue()).origin + mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue()).direction * crosshairRayDistance;
+                Vector3 endPoint = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue()).origin + 
+                                 mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue()).direction * crosshairRayDistance;
                 GameObject tempTarget = new GameObject("TempBulletTarget");
                 tempTarget.transform.position = endPoint;
                 pointerTarget = tempTarget.transform;
                 // 可選：自動銷毀這個臨時物件
                 Destroy(tempTarget, 2f);
             }
+            
             weaponSystem.SetPointerTarget(pointerTarget);
             weaponSystem?.Fire();
         }
@@ -394,67 +298,5 @@ public class PlayerController : MonoBehaviour
         attackAction = playerInput?.actions.FindAction(attackActionName);
     }
 
-    public void SetSubAttackActionName(string actionName)
-    {
-        subAttackActionName = actionName;
-        subAttackAction = playerInput?.actions.FindAction(subAttackActionName);
-    }
-
     #endregion
-
-    private void HandleUfoBeam()
-    {
-        if (subAttackAction == null) return;
-        // 狀態機控制副武器與主武器切換
-        if (!globalFireEnabled)
-        {
-            if (currentPlayerBeam != null)
-            {
-                beamPoint?.gameObject.SetActive(false);
-                currentPlayerBeam = null;
-            }
-            weaponState = WeaponState.Disabled;
-            return;
-        }
-        // 按下右鍵時
-        if (subAttackAction.WasPressedThisFrame())
-        {            
-            beamPoint.gameObject.SetActive(true);
-            weaponState = WeaponState.SubWeapon;
-            if (playerBeamPrefab != null && currentPlayerBeam == null)
-            {
-                currentPlayerBeam = Instantiate(playerBeamPrefab);
-                // 設定 beamPoint 為 PlayerBeam 的發射點
-                var playerBeam = currentPlayerBeam.GetComponent<PlayerBeam>();
-                if (playerBeam != null)
-                    playerBeam.SetSpawnPoint(beamPoint);
-            }
-        }
-        // 按住右鍵期間
-        if (subAttackAction.IsPressed() && currentPlayerBeam != null && beamPoint != null)
-        {
-            Ray ray = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
-            Vector3 lookPoint;
-            if (lockedTarget != null)
-            {
-                float zPlane = lockedTarget.position.z;
-                float t = (zPlane - ray.origin.z) / ray.direction.z;
-                lookPoint = ray.origin + ray.direction * t;
-            }
-            else
-            {
-                lookPoint = ray.origin + ray.direction * crosshairRayDistance;
-            }
-            
-            beamPoint.LookAt(lookPoint);
-        }
-        // 放開右鍵時
-        if (subAttackAction.WasReleasedThisFrame() && currentPlayerBeam != null)
-        {
-            beamPoint.gameObject.SetActive(false);
-            currentPlayerBeam = null;
-            // 放開副武器時，根據 globalFireEnabled 狀態切回主武器或禁用
-            weaponState = globalFireEnabled ? WeaponState.Normal : WeaponState.Disabled;
-        }
-    }
 }
