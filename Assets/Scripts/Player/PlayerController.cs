@@ -40,6 +40,12 @@ public class PlayerController : MonoBehaviour
     public Image crosshairImage;
     [SerializeField] private float crosshairRayDistance = 100f; // 射線距離可在 Inspector 設定
 
+    [Header("自動跟隨準心")]
+    public Image autoFollowCrosshairImage;
+
+    [Header("偵測線")]
+    [SerializeField] private LineRenderer lineRenderer;
+
     // ------- 私有狀態 -------
     private Vector2 moveInput;           // 移動輸入（-1 ~ 1）
     private Vector3 currentVelocity;     // 目前速度（世界座標）
@@ -113,6 +119,7 @@ public class PlayerController : MonoBehaviour
         HandleMovement();  // 直接位移
         ClampPosition();   // 限制邊界
         UpdateCrosshairAndRay();
+        UpdateAutoFollowCrosshair();
     }
 
     private void UpdateCrosshairAndRay()
@@ -138,6 +145,47 @@ public class PlayerController : MonoBehaviour
             currentTarget = hit.transform;
             break;
         }
+
+        // 畫出從 Ray 起點到玩家飛船的線（綠色）
+        if (playerShip != null)
+        {
+            Debug.DrawLine(ray.origin, playerShip.transform.position, Color.green);
+
+            // 計算 Ray 與玩家飛船 z 平面的交點
+            float t = (playerShip.transform.position.z - ray.origin.z) / ray.direction.z;
+            Vector3 intersection = ray.origin + ray.direction * t;
+
+            // 畫出玩家飛船到交點的線（黃色）
+            Debug.DrawLine(playerShip.transform.position, intersection, Color.yellow);
+
+            // 用 LineRenderer 畫出這條線
+            if (lineRenderer != null)
+            {
+                Vector3 dir = (intersection - playerShip.transform.position).normalized;
+                float length = Vector3.Distance(playerShip.transform.position, intersection);
+                Vector3 extendedEnd = playerShip.transform.position + dir * length * 10f;
+
+                lineRenderer.positionCount = 2;
+                lineRenderer.SetPosition(0, playerShip.transform.position);
+                lineRenderer.SetPosition(1, extendedEnd);
+                lineRenderer.startColor = Color.yellow;
+                lineRenderer.endColor = Color.yellow;
+            }
+        }
+
+        // 畫出 Raycast 射線（紅色）
+        Debug.DrawRay(ray.origin, ray.direction * crosshairRayDistance, Color.red);
+    }
+
+    private void UpdateAutoFollowCrosshair()
+    {
+        if (mainCamera == null || autoFollowCrosshairImage == null || playerShip == null) return;
+
+        // 將PlayerShip的世界座標轉成螢幕座標
+        Vector3 screenPos = mainCamera.WorldToScreenPoint(playerShip.transform.position);
+
+        // 設定UI準心的位置
+        autoFollowCrosshairImage.rectTransform.position = screenPos;
     }
 
     #endregion
