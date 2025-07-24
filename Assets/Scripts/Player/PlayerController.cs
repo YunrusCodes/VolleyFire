@@ -17,8 +17,6 @@ public class PlayerController : MonoBehaviour
     [Header("移動設定")]
     [SerializeField] private float moveSpeed = 15f;       // 基礎移動速度（每秒位移量）
     [SerializeField] private float maxSpeed = 25f;        // 速度上限
-    [SerializeField] private float acceleration = 50f;    // 加速度（單位：m/s²）
-    [SerializeField] private float deceleration = 30f;    // 減速度（單位：m/s²）
 
     [Header("邊界設定")]
     [SerializeField] private float xBoundary = 20f;       // X 軸左右邊界
@@ -38,13 +36,26 @@ public class PlayerController : MonoBehaviour
 
     [Header("準心設定")]
     public Image crosshairImage;
+    public Sprite normalCrosshairSprite;      // 無目標時的準心圖片
+    public Sprite preciseTargetSprite;        // 精準判定（射線命中）的準心圖片
+    public Sprite looseTargetSprite;          // 寬鬆判定（檢測盒命中）的準心圖片
+    public Image targetCrosshairImage;        // 目標準心圖片
     [SerializeField] private float crosshairRayDistance = 100f; // 射線距離可在 Inspector 設定
-
-    [Header("自動跟隨準心")]
-    public Image autoFollowCrosshairImage;
+    private bool isPreciseTarget = false;      // 是否為精準命中
 
     [Header("偵測線")]
-    [SerializeField] private LineRenderer lineRenderer;
+    [SerializeField] private LineRenderer mainLineRenderer;  // 原本的LineRenderer改名
+    [SerializeField] private LineRenderer boxLineRenderer1;  // 碰撞盒用
+    [SerializeField] private LineRenderer boxLineRenderer2;  // 碰撞盒用
+    [SerializeField] private LineRenderer boxLineRenderer3;  // 碰撞盒用
+    [SerializeField] private LineRenderer targetLineRenderer; // 目標連接線
+    [SerializeField] private bool showMainLine = true;      // 顯示主要瞄準線
+    [SerializeField] private bool showBoxLines = true;      // 顯示碰撞盒線條
+    [SerializeField] private bool showTargetLine = true;    // 顯示目標連接線
+    [SerializeField] private float boxDetectionLength = 100f;  // 檢測盒長度
+    [SerializeField] private float boxDetectionHeight = 0.2f;  // 檢測盒高度
+    [SerializeField] private float boxDetectionForward = 100f; // 檢測盒前方延伸距離
+    [SerializeField] private LayerMask detectionLayerMask = 1;  // 預設為 Default layer (layer 0)
 
     // ------- 私有狀態 -------
     private Vector2 moveInput;           // 移動輸入（-1 ~ 1）
@@ -119,7 +130,6 @@ public class PlayerController : MonoBehaviour
         HandleMovement();  // 直接位移
         ClampPosition();   // 限制邊界
         UpdateCrosshairAndRay();
-        UpdateAutoFollowCrosshair();
     }
 
     private void UpdateCrosshairAndRay()
@@ -127,13 +137,16 @@ public class PlayerController : MonoBehaviour
         if (mainCamera == null || crosshairImage == null) return;
 
         // 讓準心跟隨滑鼠
-        crosshairImage.rectTransform.position = Mouse.current.position.ReadValue();
+        Vector2 mousePos = Mouse.current.position.ReadValue();
+        crosshairImage.rectTransform.position = mousePos;
+
+        // 重置目標狀態
+        currentTarget = null;
+        isPreciseTarget = false;
 
         // 射線偵測
-        Ray ray = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
+        Ray ray = mainCamera.ScreenPointToRay(mousePos);
         RaycastHit[] hits = Physics.RaycastAll(ray, crosshairRayDistance);
-
-        currentTarget = null;  // 重置目標
 
         foreach (var hit in hits)
         {
@@ -143,49 +156,207 @@ public class PlayerController : MonoBehaviour
             if (!hit.collider.CompareTag("Enemy")) continue;
             
             currentTarget = hit.transform;
+            isPreciseTarget = true;  // 射線直接命中為精準判定
             break;
         }
 
-        // 畫出從 Ray 起點到玩家飛船的線（綠色）
-        if (playerShip != null)
+        // 如果射線沒有命中，檢查檢測盒
+        if (currentTarget == null && playerShip != null)
         {
-            Debug.DrawLine(ray.origin, playerShip.transform.position, Color.green);
-
             // 計算 Ray 與玩家飛船 z 平面的交點
             float t = (playerShip.transform.position.z - ray.origin.z) / ray.direction.z;
             Vector3 intersection = ray.origin + ray.direction * t;
 
-            // 畫出玩家飛船到交點的線（黃色）
-            Debug.DrawLine(playerShip.transform.position, intersection, Color.yellow);
+            // 計算方向向量
+            Vector3 dir = (intersection - playerShip.transform.position).normalized;
 
-            // 用 LineRenderer 畫出這條線
-            if (lineRenderer != null)
+            // 計算檢測盒參數
+            Vector3 boxStart = playerShip.transform.position;
+            Vector3 boxEnd = boxStart + dir * boxDetectionLength;
+            Vector3 boxCenter = (boxStart + boxEnd) * 0.5f + ray.direction * (boxDetectionForward * 0.5f);
+            
+            // 計算檢測盒大小
+            Vector3 boxSize = new Vector3(
+                boxDetectionLength,  // 長度（X軸）
+                boxDetectionHeight,  // 高度（Y軸）
+                boxDetectionForward  // 深度（Z軸）
+            );
+
+            // 計算檢測盒旋轉
+            float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+            Quaternion boxRotation = Quaternion.LookRotation(ray.direction) * Quaternion.Euler(0, 0, angle);
+
+            // 執行檢測
+            Collider[] hitColliders = Physics.OverlapBox(
+                boxCenter,
+                boxSize * 0.5f,
+                boxRotation,
+                detectionLayerMask
+            );
+
+            // 在檢測盒中尋找最近的敵人
+            if (hitColliders.Length > 0)
             {
-                Vector3 dir = (intersection - playerShip.transform.position).normalized;
-                float length = Vector3.Distance(playerShip.transform.position, intersection);
-                Vector3 extendedEnd = playerShip.transform.position + dir * length * 10f;
+                float nearestDistance = float.MaxValue;
+                Transform nearestEnemy = null;
 
-                lineRenderer.positionCount = 2;
-                lineRenderer.SetPosition(0, playerShip.transform.position);
-                lineRenderer.SetPosition(1, extendedEnd);
-                lineRenderer.startColor = Color.yellow;
-                lineRenderer.endColor = Color.yellow;
+                foreach (var hitCollider in hitColliders)
+                {
+                    if (!hitCollider.CompareTag("Enemy")) continue;
+
+                    float distance = Vector3.Distance(playerShip.transform.position, hitCollider.transform.position);
+                    if (distance < nearestDistance)
+                    {
+                        nearestDistance = distance;
+                        nearestEnemy = hitCollider.transform;
+                    }
+                }
+
+                currentTarget = nearestEnemy;
+                if (currentTarget != null)
+                {
+                    isPreciseTarget = false;  // 檢測盒命中為寬鬆判定
+                }
             }
         }
 
-        // 畫出 Raycast 射線（紅色）
-        Debug.DrawRay(ray.origin, ray.direction * crosshairRayDistance, Color.red);
+        // 更新準心顯示
+        if (targetCrosshairImage != null)
+        {
+            if (currentTarget != null)
+            {
+                // 將目標的世界座標轉換為螢幕座標
+                Vector3 screenPos = mainCamera.WorldToScreenPoint(currentTarget.position);
+                
+                // 如果目標在攝影機前方才顯示準心
+                if (screenPos.z > 0)
+                {
+                    // 根據判定類型切換準心圖片
+                    if (isPreciseTarget && preciseTargetSprite != null)
+                    {
+                        crosshairImage.sprite = preciseTargetSprite;
+                        // 精準瞄準時，Y軸朝上，且不顯示目標準心
+                        crosshairImage.rectTransform.rotation = Quaternion.identity;
+                        targetCrosshairImage.gameObject.SetActive(false);
+                    }
+                    else if (!isPreciseTarget && looseTargetSprite != null)
+                    {
+                        crosshairImage.sprite = looseTargetSprite;
+                        // 寬鬆判定時，準心指向目標，且顯示目標準心
+                        Vector2 direction = new Vector2(screenPos.x - mousePos.x, screenPos.y - mousePos.y);
+                        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+                        crosshairImage.rectTransform.rotation = Quaternion.Euler(0, 0, angle - 90);
+                        targetCrosshairImage.gameObject.SetActive(true);
+                        targetCrosshairImage.rectTransform.position = new Vector2(screenPos.x, screenPos.y);
+                    }
+                }
+                else
+                {
+                    // 切換回普通準心圖片
+                    if (normalCrosshairSprite != null)
+                        crosshairImage.sprite = normalCrosshairSprite;
+
+                    targetCrosshairImage.gameObject.SetActive(false);
+                    crosshairImage.rectTransform.rotation = Quaternion.identity;
+                }
+            }
+            else
+            {
+                // 切換回普通準心圖片
+                if (normalCrosshairSprite != null)
+                    crosshairImage.sprite = normalCrosshairSprite;
+
+                targetCrosshairImage.gameObject.SetActive(false);
+                crosshairImage.rectTransform.rotation = Quaternion.identity;
+            }
+        }
+
+        // 更新 LineRenderer 顯示
+        UpdateLineRenderers(ray);
     }
 
-    private void UpdateAutoFollowCrosshair()
+    private void UpdateLineRenderers(Ray ray)
     {
-        if (mainCamera == null || autoFollowCrosshairImage == null || playerShip == null) return;
+        if (playerShip == null) return;
 
-        // 將PlayerShip的世界座標轉成螢幕座標
-        Vector3 screenPos = mainCamera.WorldToScreenPoint(playerShip.transform.position);
+        // 畫出從 Ray 起點到玩家飛船的線（綠色）
+        Debug.DrawLine(ray.origin, playerShip.transform.position, Color.green);
 
-        // 設定UI準心的位置
-        autoFollowCrosshairImage.rectTransform.position = screenPos;
+        // 計算 Ray 與玩家飛船 z 平面的交點
+        float t = (playerShip.transform.position.z - ray.origin.z) / ray.direction.z;
+        Vector3 intersection = ray.origin + ray.direction * t;
+
+        // 計算方向向量
+        Vector3 dir = (intersection - playerShip.transform.position).normalized;
+
+        // 更新主要瞄準線
+        if (mainLineRenderer != null)
+        {
+            mainLineRenderer.enabled = showMainLine;
+            if (showMainLine)
+            {
+                float length = Vector3.Distance(playerShip.transform.position, intersection);
+                Vector3 extendedEnd = playerShip.transform.position + dir * length * 10f;
+
+                mainLineRenderer.positionCount = 2;
+                mainLineRenderer.SetPosition(0, playerShip.transform.position);
+                mainLineRenderer.SetPosition(1, extendedEnd);
+                mainLineRenderer.startColor = Color.yellow;
+                mainLineRenderer.endColor = Color.yellow;
+            }
+        }
+
+        // 更新檢測盒線條
+        UpdateBoxLines(dir, ray);
+    }
+
+    private void UpdateBoxLines(Vector3 dir, Ray ray)
+    {
+        if (boxLineRenderer1 == null || boxLineRenderer2 == null || boxLineRenderer3 == null) return;
+
+        boxLineRenderer1.enabled = showBoxLines;
+        boxLineRenderer2.enabled = showBoxLines;
+        boxLineRenderer3.enabled = showBoxLines;
+
+        if (showBoxLines)
+        {
+            Vector3 boxStart = playerShip.transform.position;
+            Vector3 boxEnd = boxStart + dir * boxDetectionLength;
+            Vector3 boxCenter = (boxStart + boxEnd) * 0.5f + ray.direction * (boxDetectionForward * 0.5f);
+            
+            Vector3 boxSize = new Vector3(
+                boxDetectionLength,
+                boxDetectionHeight,
+                boxDetectionForward
+            );
+
+            float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+            Quaternion boxRotation = Quaternion.LookRotation(ray.direction) * Quaternion.Euler(0, 0, angle);
+
+            Vector3 up = boxRotation * Vector3.up;
+            Vector3 right = boxRotation * Vector3.right;
+            Vector3 halfSize = boxSize * 0.5f;
+
+            Color lineColor = Color.green;
+            boxLineRenderer1.startColor = boxLineRenderer1.endColor = lineColor;
+            boxLineRenderer2.startColor = boxLineRenderer2.endColor = lineColor;
+            boxLineRenderer3.startColor = boxLineRenderer3.endColor = lineColor;
+
+            // 第一條線：中心軸
+            boxLineRenderer1.positionCount = 2;
+            boxLineRenderer1.SetPosition(0, boxCenter - right * halfSize.x);
+            boxLineRenderer1.SetPosition(1, boxCenter + right * halfSize.x);
+
+            // 第二條線：上邊
+            boxLineRenderer2.positionCount = 2;
+            boxLineRenderer2.SetPosition(0, boxCenter - right * halfSize.x + up * halfSize.y);
+            boxLineRenderer2.SetPosition(1, boxCenter + right * halfSize.x + up * halfSize.y);
+
+            // 第三條線：下邊
+            boxLineRenderer3.positionCount = 2;
+            boxLineRenderer3.SetPosition(0, boxCenter - right * halfSize.x - up * halfSize.y);
+            boxLineRenderer3.SetPosition(1, boxCenter + right * halfSize.x - up * halfSize.y);
+        }
     }
 
     #endregion
@@ -226,23 +397,13 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void HandleMovement()
     {
-        // 1. 計算目標速度
-        Vector3 targetVelocity = new Vector3(moveInput.x, moveInput.y, 0f) * moveSpeed;
+        // 直接計算移動速度
+        currentVelocity = new Vector3(moveInput.x, moveInput.y, 0f) * moveSpeed;
 
-        // 2. 加速 / 減速
-        if (moveInput.sqrMagnitude > 0.01f)
-        {
-            currentVelocity = Vector3.MoveTowards(currentVelocity, targetVelocity, acceleration * Time.deltaTime);
-        }
-        else
-        {
-            currentVelocity = Vector3.MoveTowards(currentVelocity, Vector3.zero, deceleration * Time.deltaTime);
-        }
-
-        // 3. 限制最大速度
+        // 限制最大速度
         currentVelocity = Vector3.ClampMagnitude(currentVelocity, maxSpeed);
 
-        // 4. 位移
+        // 位移
         if (playerShip != null)
             playerShip.transform.position += currentVelocity * Time.deltaTime;
     }
