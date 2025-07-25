@@ -52,12 +52,7 @@ namespace VolleyFire.Enemy
         private RobotState currentState;
         private RobotMode lastAttackMode = RobotMode.SwordMode;
         public Vector3 initialPosition { get; private set; }
-        private Quaternion initialRotation;
 
-        // 狀態標記
-        public bool slashbool = false;
-        public bool sheathbool = false;
-        public bool drawshootbool = false;
         #endregion
 
         public FunnelSystem funnelSystem;
@@ -92,13 +87,6 @@ namespace VolleyFire.Enemy
             currentState?.Enter();
         }
 
-        public void ResetState()
-        {
-            slashbool = false;
-            sheathbool = false;
-            drawshootbool = false;
-        }
-
         public Animator GetAnimator()
         {
             return animator;
@@ -110,7 +98,6 @@ namespace VolleyFire.Enemy
         {
             this.controller = controller;
             initialPosition = transform.position;
-            initialRotation = transform.rotation;
             TransitionToState(mode);
         }
 

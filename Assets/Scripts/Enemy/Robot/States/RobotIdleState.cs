@@ -6,11 +6,6 @@ namespace VolleyFire.Enemy
     {
         public RobotIdleState(RobotBehavior robot) : base(robot) { }
 
-        public override void Enter()
-        {
-            robot.ResetState();
-        }
-
         public override void Execute()
         {
             AnimatorStateInfo idleLayer = animator.GetCurrentAnimatorStateInfo(0);

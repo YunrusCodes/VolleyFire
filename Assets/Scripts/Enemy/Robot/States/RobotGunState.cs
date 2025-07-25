@@ -9,6 +9,8 @@ namespace VolleyFire.Enemy
         private bool isPostShootWaiting = false;
         private float postShootWaitTimer = 0f;
         private int bulletsFired = 0;
+        private bool shouldSheath = false;
+        private bool targetPointReached = false;
 
         public RobotGunState(RobotBehavior robot) : base(robot) { }
 
@@ -16,6 +18,9 @@ namespace VolleyFire.Enemy
         {
             animator.SetBool("DrawingGun", true);
             GenerateTargetPoints();
+            shouldSheath = false;
+            targetPointReached = false;
+            bulletsFired = 0;
         }
 
         public override void Execute()
@@ -35,7 +40,7 @@ namespace VolleyFire.Enemy
 
         private void HandleGunMode()
         {
-            if (robot.sheathbool)
+            if (shouldSheath && targetPointReached)
             {
                 robot.TransitionToState(RobotBehavior.RobotMode.Idle);
             }
@@ -78,6 +83,8 @@ namespace VolleyFire.Enemy
 
         private void HandleTargetPointReached()
         {
+            targetPointReached = true;
+            
             if (bulletsFired < robot.MAX_BULLETS && animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f)
             {
                 FireBullet();
@@ -87,7 +94,7 @@ namespace VolleyFire.Enemy
 
                 if (bulletsFired >= robot.MAX_BULLETS)
                 {
-                    robot.sheathbool = true;
+                    shouldSheath = true;
                     bulletsFired = 0;
                 }
             }

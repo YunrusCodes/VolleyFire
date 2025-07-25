@@ -7,9 +7,11 @@ namespace VolleyFire.Enemy
         private bool isReturning = false;
         private bool slashing = false;
         private bool drawshooting = false;
+        private bool shouldDrawShoot = false;
         private bool hasCalculatedSwordPosition = false;
         private Vector3 desiredSwordPosition;
         private bool hasSlashed = false;
+        private bool shouldSlash = false;
         private bool hasUpdatedMidway = false;
         private Vector3 swordStartPosition;
         private float swordStartToTargetDistance;
@@ -26,10 +28,10 @@ namespace VolleyFire.Enemy
         {
             AnimatorStateInfo slashLayer = animator.GetCurrentAnimatorStateInfo(1);
             
-            if (robot.drawshootbool && !slashing)
+            if (shouldDrawShoot && !slashing)
             {
                 animator.SetTrigger("DrawAndShoot");
-                robot.drawshootbool = false;
+                shouldDrawShoot = false;
                 drawshooting = true;
             }
             else if (drawshooting && slashLayer.normalizedTime >= 1f)
@@ -61,6 +63,7 @@ namespace VolleyFire.Enemy
         {
             slashing = false;
             drawshooting = false;
+            shouldDrawShoot = false;
             hasCalculatedSwordPosition = false;
             hasSlashed = false;
             hasUpdatedMidway = false;
@@ -123,7 +126,7 @@ namespace VolleyFire.Enemy
                 robot.transform.rotation = Quaternion.Lerp(robot.transform.rotation, targetRotation, robot.turnSpeed * Time.deltaTime);
             }
 
-            if (!slashing && !robot.slashbool && !isReturning)
+            if (!slashing && !shouldSlash && !isReturning)
             {
                 robot.transform.position = Vector3.Lerp(robot.transform.position, desiredRobotPosition, robot.swordMoveSpeed * Time.deltaTime);
 
@@ -131,7 +134,7 @@ namespace VolleyFire.Enemy
                 
                 if (distanceToDesiredPosition <= robot.slashTriggerDistance && !isReturning && !slashing)
                 {
-                    robot.slashbool = true;
+                    shouldSlash = true;
                 }
             }
 
@@ -152,16 +155,16 @@ namespace VolleyFire.Enemy
                 slashing = false;
                 isReturning = true;
                 hasCalculatedSwordPosition = false;
-                robot.drawshootbool = true;
+                shouldDrawShoot = true;
                 hasUpdatedMidway = false;
             }
-            else if (robot.slashbool && !drawshooting && !hasSlashed)
+            else if (shouldSlash && !drawshooting && !hasSlashed)
             {
                 animator.SetTrigger("Slash");
-                robot.slashbool = false;
+                shouldSlash = false;
                 hasSlashed = true;
             }
-            else if (robot.sheathbool)
+            else if (hasSlashed && isReturning && Vector3.Distance(robot.transform.position, robot.initialPosition) <= 0.1f)
             {
                 robot.TransitionToState(RobotBehavior.RobotMode.Idle);
             }
