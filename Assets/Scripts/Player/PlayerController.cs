@@ -507,5 +507,23 @@ public class PlayerController : MonoBehaviour
         attackAction = playerInput?.actions.FindAction(attackActionName);
     }
 
+    public Transform GetCurrentTarget()
+    {
+        if (currentTarget != null)
+            return currentTarget;
+
+        // 沒有目標時，回傳滑鼠射線終點
+        if (mainCamera != null)
+        {
+            Vector3 endPoint = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue()).origin +
+                               mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue()).direction * crosshairRayDistance;
+            GameObject tempTarget = new GameObject("TempBulletTarget");
+            tempTarget.transform.position = endPoint;
+            Destroy(tempTarget, 2f);
+            return tempTarget.transform;
+        }
+        return null;
+    }
+
     #endregion
 }
