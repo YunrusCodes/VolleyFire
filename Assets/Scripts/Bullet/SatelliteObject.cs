@@ -65,6 +65,12 @@ public class SatelliteObject : ControllableObject
         DestroyBeam();
     }
 
+    protected override void MoveReleased()
+    {
+        speed = originalSpeed * releaseSpeedMultiplier;
+        transform.position += direction * speed * Time.deltaTime;
+    }
+
     private void SpawnBeam()
     {
         if (beam != null && spawnedBeam == null)

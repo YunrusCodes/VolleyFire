@@ -776,6 +776,7 @@ MonoBehaviour:
   uiCanvas: {fileID: 7843673863206843992}
   iconOffset: 50
   grabEffect: {fileID: 3254834496116368929}
+  playerController: {fileID: 8222259579982980384}
   isGrabbing: 0
 --- !u!1 &2424151981219576200
 GameObject:

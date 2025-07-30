@@ -38,6 +38,9 @@ public class GrabSystem : MonoBehaviour
     [Header("特效設定")]
     [SerializeField] private GameObject grabEffect;         // 抓取特效物件
 
+    [Header("其他引用")]
+    [SerializeField] private PlayerController playerController; // 玩家控制器引用
+
     // 私有變數
     private InputAction grabAction;      // 抓取動作參考
     private Camera mainCamera;           // 主攝影機
@@ -263,10 +266,30 @@ public class GrabSystem : MonoBehaviour
     {
         if (currentGrabbedObject != null)
         {
+            // 取得目標位置
+            Transform target = null;
+            if (playerController != null)
+            {
+                target = playerController.GetCurrentTarget();
+            }
+
+            // 計算釋放方向
+            Vector3 releaseDirection;
+            if (target != null)
+            {
+                releaseDirection = (target.position - currentGrabbedObject.transform.position).normalized;
+            }
+            else
+            {
+                releaseDirection = Vector3.forward; // 如果沒有目標，預設向前
+            }
+
             // 設定 ControllableObject 狀態為釋放
             if (currentControllable != null)
             {
                 currentControllable.SetControlState(ControllableObject.ControlState.Released);
+                // 設定移動方向
+                currentControllable.SetDirection(releaseDirection);
                 currentControllable = null;
             }
 
@@ -342,10 +365,11 @@ public class GrabSystem : MonoBehaviour
 
     private void UpdateTargetLinePosition()
     {
-        if (targetLineRenderer != null && controllPoint != null && currentGrabbedObject != null)
+        if (targetLineRenderer != null && controllPoint != null && currentGrabbedObject != null && playerController != null)
         {
             Vector3 startPos = currentGrabbedObject.transform.position;
-            Vector3 endPos = startPos + controllPoint.forward * targetLineLength;
+            Transform target = playerController.GetCurrentTarget();
+            Vector3 endPos = target != null ? target.position : startPos + controllPoint.forward * targetLineLength;
             
             targetLineRenderer.SetPosition(0, startPos);
             targetLineRenderer.SetPosition(1, endPos);
