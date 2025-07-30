@@ -8,14 +8,16 @@ public class SatelliteSystem : MonoBehaviour
     public Vector2 yRange;
     public float zOffset;
     public GameObject satellitePrefab;
-    public float moveSpeed = 5f;
-
-    public float OpenBeamZ;
-    public GameObject beam;
-    public bool canAttack = true;    // 控制是否可以攻擊
-
-    private List<GameObject> satellites = new List<GameObject>();
-    private HashSet<GameObject> beamsSpawned = new HashSet<GameObject>();
+    private bool canFire = true;
+    public bool CanFire 
+    { 
+        get => canFire; 
+        set 
+        { 
+            canFire = value;
+            SatelliteObject.SetAttackState(value);
+        } 
+    }
 
     void Start()
     {
@@ -87,94 +89,15 @@ public class SatelliteSystem : MonoBehaviour
             if (dir.sqrMagnitude < 1e-4f) dir = Vector3.forward;
             Quaternion rotation = Quaternion.LookRotation(dir);
 
+            // 加入隨機旋轉
+            rotation *= Quaternion.Euler(Random.Range(0f, 360f), Random.Range(0f, 360f), Random.Range(0f, 360f));
+
+            // 生成衛星並初始化
             GameObject sat = Instantiate(satellitePrefab, spawnPos, rotation);
-            satellites.Add(sat);
-        }
-    }
-
-    private void SpawnTwoOrthogonalSatellites()
-    {
-        float z = zOffset;
-
-        // === 第 1 顆（在 X 邊）===
-        bool leftSide = Random.value < 0.5f;
-        float x1 = leftSide ? xRange.x : xRange.y;
-        float y1 = Random.Range(yRange.x, yRange.y);
-        Vector3 pos1 = new Vector3(x1, y1, z);
-
-        // 朝向對邊隨機 Y 點
-        float x1Target = leftSide ? xRange.y : xRange.x;
-        float y1Target = Random.Range(yRange.x, yRange.y);
-        Vector3 target1 = new Vector3(x1Target, y1Target, z);
-
-        Quaternion rot1 = Quaternion.LookRotation(target1 - pos1);
-        GameObject sat1 = Instantiate(satellitePrefab, pos1, rot1);
-        satellites.Add(sat1);
-
-        // === 第 2 顆（在 Y 邊）===
-        bool bottomSide = Random.value < 0.5f;
-        float x2 = Random.Range(xRange.x, xRange.y);
-        float y2 = bottomSide ? yRange.x : yRange.y;
-        Vector3 pos2 = new Vector3(x2, y2, z);
-
-        // 朝向對邊隨機 X 點
-        float y2Target = bottomSide ? yRange.y : yRange.x;
-        float x2Target = Random.Range(xRange.x, xRange.y);
-        Vector3 target2 = new Vector3(x2Target, y2Target, z);
-
-        Quaternion rot2 = Quaternion.LookRotation(target2 - pos2);
-        GameObject sat2 = Instantiate(satellitePrefab, pos2, rot2);
-        satellites.Add(sat2);
-    }
-
-
-    bool LineLineIntersection(Vector3 p1, Vector3 d1, Vector3 p2, Vector3 d2, out float t1, out float t2)
-    {
-        t1 = t2 = 0f;
-        Vector3 dp = p2 - p1;
-        float v12 = Vector3.Dot(d1, d1);
-        float v22 = Vector3.Dot(d2, d2);
-        float v1v2 = Vector3.Dot(d1, d2);
-        float denom = v12 * v22 - v1v2 * v1v2;
-        if (Mathf.Abs(denom) < 1e-6f) return false;
-        t1 = (Vector3.Dot(dp, d1) * v22 - Vector3.Dot(dp, d2) * v1v2) / denom;
-        t2 = (Vector3.Dot(dp, d2) * v12 - Vector3.Dot(dp, d1) * v1v2) / denom;
-        Vector3 cross = p1 + d1 * t1;
-        if (cross.x < xRange.x || cross.x > xRange.y || cross.y < yRange.x || cross.y > yRange.y)
-            return false;
-        return true;
-    }
-
-    void Update()
-    {
-        Vector3 moveDir = -this.transform.forward;
-        for (int i = satellites.Count - 1; i >= 0; i--)
-        {
-            GameObject sat = satellites[i];
-            if (sat == null)
+            SatelliteObject satelliteObj = sat.GetComponent<SatelliteObject>();
+            if (satelliteObj != null)
             {
-                satellites.RemoveAt(i);
-                continue;
-            }
-
-            sat.transform.position += moveDir * moveSpeed * Time.deltaTime;
-
-            if (!beamsSpawned.Contains(sat))
-            {
-                float dist = Mathf.Abs(sat.transform.position.z - this.transform.position.z);
-                if (dist <= OpenBeamZ && canAttack)  // 檢查是否可以攻擊
-                {
-                    GameObject b = Instantiate(beam, sat.transform.position, sat.transform.rotation, sat.transform);
-                    b.transform.localRotation = Quaternion.identity;
-
-                    CannonRay ray = b.GetComponent<CannonRay>();
-                    if (ray != null)
-                    {
-                        ray.SetSpawnPoint(sat.transform);
-                    }
-
-                    beamsSpawned.Add(sat);
-                }
+                satelliteObj.Initialize(dir, transform);
             }
         }
     }
@@ -191,32 +114,5 @@ public class SatelliteSystem : MonoBehaviour
         Gizmos.DrawLine(p2, p3);
         Gizmos.DrawLine(p3, p4);
         Gizmos.DrawLine(p4, p1);
-    }
-
-    /// <summary>
-    /// 設置衛星系統的攻擊狀態
-    /// </summary>
-    /// <param name="state">true 為可以攻擊，false 為停止攻擊</param>
-    public void SetAttackState(bool state)
-    {
-        canAttack = state;
-        
-        // 如果設置為 false，清除所有已存在的光束
-        if (!state)
-        {
-            foreach (GameObject sat in satellites)
-            {
-                if (sat != null)
-                {
-                    // 找到並銷毀所有子物件中的光束
-                    CannonRay[] rays = sat.GetComponentsInChildren<CannonRay>();
-                    foreach (CannonRay ray in rays)
-                    {
-                        Destroy(ray.gameObject);
-                    }
-                }
-            }
-            beamsSpawned.Clear();
-        }
     }
 }

@@ -293,6 +293,7 @@ public class PlayerController : MonoBehaviour
         if (mainLineRenderer != null)
         {
             mainLineRenderer.enabled = showMainLine;
+            mainLineRenderer.gameObject.SetActive(showMainLine);
             if (showMainLine)
             {
                 float length = Vector3.Distance(playerShip.transform.position, intersection);
@@ -308,6 +309,13 @@ public class PlayerController : MonoBehaviour
 
         // 更新檢測盒線條
         UpdateBoxLines(dir, ray);
+
+        // 更新目標連接線
+        if (targetLineRenderer != null)
+        {
+            targetLineRenderer.enabled = showTargetLine;
+            targetLineRenderer.gameObject.SetActive(showTargetLine);
+        }
     }
 
     private void UpdateBoxLines(Vector3 dir, Ray ray)
@@ -317,6 +325,11 @@ public class PlayerController : MonoBehaviour
         boxLineRenderer1.enabled = showBoxLines;
         boxLineRenderer2.enabled = showBoxLines;
         boxLineRenderer3.enabled = showBoxLines;
+
+        // 設置物件啟用狀態
+        boxLineRenderer1.gameObject.SetActive(showBoxLines);
+        boxLineRenderer2.gameObject.SetActive(showBoxLines);
+        boxLineRenderer3.gameObject.SetActive(showBoxLines);
 
         if (showBoxLines)
         {

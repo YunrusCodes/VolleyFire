@@ -57,7 +57,6 @@ public class FederalAircraft : EnemyBehavior
     private float moveTimer = 0f;
     private List<Vector2> remainingDirections;
     private Vector2 currentMoveDirection;
-    private bool isMoving = false;
 
     private void InitializeDirections()
     {

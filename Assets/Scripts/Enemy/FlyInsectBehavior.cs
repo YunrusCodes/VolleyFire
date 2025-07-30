@@ -29,7 +29,6 @@ public class FlyInsectBehavior : EnemyBehavior
     private Vector2 swingDir;
     private Vector2 swingTarget;
     public float swingSpeed = 5f; // 可調整
-    private bool isDead = false;
     private bool isRotatingBack = false;  // 是否正在轉回原始方向
 
     [Header("攻擊動畫設定")]

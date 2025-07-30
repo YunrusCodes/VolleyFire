@@ -440,9 +440,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8077961303080014877}
+  - component: {fileID: 5631337763842379665}
+  - component: {fileID: 2874053828120349338}
   m_Layer: 0
   m_Name: maggelans
-  m_TagString: Untagged
+  m_TagString: ControllAble
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -463,6 +465,48 @@ Transform:
   - {fileID: 2923110982399276766}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &5631337763842379665
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4544872649435666448}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 9.070535, y: 3.5765018, z: 4.650599}
+  m_Center: {x: 0.061596394, y: 0.026320696, z: 0.09}
+--- !u!114 &2874053828120349338
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4544872649435666448}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58650e6bcea45d04ea095f5a7189a137, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speed: 20
+  lifetime: 5
+  useRigidbody: 0
+  explosionPrefab: {fileID: 8640070007292392689, guid: 1db44c370478b7146823784ef4dd7cc2, type: 3}
+  releaseDamage: 50
+  targetTag: Enemy
+  beam: {fileID: 1876921289776003243, guid: fb660ccec56c0e246b52a2c64457c607, type: 3}
+  openBeamZ: 45
+  closeBeamZ: -15
 --- !u!1 &4671999858456128835
 GameObject:
   m_ObjectHideFlags: 0
@@ -553,7 +597,7 @@ Transform:
   m_GameObject: {fileID: 5748010449128796509}
   serializedVersion: 2
   m_LocalRotation: {x: 0.71418256, y: -0, z: -0, w: 0.69995946}
-  m_LocalPosition: {x: 0, y: 0.06, z: -2.86}
+  m_LocalPosition: {x: 0, y: 0, z: -0.02}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

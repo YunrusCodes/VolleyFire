@@ -14758,7 +14758,7 @@ MonoBehaviour:
   animator: {fileID: 3415504464694422045}
   isLeaving: 0
   xRange: {x: -10, y: 10}
-  yRange: {x: -10, y: 10}
+  yRange: {x: -10, y: 0}
   bulletPrefab: {fileID: 7555402867869293541, guid: 11548ec74589a1840a46b6ee62504086, type: 3}
   fireInterval: 1
   bulletSpeed: 30

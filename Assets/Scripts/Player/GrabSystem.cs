@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using VolleyFire;
+using System.Collections.Generic; // Added for Dictionary
 
 /// <summary>
 /// 抓取系統 - 負責處理物件的抓取與移動功能
@@ -10,6 +12,15 @@ public class GrabSystem : MonoBehaviour
     [Header("抓取點設定")]
     [SerializeField] private Transform controllPoint;        // 抓取目標位置
     [SerializeField] private float grabDistance = 100f;      // 抓取射線距離
+    [SerializeField] private LineRenderer lineRenderer;      // 連線渲染器
+    [SerializeField] private float lineWidth = 0.1f;        // 連線寬度
+    [SerializeField] private LineRenderer targetLineRenderer; // 目標指示線渲染器
+    [SerializeField] private float targetLineLength = 200f;  // 目標指示線長度
+
+    [Header("音效設定")]
+    [SerializeField] private AudioSource audioSource;        // 音效來源
+    [SerializeField] private AudioClip grabSound;           // 抓取音效
+    [SerializeField] private AudioClip releaseSound;        // 釋放音效
 
     [Header("Input System 設定")]
     [SerializeField] private PlayerInput playerInput;        // PlayerInput 組件
@@ -19,14 +30,19 @@ public class GrabSystem : MonoBehaviour
     [SerializeField] private bool useSmoothMovement = true;  // 是否使用平滑移動
     [SerializeField] private float moveSpeed = 5f;           // 移動速度（平滑移動時使用）
 
+    [Header("UI 設定")]
+    [SerializeField] private GameObject grableIconPrefab;    // 可抓取物件的 UI 圖示預製體
+    [SerializeField] private Transform uiCanvas;            // UI Canvas
+    [SerializeField] private float iconOffset = 50f;        // 圖示偏移距離
+
     // 私有變數
     private InputAction grabAction;      // 抓取動作參考
     private Camera mainCamera;           // 主攝影機
     private GameObject currentGrabbedObject; // 目前抓取的物件
-    private bool isGrabbing = false;     // 是否正在抓取
-    private Vector3? releaseTargetPosition = null; // 釋放後的目標座標
-
-    #region Unity 生命週期
+    [SerializeField] private bool isGrabbing = false;     // 是否正在抓取
+    private ControllableObject currentControllable; // 目前控制的物件
+    private Dictionary<GameObject, GameObject> grableIcons = new Dictionary<GameObject, GameObject>(); // 可抓取物件及其圖示的對應
+    private HashSet<GameObject> releasedObjects = new HashSet<GameObject>(); // 已釋放的物件列表
 
     private void Awake()
     {
@@ -44,6 +60,31 @@ public class GrabSystem : MonoBehaviour
             return;
         }
 
+        if (uiCanvas == null)
+        {
+            Debug.LogWarning("請在 Inspector 中指定 UI Canvas！");
+        }
+
+        // 初始化 LineRenderer
+        if (lineRenderer == null)
+        {
+            lineRenderer = gameObject.AddComponent<LineRenderer>();
+        }
+
+        // 初始化目標指示線 LineRenderer
+        if (targetLineRenderer == null)
+        {
+            targetLineRenderer = gameObject.AddComponent<LineRenderer>();
+        }
+
+        // 初始化 AudioSource
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+
+        InitializeLineRenderer();
+        InitializeTargetLineRenderer();
         InitializeInputSystem();
     }
 
@@ -67,35 +108,34 @@ public class GrabSystem : MonoBehaviour
             UpdateGrabbedObjectPosition();
         }
 
-        // 釋放後自動移動
-        if (releaseTargetPosition.HasValue && currentGrabbedObject != null)
+        // 更新連線位置
+        if (isGrabbing && currentGrabbedObject != null)
         {
-            Vector3 target = releaseTargetPosition.Value;
-            Vector3 current = currentGrabbedObject.transform.position;
-            Vector3 newPos = Vector3.Lerp(current, target, moveSpeed * Time.deltaTime);
-            currentGrabbedObject.transform.position = newPos;
-
-            if (Vector3.Distance(current, target) < 0.05f)
-            {
-                currentGrabbedObject.transform.position = target;
-                currentGrabbedObject = null;
-                releaseTargetPosition = null;
-            }
+            UpdateLinePosition();
+            UpdateTargetLinePosition();
         }
+
+        // 更新可抓取物件的 UI 圖示
+        UpdateGrableIcons();
     }
 
     private void OnDestroy()
     {
+        // 清理所有圖示
+        foreach (var icon in grableIcons.Values)
+        {
+            if (icon != null)
+            {
+                Destroy(icon);
+            }
+        }
+        grableIcons.Clear();
+        releasedObjects.Clear();
+
+        // 停用輸入 Action
         grabAction?.Disable();
     }
 
-    #endregion
-
-    #region 輸入系統初始化
-
-    /// <summary>
-    /// 初始化輸入系統，取得抓取動作參考
-    /// </summary>
     private void InitializeInputSystem()
     {
         grabAction = playerInput.actions.FindAction(grabActionName);
@@ -106,13 +146,25 @@ public class GrabSystem : MonoBehaviour
         }
     }
 
-    #endregion
+    private void InitializeLineRenderer()
+    {
+        lineRenderer.positionCount = 2;
+        lineRenderer.startWidth = lineWidth;
+        lineRenderer.endWidth = lineWidth;
+        lineRenderer.enabled = false;
+    }
 
-    #region 抓取處理
+    private void InitializeTargetLineRenderer()
+    {
+        if (targetLineRenderer != null)
+        {
+            targetLineRenderer.positionCount = 2;
+            targetLineRenderer.startWidth = lineWidth;
+            targetLineRenderer.endWidth = lineWidth;
+            targetLineRenderer.enabled = false;
+        }
+    }
 
-    /// <summary>
-    /// 處理抓取輸入
-    /// </summary>
     private void HandleGrabInput()
     {
         if (grabAction == null) return;
@@ -130,9 +182,6 @@ public class GrabSystem : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 嘗試抓取物件
-    /// </summary>
     private void TryGrab()
     {
         if (controllPoint == null) return;
@@ -149,14 +198,23 @@ public class GrabSystem : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 抓取指定物件
-    /// </summary>
-    /// <param name="objectToGrab">要抓取的物件</param>
     private void GrabObject(GameObject objectToGrab)
     {
+        // 移除被抓取物件的圖示
+        if (grableIcons.TryGetValue(objectToGrab, out GameObject icon))
+        {
+            Destroy(icon);
+        }
+
         currentGrabbedObject = objectToGrab;
         isGrabbing = true;
+
+        // 設定 ControllableObject 狀態
+        currentControllable = objectToGrab.GetComponent<ControllableObject>();
+        if (currentControllable != null)
+        {
+            currentControllable.SetControlState(ControllableObject.ControlState.Controlled);
+        }
 
         // 立即設為 ControllPoint 的子物件
         currentGrabbedObject.transform.SetParent(controllPoint);
@@ -166,47 +224,74 @@ public class GrabSystem : MonoBehaviour
             // 即時移動：直接設定到本地座標 (0,0,0)
             currentGrabbedObject.transform.localPosition = Vector3.zero;
         }
-        // 如果使用平滑移動，讓 UpdateGrabbedObjectPosition 處理
+
+        // 啟用連線
+        if (lineRenderer != null)
+        {
+            lineRenderer.enabled = true;
+            UpdateLinePosition();
+        }
+
+        // 啟用目標指示線
+        if (targetLineRenderer != null)
+        {
+            targetLineRenderer.enabled = true;
+            UpdateTargetLinePosition();
+        }
+
+        // 播放抓取音效
+        if (audioSource != null && grabSound != null)
+        {
+            audioSource.Stop();
+            audioSource.clip = grabSound;
+            audioSource.Play();
+        }
 
         Debug.Log($"已抓取物件：{objectToGrab.name}");
     }
 
-    /// <summary>
-    /// 釋放目前抓取的物件
-    /// </summary>
     private void ReleaseGrabbedObject()
     {
         if (currentGrabbedObject != null)
         {
-            // 取得 PlayerController 的目標座標
-            PlayerController playerController = FindObjectOfType<PlayerController>();
-            if (playerController != null)
+            // 設定 ControllableObject 狀態為釋放
+            if (currentControllable != null)
             {
-                Transform target = playerController.GetCurrentTarget();
-                if (target != null)
-                {
-                    releaseTargetPosition = target.position;
-                }
-                else
-                {
-                    releaseTargetPosition = null;
-                }
-            }
-            else
-            {
-                releaseTargetPosition = null;
+                currentControllable.SetControlState(ControllableObject.ControlState.Released);
+                currentControllable = null;
             }
 
             // 解除父子關係
             currentGrabbedObject.transform.SetParent(null);
             Debug.Log($"釋放物件：{currentGrabbedObject.name}");
+            currentGrabbedObject = null;
+
+            // 關閉連線
+            if (lineRenderer != null)
+            {
+                lineRenderer.enabled = false;
+            }
+
+            // 關閉目標指示線
+            if (targetLineRenderer != null)
+            {
+                targetLineRenderer.enabled = false;
+            }
+
+            // 處理音效
+            if (audioSource != null)
+            {
+                audioSource.Stop();
+                if (releaseSound != null)
+                {
+                    audioSource.clip = releaseSound;
+                    audioSource.Play();
+                }
+            }
         }
         isGrabbing = false;
     }
 
-    /// <summary>
-    /// 更新被抓取物件的位置（平滑移動到本地座標 0,0,0）
-    /// </summary>
     private void UpdateGrabbedObjectPosition()
     {
         if (currentGrabbedObject == null || controllPoint == null) return;
@@ -218,62 +303,125 @@ public class GrabSystem : MonoBehaviour
         Vector3 newLocalPosition = Vector3.Lerp(currentLocalPosition, targetLocalPosition, moveSpeed * Time.deltaTime);
         currentGrabbedObject.transform.localPosition = newLocalPosition;
         
-        // 當距離很小時，停止移動
-        if (Vector3.Distance(currentLocalPosition, targetLocalPosition) < 0.01f)
+        // 當距離很小時，直接設定到目標位置
+        if (Vector3.Distance(currentLocalPosition, targetLocalPosition) < 0.5f)
         {
             currentGrabbedObject.transform.localPosition = targetLocalPosition;
-            isGrabbing = false; // 停止抓取狀態
+            
+            // 停止抓取音效
+            if (audioSource != null && audioSource.clip == grabSound)
+            {
+                audioSource.Stop();
+            }
         }
     }
 
-    #endregion
+    private void UpdateLinePosition()
+    {
+        if (lineRenderer != null && controllPoint != null)
+        {
+            lineRenderer.SetPosition(0, controllPoint.position);
+            lineRenderer.SetPosition(1, currentGrabbedObject.transform.position);
+        }
+    }
 
-    #region 公開方法
+    private void UpdateTargetLinePosition()
+    {
+        if (targetLineRenderer != null && controllPoint != null)
+        {
+            Vector3 startPos = controllPoint.position;
+            Vector3 endPos = startPos + Vector3.forward * targetLineLength;
+            
+            targetLineRenderer.SetPosition(0, startPos);
+            targetLineRenderer.SetPosition(1, endPos);
+        }
+    }
 
-    /// <summary>
-    /// 設定抓取點
-    /// </summary>
-    /// <param name="newControllPoint">新的抓取點</param>
+    private void UpdateGrableIcons()
+    {
+        if (mainCamera == null || uiCanvas == null || grableIconPrefab == null) return;
+
+        // 找出所有可抓取物件
+        GameObject[] grableObjects = GameObject.FindGameObjectsWithTag("ControllAble");
+        HashSet<GameObject> currentObjects = new HashSet<GameObject>();
+        // 清理不再存在的物件的圖示
+        List<GameObject> objectsToRemove = new List<GameObject>();
+        foreach (var pair in grableIcons)
+        {
+            if (!currentObjects.Contains(pair.Key))
+            {
+                if (pair.Value != null)
+                {
+                    Destroy(pair.Value);
+                }
+                objectsToRemove.Add(pair.Key);
+            }
+        }
+
+        foreach (var obj in objectsToRemove)
+        {
+            grableIcons.Remove(obj);
+        }
+        foreach (var grableObject in grableObjects)
+        {
+            // 如果物件正在被抓取，跳過
+            if (grableObject == currentGrabbedObject) continue;
+            if (grableObject.GetComponent<ControllableObject>().currentState != ControllableObject.ControlState.Uncontrolled) continue;
+
+            currentObjects.Add(grableObject);
+
+            // 將物件位置轉換為螢幕座標
+            Vector3 screenPos = mainCamera.WorldToScreenPoint(grableObject.transform.position);
+
+            // 如果物件在攝影機前方且在螢幕範圍內
+            if (screenPos.z > 0 && IsInScreen(screenPos))
+            {
+                // 如果圖示不存在，創建新的
+                if (!grableIcons.ContainsKey(grableObject))
+                {
+                    GameObject icon = Instantiate(grableIconPrefab, uiCanvas);
+                    grableIcons.Add(grableObject, icon);
+                }
+
+                // 更新圖示位置
+                grableIcons[grableObject].transform.position = screenPos;
+                
+                // 只有在沒有抓取物件時才顯示圖示
+                grableIcons[grableObject].SetActive(!isGrabbing);
+            }
+        }
+
+
+    }
+
+    private bool IsInScreen(Vector3 screenPos)
+    {
+        return screenPos.x >= 0 && screenPos.x <= Screen.width &&
+               screenPos.y >= 0 && screenPos.y <= Screen.height;
+    }
+
     public void SetControllPoint(Transform newControllPoint)
     {
         controllPoint = newControllPoint;
     }
 
-    /// <summary>
-    /// 設定是否使用平滑移動
-    /// </summary>
-    /// <param name="useSmooth">是否使用平滑移動</param>
     public void SetSmoothMovement(bool useSmooth)
     {
         useSmoothMovement = useSmooth;
     }
 
-    /// <summary>
-    /// 設定移動速度
-    /// </summary>
-    /// <param name="speed">移動速度</param>
     public void SetMoveSpeed(float speed)
     {
         moveSpeed = speed;
     }
 
-    /// <summary>
-    /// 取得目前是否正在抓取
-    /// </summary>
-    /// <returns>是否正在抓取</returns>
     public bool IsGrabbing()
     {
         return isGrabbing;
     }
 
-    /// <summary>
-    /// 取得目前抓取的物件
-    /// </summary>
-    /// <returns>目前抓取的物件，如果沒有則返回 null</returns>
     public GameObject GetCurrentGrabbedObject()
     {
         return currentGrabbedObject;
     }
-
-    #endregion
 } 

@@ -8,7 +8,6 @@ namespace VolleyFire.Funnel
         public Transform Transform { get; private set; }
         public BaseHealth Health { get; private set; }
         public AudioSource Audio { get; private set; }
-        public FunnelStrategy Strategy { get; set; }
         
         private float lastShootTime;
         private GameObject bulletPrefab;
