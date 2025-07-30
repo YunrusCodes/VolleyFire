@@ -35,6 +35,9 @@ public class GrabSystem : MonoBehaviour
     [SerializeField] private Transform uiCanvas;            // UI Canvas
     [SerializeField] private float iconOffset = 50f;        // 圖示偏移距離
 
+    [Header("特效設定")]
+    [SerializeField] private GameObject grabEffect;         // 抓取特效物件
+
     // 私有變數
     private InputAction grabAction;      // 抓取動作參考
     private Camera mainCamera;           // 主攝影機
@@ -206,6 +209,12 @@ public class GrabSystem : MonoBehaviour
             Destroy(icon);
         }
 
+        // 啟用抓取特效
+        if (grabEffect != null)
+        {
+            grabEffect.SetActive(true);
+        }
+
         currentGrabbedObject = objectToGrab;
         isGrabbing = true;
 
@@ -288,6 +297,12 @@ public class GrabSystem : MonoBehaviour
                     audioSource.Play();
                 }
             }
+
+            // 關閉抓取特效
+            if (grabEffect != null)
+            {
+                grabEffect.SetActive(false);
+            }
         }
         isGrabbing = false;
     }
@@ -327,10 +342,10 @@ public class GrabSystem : MonoBehaviour
 
     private void UpdateTargetLinePosition()
     {
-        if (targetLineRenderer != null && controllPoint != null)
+        if (targetLineRenderer != null && controllPoint != null && currentGrabbedObject != null)
         {
-            Vector3 startPos = controllPoint.position;
-            Vector3 endPos = startPos + Vector3.forward * targetLineLength;
+            Vector3 startPos = currentGrabbedObject.transform.position;
+            Vector3 endPos = startPos + controllPoint.forward * targetLineLength;
             
             targetLineRenderer.SetPosition(0, startPos);
             targetLineRenderer.SetPosition(1, endPos);
