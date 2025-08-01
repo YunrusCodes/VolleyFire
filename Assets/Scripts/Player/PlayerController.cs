@@ -140,6 +140,21 @@ public class PlayerController : MonoBehaviour
         Vector2 mousePos = Mouse.current.position.ReadValue();
         crosshairImage.rectTransform.position = mousePos;
 
+        // 如果射擊被禁用，直接使用普通準心並返回
+        if (!globalFireEnabled)
+        {
+            if (normalCrosshairSprite != null)
+            {
+                crosshairImage.sprite = normalCrosshairSprite;
+                crosshairImage.rectTransform.rotation = Quaternion.identity;
+            }
+            if (targetCrosshairImage != null)
+            {
+                targetCrosshairImage.gameObject.SetActive(false);
+            }
+            return;
+        }
+
         // 重置目標狀態
         currentTarget = null;
         isPreciseTarget = false;

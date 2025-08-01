@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
-// using YourNamespace; // 如果 BGMManager 有命名空間，請取消註解並填入正確命名空間
-
+using UnityEngine.Events;
 /// <summary>
 /// 波次對話數據 - 管理單一類型的對話列表
 /// </summary>
@@ -23,7 +22,11 @@ public class WaveDialogueData
     
     [Header("BGM 切換（可選）")]
     public AudioClip BGMToSwitch;
-    
+
+    [Header("事件回調")]
+    public UnityEvent OnDialogueBegin;  // 對話開始事件
+    public UnityEvent OnDialogueEnd;    // 對話結束事件
+
     public WaveDialogueData()
     {
         dialogues = new List<string>();
@@ -31,8 +34,10 @@ public class WaveDialogueData
         autoRead = false;
         autoReadSpeed = 3f;
         enablePlayerFire = true;
+        OnDialogueBegin = new UnityEvent();
+        OnDialogueEnd = new UnityEvent();
     }
-    
+
     /// <summary>
     /// 觸發所有對話
     /// </summary>
@@ -40,11 +45,15 @@ public class WaveDialogueData
     {
         if (!enabled || DialogueManager.Instance == null) return;
         
+        // 觸發開始事件
+        OnDialogueBegin?.Invoke();
+        
         // 切換 BGM
         if (BGMToSwitch != null && BGMManager.Instance != null)
         {
             BGMManager.Instance.SwitchBGM(BGMToSwitch);
         }
+        
         // 控制玩家射擊
         PlayerController.EnableFire(enablePlayerFire);
         
@@ -64,19 +73,11 @@ public class WaveDialogueData
         {
             DialogueManager.OnDialogueEnded += OnDialogueEnded;
         }
+
+        // 訂閱對話結束事件以觸發 OnDialogueEnd
+        DialogueManager.OnDialogueEnded += InvokeOnDialogueEnd;
     }
-    
-    /// <summary>
-    /// 對話結束回調
-    /// </summary>
-    private void OnDialogueEnded()
-    {
-        // 恢復玩家射擊
-        PlayerController.EnableFire(true);
-        // 取消訂閱事件
-        DialogueManager.OnDialogueEnded -= OnDialogueEnded;
-    }
-    
+
     /// <summary>
     /// 觸發對話並等待完成
     /// </summary>
@@ -84,11 +85,15 @@ public class WaveDialogueData
     {
         if (!enabled || DialogueManager.Instance == null) return;
         
+        // 觸發開始事件
+        OnDialogueBegin?.Invoke();
+        
         // 切換 BGM
         if (BGMToSwitch != null && BGMManager.Instance != null)
         {
             BGMManager.Instance.SwitchBGM(BGMToSwitch);
         }
+        
         // 控制玩家射擊
         PlayerController.EnableFire(enablePlayerFire);
         
@@ -107,17 +112,78 @@ public class WaveDialogueData
             if (enemyWave != null)
             {
                 enemyWave.SetWaitingForDialogue(true);
-                enemyWave.StartCoroutine(WaitForDialogueComplete());
+                enemyWave.StartCoroutine(WaitForDialogueComplete(enemyWave));
             }
             
             // 如果啟用自動閱讀，在等待協程中處理
             if (autoRead && DialogueManager.Instance != null)
             {
-                // 延遲一下再開始自動閱讀，確保對話已經開始顯示
                 enemyWave?.StartCoroutine(DelayedAutoRead());
             }
+
+            // 訂閱對話結束事件以觸發 OnDialogueEnd
+            DialogueManager.OnDialogueEnded += InvokeOnDialogueEnd;
         }
     }
+
+    /// <summary>
+    /// 等待對話完成的協程
+    /// </summary>
+    private System.Collections.IEnumerator WaitForDialogueComplete(EnemyWave enemyWave)
+    {
+        while (DialogueManager.Instance.IsDialogueActive())
+        {
+            yield return null;
+        }
+        
+        // 通知 EnemyWave 對話完成
+        if (enemyWave != null)
+        {
+            enemyWave.SetWaitingForDialogue(false);
+            enemyWave.OnDialogueComplete();
+        }
+
+        // 觸發結束事件
+        OnDialogueEnd?.Invoke();
+    }
+
+    /// <summary>
+    /// 延遲開始自動閱讀的協程
+    /// </summary>
+    private System.Collections.IEnumerator DelayedAutoRead()
+    {
+        yield return null;
+        
+        if (DialogueManager.Instance != null)
+        {
+            DialogueManager.Instance.StartAutoReadCoroutine(autoReadSpeed);
+        }
+    }
+
+    /// <summary>
+    /// 對話結束回調
+    /// </summary>
+    private void OnDialogueEnded()
+    {
+        // 恢復玩家射擊
+        PlayerController.EnableFire(true);
+        // 取消訂閱事件
+        DialogueManager.OnDialogueEnded -= OnDialogueEnded;
+    }
+
+    /// <summary>
+    /// 觸發 OnDialogueEnd 事件的方法
+    /// </summary>
+    private void InvokeOnDialogueEnd()
+    {
+        // 恢復玩家射擊
+        PlayerController.EnableFire(true);
+        OnDialogueEnd?.Invoke();
+        // 取消訂閱，避免重複觸發
+        DialogueManager.OnDialogueEnded -= InvokeOnDialogueEnd;
+    }
+
+
     
     /// <summary>
     /// 等待對話完成的協程
@@ -141,19 +207,6 @@ public class WaveDialogueData
         }
     }
     
-    /// <summary>
-    /// 延遲開始自動閱讀的協程
-    /// </summary>
-    private System.Collections.IEnumerator DelayedAutoRead()
-    {
-        // 等待一幀，確保對話已經開始
-        yield return null;
-        
-        if (DialogueManager.Instance != null)
-        {
-            DialogueManager.Instance.StartAutoReadCoroutine(autoReadSpeed);
-        }
-    }
 }
 
 /// <summary>

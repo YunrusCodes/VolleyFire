@@ -106,6 +106,13 @@ public class GrabSystem : MonoBehaviour
 
     private void Update()
     {
+        // 如果射擊被禁用，強制釋放物體
+        if (!PlayerController.GlobalFireEnabled && isGrabbing)
+        {
+            ReleaseGrabbedObject();
+            return;
+        }
+
         HandleGrabInput();
         
         // 如果正在抓取且使用平滑移動，更新物件位置
@@ -190,6 +197,8 @@ public class GrabSystem : MonoBehaviour
 
     private void TryGrab()
     {
+        // 檢查是否允許射擊，如果不允許則不能抓取
+        if (!PlayerController.GlobalFireEnabled) return;
         if (controllPoint == null) return;
 
         Vector2 mousePos = Mouse.current.position.ReadValue();
