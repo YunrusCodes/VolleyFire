@@ -444,6 +444,10 @@ PrefabInstance:
       value: 431.75
       objectReference: {fileID: 0}
     - target: {fileID: 1960145224590206329, guid: d0b4ab92739fe804cb7103b46349b346, type: 3}
+      propertyPath: autoAdvance
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1960145224590206329, guid: d0b4ab92739fe804cb7103b46349b346, type: 3}
       propertyPath: characterNameText
       value: 
       objectReference: {fileID: 0}
