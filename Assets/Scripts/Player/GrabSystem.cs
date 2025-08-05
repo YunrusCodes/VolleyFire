@@ -221,12 +221,6 @@ public class GrabSystem : MonoBehaviour
             Destroy(icon);
         }
 
-        // 啟用抓取特效
-        if (grabEffect != null)
-        {
-            grabEffect.SetActive(true);
-        }
-
         currentGrabbedObject = objectToGrab;
         isGrabbing = true;
 
@@ -434,8 +428,8 @@ public class GrabSystem : MonoBehaviour
                 // 更新圖示位置
                 grableIcons[grableObject].transform.position = screenPos;
                 
-                // 只有在沒有抓取物件時才顯示圖示
-                grableIcons[grableObject].SetActive(!isGrabbing);
+                // 只有在沒有抓取物件且允許射擊時才顯示圖示
+                grableIcons[grableObject].SetActive(!isGrabbing && PlayerController.GlobalFireEnabled);
             }
         }
 

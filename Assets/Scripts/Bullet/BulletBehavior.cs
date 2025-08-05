@@ -16,6 +16,7 @@ public abstract class BulletBehavior : MonoBehaviour
     protected Vector3 direction;      // 移動方向
     protected float spawnTime;        // 生成時間
     
+    
     [SerializeField] protected GameObject explosionPrefab;
     private GameObject myExplosionEffect;
     
@@ -45,7 +46,8 @@ public abstract class BulletBehavior : MonoBehaviour
         // 檢查存活時間，-1 視為無限壽命
         if (lifetime >= 0f && Time.time - spawnTime > lifetime)
         {
-            DestroyBullet();
+            Debug.LogWarning("Bullet destroyed");
+            DestroyBullet(false);
             return;
         }
         
@@ -122,10 +124,11 @@ public abstract class BulletBehavior : MonoBehaviour
     /// <summary>
     /// 銷毀子彈
     /// </summary>
-    public virtual void DestroyBullet()
+    public virtual void DestroyBullet(bool generateEffect = true)
     {
+        Debug.LogWarning("DestroyBullet called, generateEffect: " + generateEffect);
         // 只在第一次產生特效
-        if (explosionPrefab != null)
+        if (explosionPrefab != null && generateEffect)
         {
             if (myExplosionEffect == null)
             {

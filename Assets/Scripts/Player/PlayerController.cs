@@ -17,6 +17,8 @@ public class PlayerController : MonoBehaviour
     [Header("移動設定")]
     [SerializeField] private float moveSpeed = 15f;       // 基礎移動速度（每秒位移量）
     [SerializeField] private float maxSpeed = 25f;        // 速度上限
+    [SerializeField] private float cameraRotationSpeed = 15f;  // 相機旋轉速度
+    [SerializeField] private float maxCameraRotation = 15f;    // 最大相機旋轉角度
 
     [Header("邊界設定")]
     [SerializeField] private float xBoundary = 20f;       // X 軸左右邊界
@@ -434,6 +436,22 @@ public class PlayerController : MonoBehaviour
         // 位移
         if (playerShip != null)
             playerShip.transform.position += currentVelocity * Time.deltaTime;
+
+        // 根據移動輸入旋轉相機
+        if (mainCamera != null)
+        {
+            // 計算目標旋轉角度
+            float targetZRotation = moveInput.x * maxCameraRotation; // A/D 控制 Z 軸旋轉
+            float targetXRotation = -moveInput.y * maxCameraRotation; // W/S 控制 X 軸旋轉
+
+            // 平滑插值到目標角度
+            Vector3 currentRotation = mainCamera.transform.eulerAngles;
+            currentRotation.z = Mathf.LerpAngle(currentRotation.z, targetZRotation, Time.deltaTime * cameraRotationSpeed);
+            currentRotation.x = Mathf.LerpAngle(currentRotation.x, targetXRotation, Time.deltaTime * cameraRotationSpeed);
+
+            // 應用旋轉
+            mainCamera.transform.eulerAngles = currentRotation;
+        }
     }
 
     /// <summary>

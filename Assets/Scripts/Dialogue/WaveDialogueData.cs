@@ -18,7 +18,8 @@ public class WaveDialogueData
     public float autoReadSpeed = 3f; // 自動閱讀間隔（秒）
     
     [Header("玩家控制設定")]
-    public bool enablePlayerFire = true; // 對話時是否啟用玩家射擊
+    public bool enablePlayerFireDuringDialogue = false; // 對話期間是否可以射擊
+    public bool enablePlayerFireAfterDialogue = true;   // 對話結束後是否可以射擊
     
     [Header("BGM 切換（可選）")]
     public AudioClip BGMToSwitch;
@@ -33,7 +34,8 @@ public class WaveDialogueData
         enabled = true;
         autoRead = false;
         autoReadSpeed = 3f;
-        enablePlayerFire = true;
+        enablePlayerFireDuringDialogue = false;
+        enablePlayerFireAfterDialogue = true;
         OnDialogueBegin = new UnityEvent();
         OnDialogueEnd = new UnityEvent();
     }
@@ -54,8 +56,8 @@ public class WaveDialogueData
             BGMManager.Instance.SwitchBGM(BGMToSwitch);
         }
         
-        // 控制玩家射擊
-        PlayerController.EnableFire(enablePlayerFire);
+        // 控制玩家射擊（對話開始時）
+        PlayerController.EnableFire(enablePlayerFireDuringDialogue);
         
         foreach (var dialogue in dialogues)
         {
@@ -69,7 +71,7 @@ public class WaveDialogueData
         }
         
         // 如果禁用了玩家射擊，需要監聽對話完成事件來恢復
-        if (!enablePlayerFire)
+        if (!enablePlayerFireDuringDialogue)
         {
             DialogueManager.OnDialogueEnded += OnDialogueEnded;
         }
@@ -94,8 +96,8 @@ public class WaveDialogueData
             BGMManager.Instance.SwitchBGM(BGMToSwitch);
         }
         
-        // 控制玩家射擊
-        PlayerController.EnableFire(enablePlayerFire);
+        // 控制玩家射擊（對話開始時）
+        PlayerController.EnableFire(enablePlayerFireDuringDialogue);
         
         bool hasTriggeredDialogue = false;
         
@@ -165,8 +167,8 @@ public class WaveDialogueData
     /// </summary>
     private void OnDialogueEnded()
     {
-        // 恢復玩家射擊
-        PlayerController.EnableFire(true);
+        // 設置對話結束後的玩家射擊狀態
+        PlayerController.EnableFire(enablePlayerFireAfterDialogue);
         // 取消訂閱事件
         DialogueManager.OnDialogueEnded -= OnDialogueEnded;
     }
@@ -176,8 +178,8 @@ public class WaveDialogueData
     /// </summary>
     private void InvokeOnDialogueEnd()
     {
-        // 恢復玩家射擊
-        PlayerController.EnableFire(true);
+        // 設置對話結束後的玩家射擊狀態
+        PlayerController.EnableFire(enablePlayerFireAfterDialogue);
         OnDialogueEnd?.Invoke();
         // 取消訂閱，避免重複觸發
         DialogueManager.OnDialogueEnded -= InvokeOnDialogueEnd;
@@ -232,7 +234,8 @@ public class EnemyHealthDialogueData
     public float autoReadSpeed = 3f; // 自動閱讀間隔（秒）
     
     [Header("玩家控制設定")]
-    public bool enablePlayerFire = true; // 對話時是否啟用玩家射擊
+    public bool enablePlayerFireDuringDialogue = false; // 對話期間是否可以射擊
+    public bool enablePlayerFireAfterDialogue = true;   // 對話結束後是否可以射擊
     
     [Header("BGM 切換（可選）")]
     public AudioClip BGMToSwitch;
@@ -244,7 +247,8 @@ public class EnemyHealthDialogueData
         triggered = false;
         autoRead = false;
         autoReadSpeed = 3f;
-        enablePlayerFire = true;
+        enablePlayerFireDuringDialogue = false;
+        enablePlayerFireAfterDialogue = true;
     }
     
     /// <summary>
@@ -265,7 +269,7 @@ public class EnemyHealthDialogueData
             }
             
             // 控制玩家射擊
-            PlayerController.EnableFire(enablePlayerFire);
+            PlayerController.EnableFire(enablePlayerFireDuringDialogue);
             
             foreach (var dialogue in dialogues)
             {
@@ -279,7 +283,7 @@ public class EnemyHealthDialogueData
             }
             
             // 如果禁用了玩家射擊，需要監聽對話完成事件來恢復
-            if (!enablePlayerFire)
+            if (!enablePlayerFireDuringDialogue)
             {
                 DialogueManager.OnDialogueEnded += OnDialogueEnded;
             }
@@ -320,8 +324,8 @@ public class EnemyHealthDialogueData
     /// </summary>
     private void OnDialogueEnded()
     {
-        // 恢復玩家射擊
-        PlayerController.EnableFire(true);
+        // 設置對話結束後的玩家射擊狀態
+        PlayerController.EnableFire(enablePlayerFireAfterDialogue);
         // 取消訂閱事件
         DialogueManager.OnDialogueEnded -= OnDialogueEnded;
     }
@@ -357,7 +361,8 @@ public class WaveProcessTimeDialogueData
     public float autoReadSpeed = 3f; // 自動閱讀間隔（秒）
     
     [Header("玩家控制設定")]
-    public bool enablePlayerFire = true; // 對話時是否啟用玩家射擊
+    public bool enablePlayerFireDuringDialogue = false; // 對話期間是否可以射擊
+    public bool enablePlayerFireAfterDialogue = true;   // 對話結束後是否可以射擊
     
     [Header("BGM 切換（可選）")]
     public AudioClip BGMToSwitch;
@@ -377,7 +382,8 @@ public class WaveProcessTimeDialogueData
         lastDisplayedSecond = 0;
         autoRead = false;
         autoReadSpeed = 3f;
-        enablePlayerFire = true;
+        enablePlayerFireDuringDialogue = false;
+        enablePlayerFireAfterDialogue = true;
     }
     
     /// <summary>
@@ -456,7 +462,7 @@ public class WaveProcessTimeDialogueData
             }
             
             // 控制玩家射擊
-            PlayerController.EnableFire(enablePlayerFire);
+            PlayerController.EnableFire(enablePlayerFireDuringDialogue);
             
             foreach (var dialogue in dialogues)
             {
@@ -475,12 +481,7 @@ public class WaveProcessTimeDialogueData
             {
                 DialogueManager.Instance.StartAutoReadCoroutine(autoReadSpeed);
             }
-            
-            // 如果禁用了玩家射擊，需要監聽對話完成事件來恢復
-            if (!enablePlayerFire)
-            {
-                DialogueManager.OnDialogueEnded += OnDialogueEnded;
-            }
+            DialogueManager.OnDialogueEnded += OnDialogueEnded;
         }
     }
     
@@ -489,8 +490,8 @@ public class WaveProcessTimeDialogueData
     /// </summary>
     private void OnDialogueEnded()
     {
-        // 恢復玩家射擊
-        PlayerController.EnableFire(true);
+        // 設置對話結束後的玩家射擊狀態
+        PlayerController.EnableFire(enablePlayerFireAfterDialogue);
         // 取消訂閱事件
         DialogueManager.OnDialogueEnded -= OnDialogueEnded;
     }

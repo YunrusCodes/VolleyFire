@@ -216,7 +216,7 @@ public class CannonRay : BulletBehavior
             Debug.LogWarning("最大長度必須大於0，已自動調整為1");
         }
     }
-    public override void DestroyBullet()
+    public override void DestroyBullet(bool generateEffect = false)
     {
 
         // 回收自己
