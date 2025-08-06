@@ -595,6 +595,8 @@ MonoBehaviour:
   playerHealth: {fileID: 4339682622986420541}
   moveSpeed: 15
   maxSpeed: 25
+  cameraRotationSpeed: 15
+  maxCameraRotation: 15
   xBoundary: 20
   yBoundary: 10
   weaponSystem: {fileID: 7720245402069381931}
@@ -784,6 +786,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99034c3448209fb48a5b3a0df9bc1a4a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  enableGrab: 1
   controllPoint: {fileID: 1975387711937802414}
   grabDistance: 200
   lineRenderer: {fileID: 813629885457951189}

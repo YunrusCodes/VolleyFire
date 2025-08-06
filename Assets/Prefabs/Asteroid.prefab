@@ -126,8 +126,10 @@ MonoBehaviour:
   lifetime: 5
   useRigidbody: 0
   explosionPrefab: {fileID: 8640070007292392689, guid: 1db44c370478b7146823784ef4dd7cc2, type: 3}
+  currentState: 0
   releaseDamage: 50
   targetTag: Enemy
+  destroySelfZ: 0.3
 --- !u!54 &8683694743882582630
 Rigidbody:
   m_ObjectHideFlags: 0

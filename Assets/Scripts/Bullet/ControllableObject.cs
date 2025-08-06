@@ -111,8 +111,8 @@ public abstract class ControllableObject : BulletBehavior
     /// </summary>
     protected virtual void OnReleased() 
     {
-        SetLifetime(5f); // 釋放時設置 5 秒存活時間
         spawnTime = Time.time;
+        SetLifetime(5f); // 釋放時設置 5 秒存活時間
     }
 
     /// <summary>

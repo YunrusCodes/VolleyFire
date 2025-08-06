@@ -9,6 +9,22 @@ using System.Collections.Generic; // Added for Dictionary
 /// </summary>
 public class GrabSystem : MonoBehaviour
 {
+    public bool enableGrab = true;
+    public void SetEnableGrab(bool enable)
+    {
+        enableGrab = enable;
+
+        if (!enable)
+        {
+            foreach (var icon in grableIcons.Values)
+            {
+                if (icon != null)
+                    Destroy(icon);
+            }
+            grableIcons.Clear();
+        }
+    }
+
     [Header("抓取點設定")]
     [SerializeField] private Transform controllPoint;        // 抓取目標位置
     [SerializeField] private float grabDistance = 100f;      // 抓取射線距離
@@ -49,6 +65,9 @@ public class GrabSystem : MonoBehaviour
     private ControllableObject currentControllable; // 目前控制的物件
     private Dictionary<GameObject, GameObject> grableIcons = new Dictionary<GameObject, GameObject>(); // 可抓取物件及其圖示的對應
     private HashSet<GameObject> releasedObjects = new HashSet<GameObject>(); // 已釋放的物件列表
+    private GameObject lastReleasedObject; // 最後釋放的物體
+    private float releaseTrackingDuration = 3f; // 追蹤時間（秒）
+    private float releaseTrackingTimer = 0f; // 追蹤計時器
 
     private void Awake()
     {
@@ -106,8 +125,9 @@ public class GrabSystem : MonoBehaviour
 
     private void Update()
     {
+
         // 如果射擊被禁用，強制釋放物體
-        if (!PlayerController.GlobalFireEnabled && isGrabbing)
+        if (!PlayerController.GlobalFireEnabled && isGrabbing || !enableGrab)
         {
             ReleaseGrabbedObject();
             return;
@@ -128,8 +148,18 @@ public class GrabSystem : MonoBehaviour
             UpdateTargetLinePosition();
         }
 
+        // 追蹤已釋放的物體
+        if (lastReleasedObject != null)
+        {
+            TrackReleasedObject();
+        }
+
         // 更新可抓取物件的 UI 圖示
-        UpdateGrableIcons();
+        if (enableGrab)
+        {
+            UpdateGrableIcons();
+        }
+
     }
 
     private void OnDestroy()
@@ -180,6 +210,7 @@ public class GrabSystem : MonoBehaviour
 
     private void HandleGrabInput()
     {
+        if (!enableGrab) return;
         if (grabAction == null) return;
 
         // 按下右鍵時嘗試抓取
@@ -269,36 +300,50 @@ public class GrabSystem : MonoBehaviour
     {
         if (currentGrabbedObject != null)
         {
-            // 取得目標位置
-            Transform target = null;
-            if (playerController != null)
-            {
-                target = playerController.GetCurrentTarget();
-            }
+        // 記錄釋放時的位置資訊
+        Vector3 releaseWorldPosition = currentGrabbedObject.transform.position;
+        Vector3 releaseLocalPosition = currentGrabbedObject.transform.localPosition;
 
-            // 計算釋放方向
-            Vector3 releaseDirection;
-            if (target != null)
-            {
-                releaseDirection = (target.position - currentGrabbedObject.transform.position).normalized;
-            }
-            else
-            {
-                releaseDirection = Vector3.forward; // 如果沒有目標，預設向前
-            }
+        // 取得目標位置
+        Transform target = null;
+        if (playerController != null)
+        {
+            target = playerController.GetCurrentTarget();
+        }
 
-            // 設定 ControllableObject 狀態為釋放
-            if (currentControllable != null)
-            {
-                currentControllable.SetControlState(ControllableObject.ControlState.Released);
-                // 設定移動方向
-                currentControllable.SetDirection(releaseDirection);
-                currentControllable = null;
-            }
+        // 計算釋放方向
+        Vector3 releaseDirection;
+        if (target != null)
+        {
+            releaseDirection = (target.position - currentGrabbedObject.transform.position).normalized;
+        }
+        else
+        {
+            releaseDirection = Vector3.forward; // 如果沒有目標，預設向前
+        }
+
+        // 記錄釋放資訊
+        Debug.Log($"[Player] 物體釋放 - " +
+                  $"世界座標: {releaseWorldPosition:F2}, " +
+                  $"本地座標: {releaseLocalPosition:F2}, " +
+                  $"釋放方向: {releaseDirection:F2}, " +
+                  $"目標物體: {(target != null ? target.name : "無目標")}");
+
+        // 設定 ControllableObject 狀態為釋放
+        if (currentControllable != null)
+        {
+            currentControllable.SetControlState(ControllableObject.ControlState.Released);
+            currentControllable.SetDirection(releaseDirection);
+            currentControllable = null;
+        }
 
             // 解除父子關係
             currentGrabbedObject.transform.SetParent(null);
             Debug.Log($"釋放物件：{currentGrabbedObject.name}");
+            // 設置最後釋放的物體和重置計時器
+            lastReleasedObject = currentGrabbedObject;
+            releaseTrackingTimer = 0f;
+            
             currentGrabbedObject = null;
 
             // 關閉連線
@@ -339,10 +384,18 @@ public class GrabSystem : MonoBehaviour
 
         Vector3 targetLocalPosition = Vector3.zero; // 目標本地座標 (0,0,0)
         Vector3 currentLocalPosition = currentGrabbedObject.transform.localPosition;
+        Vector3 currentWorldPosition = currentGrabbedObject.transform.position;
         
         // 使用 Lerp 進行平滑移動到本地座標
         Vector3 newLocalPosition = Vector3.Lerp(currentLocalPosition, targetLocalPosition, moveSpeed * Time.deltaTime);
         currentGrabbedObject.transform.localPosition = newLocalPosition;
+
+
+        Debug.Log($"[Player] 抓取物體位置 - " +
+                $"世界座標: {currentWorldPosition:F2}, " +
+                $"本地座標: {currentLocalPosition:F2}, " +
+                $"目標座標: {targetLocalPosition:F2}, " +
+                $"移動速度: {moveSpeed:F2}");
         
         // 當距離很小時，直接設定到目標位置
         if (Vector3.Distance(currentLocalPosition, targetLocalPosition) < 0.5f)
@@ -368,11 +421,34 @@ public class GrabSystem : MonoBehaviour
 
     private void UpdateTargetLinePosition()
     {
-        if (targetLineRenderer != null && controllPoint != null && currentGrabbedObject != null && playerController != null)
+        if (targetLineRenderer != null && controllPoint != null && currentGrabbedObject != null)
         {
             Vector3 startPos = currentGrabbedObject.transform.position;
-            Transform target = playerController.GetCurrentTarget();
-            Vector3 endPos = target != null ? target.position : startPos + controllPoint.forward * targetLineLength;
+            Vector3 releaseDirection;
+
+            // 計算釋放方向
+            if (playerController != null)
+            {
+                Transform target = playerController.GetCurrentTarget();
+                if (target != null)
+                {
+                    // 如果有目標，方向指向目標
+                    releaseDirection = (target.position - startPos).normalized;
+                }
+                else
+                {
+                    // 如果沒有目標，使用控制點的前方向
+                    releaseDirection = controllPoint.forward;
+                }
+            }
+            else
+            {
+                // 如果沒有 playerController，使用控制點的前方向
+                releaseDirection = controllPoint.forward;
+            }
+
+            // 設定目標線的終點位置
+            Vector3 endPos = startPos + releaseDirection * targetLineLength;
             
             targetLineRenderer.SetPosition(0, startPos);
             targetLineRenderer.SetPosition(1, endPos);
@@ -429,11 +505,9 @@ public class GrabSystem : MonoBehaviour
                 grableIcons[grableObject].transform.position = screenPos;
                 
                 // 只有在沒有抓取物件且允許射擊時才顯示圖示
-                grableIcons[grableObject].SetActive(!isGrabbing && PlayerController.GlobalFireEnabled);
+                grableIcons[grableObject].SetActive(!isGrabbing && PlayerController.GlobalFireEnabled && enableGrab);
             }
         }
-
-
     }
 
     private bool IsInScreen(Vector3 screenPos)
@@ -465,5 +539,43 @@ public class GrabSystem : MonoBehaviour
     public GameObject GetCurrentGrabbedObject()
     {
         return currentGrabbedObject;
+    }
+
+    private void TrackReleasedObject()
+    {
+        if (lastReleasedObject == null) return;
+
+        // 更新計時器
+        releaseTrackingTimer += Time.deltaTime;
+
+        // 如果超過追蹤時間，停止追蹤
+        if (releaseTrackingTimer >= releaseTrackingDuration)
+        {
+            lastReleasedObject = null;
+            return;
+        }
+
+        // 獲取物體資訊
+        Vector3 currentPosition = lastReleasedObject.transform.position;
+        Vector3 velocity = Vector3.zero;
+        
+        // 如果有 Rigidbody，獲取速度
+        Rigidbody rb = lastReleasedObject.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            velocity = rb.linearVelocity;
+        }
+
+        // 獲取 ControllableObject 的狀態
+        ControllableObject controllable = lastReleasedObject.GetComponent<ControllableObject>();
+        string state = controllable != null ? controllable.currentState.ToString() : "Unknown";
+
+        // 記錄位置資訊
+        Debug.Log($"[Player] 已釋放物體追蹤 - " +
+                  $"物體: {lastReleasedObject.name}, " +
+                  $"位置: {currentPosition:F2}, " +
+                  $"速度: {velocity:F2}, " +
+                  $"狀態: {state}, " +
+                  $"追蹤時間: {releaseTrackingTimer:F2}s");
     }
 } 

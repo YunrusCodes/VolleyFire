@@ -375,6 +375,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 848529919710604685, guid: d0b4ab92739fe804cb7103b46349b346, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 21
+      objectReference: {fileID: 0}
+    - target: {fileID: 848529919710604685, guid: d0b4ab92739fe804cb7103b46349b346, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 210
+      objectReference: {fileID: 0}
     - target: {fileID: 1079651470945257871, guid: d0b4ab92739fe804cb7103b46349b346, type: 3}
       propertyPath: m_SizeDelta.y
       value: 0
@@ -518,6 +526,18 @@ PrefabInstance:
     - target: {fileID: 2528894316379057114, guid: d0b4ab92739fe804cb7103b46349b346, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3604637376893770582, guid: d0b4ab92739fe804cb7103b46349b346, type: 3}
+      propertyPath: inputMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3604637376893770582, guid: d0b4ab92739fe804cb7103b46349b346, type: 3}
+      propertyPath: nextLineKeyCode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3604637376893770582, guid: d0b4ab92739fe804cb7103b46349b346, type: 3}
+      propertyPath: hurryUpLineKeyCode
+      value: 32
       objectReference: {fileID: 0}
     - target: {fileID: 4955093082104763669, guid: d0b4ab92739fe804cb7103b46349b346, type: 3}
       propertyPath: m_SizeDelta.x
