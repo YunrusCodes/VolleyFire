@@ -36,6 +36,6 @@ public class FunnelHealth : BaseHealth
             elapsed += Time.deltaTime;
             yield return null;
         }
-        Destroy(gameObject);
+        // Destroy(gameObject);
     }
 } 

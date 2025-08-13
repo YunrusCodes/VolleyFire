@@ -9,7 +9,6 @@ public class DialogueManager : MonoBehaviour
 {
     [Header("對話系統設定")]
     [SerializeField] private DialogueRunner dialogueRunner;
-    [SerializeField] private MonoBehaviour dialogueUI;
 
     [Header("對話觸發設定")]
     [SerializeField] private bool enableDialogueSystem = true;

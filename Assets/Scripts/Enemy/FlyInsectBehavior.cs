@@ -29,12 +29,19 @@ public class FlyInsectBehavior : EnemyBehavior
     private Vector2 swingDir;
     private Vector2 swingTarget;
     public float swingSpeed = 5f; // 可調整
-    private bool isDead = false;
+    private bool isRotatingBack = false;  // 是否正在轉回原始方向
+
+    [Header("攻擊動畫設定")]
+    public float attackPrepareTime = 1f;    // 攻擊準備時間
+    public float rotationSpeed = 5f;        // 轉向速度
+    private float attackPrepareTimer = 0f;   // 攻擊準備計時器
+    private bool isPreparing = false;        // 是否正在準備攻擊
 
     public override void Init(EnemyController controller)
     {
         base.Init(controller);
         this.controller = controller;
+        animator = GetComponent<Animator>();
         baseCenter = transform.position;
         // Swing 狀態初始化
         isSwinging = true;
@@ -48,6 +55,8 @@ public class FlyInsectBehavior : EnemyBehavior
         directionTimer = directionChangeInterval;
         hoverTimer = hoverTime;
         isImpacting = false;
+        isPreparing = false;
+        attackPrepareTimer = 0f;
     }
 
     public override void Tick()
@@ -81,6 +90,13 @@ public class FlyInsectBehavior : EnemyBehavior
             return;
         }
 
+        // 返回後的轉向狀態
+        if (isRotatingBack)
+        {
+            HandleRotateBack();
+            return;
+        }
+
         if (isReturning)
         {
             Vector3 dir = (preImpactPosition - transform.position).normalized;
@@ -90,7 +106,7 @@ public class FlyInsectBehavior : EnemyBehavior
             {
                 transform.position = preImpactPosition;
                 isReturning = false;
-                hoverTimer = hoverTime;
+                isRotatingBack = true;  // 開始轉回-Z方向
             }
             else
             {
@@ -99,23 +115,40 @@ public class FlyInsectBehavior : EnemyBehavior
             return;
         }
 
-        if (!isImpacting)
+        if (!isImpacting && !isPreparing)
         {
             HoverBehavior();
             hoverTimer -= Time.deltaTime;
             if (hoverTimer <= 0f)
             {
                 playerTarget = GameObject.FindGameObjectWithTag("Player")?.transform;
-                preImpactPosition = transform.position;
                 if (playerTarget != null)
+                {
+                    preImpactPosition = transform.position;
                     impactTargetPosition = playerTarget.position;
-                isImpacting = true;
+                    // 開始準備攻擊
+                    StartAttackPreparation();
+                }
+                else
+                {
+                    hoverTimer = hoverTime; // 如果找不到玩家，重置計時器
+                }
             }
             return;
         }
 
+        // 處理攻擊準備階段
+        if (isPreparing)
+        {
+            HandleAttackPreparation();
+            return;
+        }
+
         // Impacting 狀態
-        ImpactBehavior();
+        if (isImpacting)
+        {
+            ImpactBehavior();
+        }
     }
 
     private void HoverBehavior()
@@ -177,6 +210,69 @@ public class FlyInsectBehavior : EnemyBehavior
     {
         float randAngle = Random.Range(0f, Mathf.PI * 2f);
         moveDir = new Vector2(Mathf.Cos(randAngle), Mathf.Sin(randAngle)).normalized;
+    }
+
+    private void StartAttackPreparation()
+    {
+        isPreparing = true;
+        attackPrepareTimer = attackPrepareTime;
+        animator.SetBool("Attack", true);
+    }
+
+    private void HandleAttackPreparation()
+    {
+        // 更新朝向
+        if (playerTarget != null)
+        {
+            // 3D空間中看向目標
+            Vector3 directionToPlayer = (playerTarget.position - transform.position).normalized;
+            // 計算目標旋轉
+            Quaternion targetRotation = Quaternion.LookRotation(directionToPlayer);
+            // 使用 Lerp 平滑轉向
+            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+            
+            // 更新目標位置（以防玩家移動）
+            impactTargetPosition = playerTarget.position;
+        }
+
+        attackPrepareTimer -= Time.deltaTime;
+        if (attackPrepareTimer <= 0f)
+        {
+            // 檢查是否已經基本面向目標
+            if (playerTarget != null)
+            {
+                Vector3 directionToPlayer = (playerTarget.position - transform.position).normalized;
+                float angleToTarget = Vector3.Angle(transform.forward, directionToPlayer);
+                
+                // 如果還沒有基本面向目標（角度差大於5度），重置計時器
+                if (angleToTarget > 5f)
+                {
+                    attackPrepareTimer = 0.1f; // 給予短暫的額外時間繼續轉向
+                    return;
+                }
+            }
+
+            // 準備完成，開始衝撞
+            isPreparing = false;
+            isImpacting = true;
+        }
+    }
+
+    private void HandleRotateBack()
+    {
+        // 計算目標旋轉（面向-Z方向）
+        Quaternion targetRotation = Quaternion.LookRotation(Vector3.back);
+        // 使用 Lerp 平滑轉向
+        transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+
+        // 檢查是否已經基本面向-Z
+        float angleToTarget = Vector3.Angle(transform.forward, Vector3.back);
+        if (angleToTarget <= 5f)
+        {
+            isRotatingBack = false;
+            hoverTimer = hoverTime;
+            animator.SetBool("Attack", false);
+        }
     }
 
     private void OnCollisionEnter(Collision collision)

@@ -8,7 +8,6 @@ namespace VolleyFire.Funnel
         public Transform Transform { get; private set; }
         public BaseHealth Health { get; private set; }
         public AudioSource Audio { get; private set; }
-        public FunnelStrategy Strategy { get; set; }
         
         private float lastShootTime;
         private GameObject bulletPrefab;
@@ -32,7 +31,7 @@ namespace VolleyFire.Funnel
         {
             PlaySound();
             
-            while (Vector3.Distance(Transform.position, targetPosition) > 0.1f)
+            while (Vector3.Distance(Transform.position, targetPosition) > 0.1f && !Health.IsDead())
             {
                 Vector3 dir = (targetPosition - Transform.position).normalized;
                 Transform.position = Vector3.MoveTowards(Transform.position, targetPosition, movementSpeed * Time.deltaTime);
@@ -59,7 +58,7 @@ namespace VolleyFire.Funnel
             float distance = Vector3.Distance(startPos, targetPosition);
             float startTime = Time.time;
 
-            while (Vector3.Distance(Transform.position, targetPosition) > 0.1f)
+            while (Vector3.Distance(Transform.position, targetPosition) > 0.1f && !Health.IsDead())
             {
                 float elapsed = (Time.time - startTime) * movementSpeed;
                 float t = Mathf.Clamp01(elapsed / distance);

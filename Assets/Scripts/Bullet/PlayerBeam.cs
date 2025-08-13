@@ -148,7 +148,7 @@ public class PlayerBeam : BulletBehavior
         }
     }
     
-    public override void DestroyBullet()
+    public override void DestroyBullet(bool generateEffect = false)
     {
         // 回收自己
         gameObject.SetActive(false);

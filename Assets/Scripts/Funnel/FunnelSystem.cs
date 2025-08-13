@@ -237,12 +237,5 @@ namespace VolleyFire.Funnel
 
             return new Vector3(WorldCenterPoint.x, WorldCenterPoint.y, apexZ);
         }
-
-        // 新增方法：切換到 Activate 狀態
-        public void ActivateOnce()
-        {
-            // 999 代表 Activate 狀態
-            ApplyMode((FunnelMode)999);
-        }
     }
 }

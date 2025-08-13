@@ -37,7 +37,7 @@ public class EnemyWave : MonoBehaviour
     {    
         OnWaveStart?.Invoke();
         // 1. 等待移動前對話結束
-        waveMoveBeforeDialogues.TriggerDialoguesAndWait();
+        waveMoveBeforeDialogues?.TriggerDialoguesAndWait();
         while (isWaitingForDialogue) yield return null;
 
         // 2. 進入移動階段
