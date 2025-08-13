@@ -36,6 +36,7 @@ public class AirFighterBehavior : EnemyBehavior
     private float stateTimer;
     private float directionUpdateTimer; // 方向更新計時器
     private bool isGatlingAudioPlaying = false; // 機槍音效播放狀態
+    private bool isClockwiseRotation = false; // 盤旋方向：true=順時針，false=逆時針
     
     public float alignDuration = 3f;
     public float circleDuration = 5f;
@@ -125,6 +126,10 @@ public class AirFighterBehavior : EnemyBehavior
         // 狀態切換
         if (stateTimer >= alignDuration)
         {
+                    // 根據最後移動方向決定盤旋方向
+        // 使用x、y方向來決定盤旋方向，讓繞行不在x、z平面
+        isClockwiseRotation = (alignDirection.x < 0); // -x為順時針，+x為逆時針
+            
             // 停止機槍音效
             StopGatlingAudio();
             currentState = FighterState.CircularMove;
@@ -139,8 +144,44 @@ public class AirFighterBehavior : EnemyBehavior
         
         // 計算飛機的朝向
         Vector3 toCenter = (circleCenter - transform.position);
-        Vector3 upDir = toCenter.normalized;
-        Vector3 forwardDir = Vector3.Cross(Vector3.up, toCenter).normalized;
+        
+        // 根據x、y分量的大小來決定盤旋平面
+        Vector3 rotationNormal;
+        float xWeight = Mathf.Abs(alignDirection.x);
+        float yWeight = Mathf.Abs(alignDirection.y);
+        
+        // 根據x、y分量的權重來混合旋轉軸
+        if (xWeight > 0.01f || yWeight > 0.01f) // 避免除以零
+        {
+            // 計算權重比例
+            float totalWeight = xWeight + yWeight;
+            float xRatio = xWeight / totalWeight;
+            float yRatio = yWeight / totalWeight;
+            
+            // 混合x軸和y軸作為旋轉軸
+            rotationNormal = (Vector3.right * xRatio + Vector3.up * yRatio).normalized;
+        }
+        else
+        {
+            // 如果x、y分量都很小，使用預設的y軸
+            rotationNormal = Vector3.up;
+        }
+        
+        // 根據盤旋方向決定前進方向
+        Vector3 forwardDir;
+        if (isClockwiseRotation)
+        {
+            // 順時針：使用 -Vector3.Cross(rotationNormal, toCenter)
+            forwardDir = -Vector3.Cross(rotationNormal, toCenter).normalized;
+        }
+        else
+        {
+            // 逆時針：使用原本的 Vector3.Cross(rotationNormal, toCenter)
+            forwardDir = Vector3.Cross(rotationNormal, toCenter).normalized;
+        }
+        
+        // 計算上方向，確保與盤旋平面垂直
+        Vector3 upDir = Vector3.Cross(forwardDir, rotationNormal).normalized;
         
         // 使用叉積計算右方向
         Vector3 rightDir = Vector3.Cross(forwardDir, upDir).normalized;
@@ -157,16 +198,16 @@ public class AirFighterBehavior : EnemyBehavior
         
         // 處理y方向的旋轉（上方向）
         Vector3 targetUpDir;
-        if (zMovement > 0)
-        {
+        // if (zMovement > 0)
+        // {
             // z位移方向 > 0，本體y軸照目前這樣lerp
             targetUpDir = upDir;
-        }
-        else
-        {
-            // z位移方向 < 0，本體y軸與世界座標的y軸lerp
-            targetUpDir = Vector3.up;
-        }
+        //}
+        // else
+        // {
+        //     // z位移方向 < 0，本體y軸與世界座標的y軸lerp
+        //     targetUpDir = Vector3.up;
+        // }
         
         // 分開處理x、z方向的旋轉和y方向的旋轉
         // 先lerp x、z方向（前進方向），使用原本的速度
@@ -215,7 +256,7 @@ public class AirFighterBehavior : EnemyBehavior
 
         // 計算並平滑過渡到起始角度
         Quaternion targetRotation = Quaternion.Euler(0, -180, 0); // 起始角度
-        transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * rotationLerpSpeed);
+        transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime);
         
         // 檢查是否需要修正z座標
         float currentZ = transform.position.z;
@@ -234,8 +275,7 @@ public class AirFighterBehavior : EnemyBehavior
         Debug.DrawLine(transform.position, new Vector3(transform.position.x, transform.position.y, startPosition.z), Color.yellow); // 到目標平面的距離
         
         // 檢查是否返回完成
-        if (Mathf.Abs(transform.position.z - startPosition.z) < 10f && 
-            Quaternion.Angle(transform.rotation, targetRotation) < 0.1f)
+        if (Mathf.Abs(transform.position.z - startPosition.z) < 10f)
         {
             // 返回完成後切換到對齊玩家狀態
             currentState = FighterState.AlignAttack;
@@ -297,7 +337,7 @@ public class AirFighterBehavior : EnemyBehavior
         {
             Vector3 playerPos = player.transform.position;
             // 計算到玩家上方偏移位置的方向
-            Vector3 targetPos = new Vector3(playerPos.x, playerPos.y + 2f, transform.position.z);
+            Vector3 targetPos = new Vector3(playerPos.x, playerPos.y, transform.position.z);
             alignDirection = (targetPos - transform.position).normalized;
         }
         else
