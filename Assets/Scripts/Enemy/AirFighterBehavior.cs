@@ -4,32 +4,38 @@ using System.Collections;
 public class AirFighterBehavior : EnemyBehavior
 {
     [Header("戰機參數")]
-    public GameObject mainCannonPrefab;
-    public float mainCannonSpeed = 15f;
-    public float fireInterval = 0.5f;
+    public Transform[] GatlingFirePoints;
+    public GameObject GatlingPrefab;
+    public float gatlingFireInterval = 0.1f;
+    public float gatlingBulletSpeed = 20f;
     
     [Header("移動參數")]
     public float alignSpeed = 8f;
     public float circularSpeed = 5f;
     public float returnSpeed = 10f;
     public float circleRadius = 5f;
+    public float directionUpdateInterval = 3f; // 方向更新間隔
+    public float maxZRotationAngle = 22.5f; // 最大z軸偏轉角度
+    public float maxXRotationAngle = 11.25f; // 最大x軸偏轉角度
     
     [Header("音效")]
-    public AudioClip cannonFireSfx;
+    public AudioClip GatlingAudio;
     private AudioSource audioSource;
 
-    private enum FighterState { AlignAttack, CircularMove, ReturnToStart }
-    private FighterState currentState;
+    public enum FighterState { AlignAttack, CircularMove, ReturnToStart }
+    public FighterState currentState;
     
     private EnemyController controller;
     private Vector3 startPosition;
-    private Vector3 alignTargetPos;
+    private Vector3 alignDirection; // 對齊方向
     private Vector3 circleCenter;
     private float idealAngle;      // 理想角度
     private float currentAngle;    // 當前角度
     private Vector3 idealPosition; // 理想位置
     private float fireTimer;
     private float stateTimer;
+    private float directionUpdateTimer; // 方向更新計時器
+    private bool isGatlingAudioPlaying = false; // 機槍音效播放狀態
     
     public float alignDuration = 3f;
     public float circleDuration = 5f;
@@ -50,6 +56,7 @@ public class AirFighterBehavior : EnemyBehavior
         currentState = FighterState.AlignAttack;
         fireTimer = 0f;
         stateTimer = 0f;
+        directionUpdateTimer = 0f;
         SetupNextState();
     }
 
@@ -79,22 +86,47 @@ public class AirFighterBehavior : EnemyBehavior
     
     private void HandleAlignAttack()
     {
-        // 移動到對齊位置
-        Vector3 currentPos = transform.position;
-        Vector3 targetPos = new Vector3(alignTargetPos.x, alignTargetPos.y, currentPos.z);
-        transform.position = Vector3.MoveTowards(currentPos, targetPos, alignSpeed * Time.deltaTime);
+        // 更新方向計時器
+        directionUpdateTimer += Time.deltaTime;
         
-        // 發射主砲
-        fireTimer += Time.deltaTime;
-        if (fireTimer >= fireInterval)
+        // 每3秒更新一次方向
+        if (directionUpdateTimer >= directionUpdateInterval)
         {
-            FireMainCannon();
+            UpdateAlignDirection();
+            directionUpdateTimer = 0f;
+        }
+        
+        // 沿著對齊方向移動
+        transform.position += alignDirection * alignSpeed * Time.deltaTime;
+        
+        // 根據位移方向計算x軸和z軸轉角，並限制最大偏轉角度
+        // x轉角根據y位移程度，z轉角根據x位移程度
+        float xRotation = -alignDirection.y * maxXRotationAngle;
+        float zRotation = alignDirection.x * maxZRotationAngle;
+        
+        xRotation = Mathf.Clamp(xRotation, -maxXRotationAngle, maxXRotationAngle);
+        zRotation = Mathf.Clamp(zRotation, -maxZRotationAngle, maxZRotationAngle);
+        
+        // 創建目標旋轉，保持當前y旋轉，改變x軸和z軸
+        Quaternion currentRotation = transform.rotation;
+        Quaternion targetRotation = Quaternion.Euler(xRotation, currentRotation.eulerAngles.y, zRotation);
+        
+        // 平滑插值到目標旋轉
+        transform.rotation = Quaternion.Lerp(currentRotation, targetRotation, Time.deltaTime);
+        
+        // 發射機槍
+        fireTimer += Time.deltaTime;
+        if (fireTimer >= gatlingFireInterval)
+        {
+            FireGatling();
             fireTimer = 0f;
         }
         
         // 狀態切換
         if (stateTimer >= alignDuration)
         {
+            // 停止機槍音效
+            StopGatlingAudio();
             currentState = FighterState.CircularMove;
             SetupNextState();
         }
@@ -116,11 +148,42 @@ public class AirFighterBehavior : EnemyBehavior
         // 確保上方向完全垂直於前進方向
         upDir = Vector3.Cross(rightDir, forwardDir).normalized;
         
-        // 創建目標旋轉
-        Quaternion targetRotation = Quaternion.LookRotation(forwardDir, upDir);
+        // 分開處理x、z旋轉方向和y方向
+        float xMovement = transform.forward.x;
+        float zMovement = transform.forward.z;
         
-        // 平滑插值到目標旋轉
-        transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * rotationLerpSpeed);
+        // 處理x、z方向的旋轉（前進方向）
+        Vector3 targetForwardDir = forwardDir;
+        
+        // 處理y方向的旋轉（上方向）
+        Vector3 targetUpDir;
+        if (zMovement > 0)
+        {
+            // z位移方向 > 0，本體y軸照目前這樣lerp
+            targetUpDir = upDir;
+        }
+        else
+        {
+            // z位移方向 < 0，本體y軸與世界座標的y軸lerp
+            targetUpDir = Vector3.up;
+        }
+        
+        // 分開處理x、z方向的旋轉和y方向的旋轉
+        // 先lerp x、z方向（前進方向），使用原本的速度
+        Vector3 currentForward = transform.forward;
+        Vector3 lerpedForward = Vector3.Lerp(currentForward, targetForwardDir, Time.deltaTime * rotationLerpSpeed);
+        
+        // 再lerp y方向（上方向），使用Time.deltaTime * 1
+        Vector3 currentUp = transform.up;
+        Vector3 lerpedUp = Vector3.Lerp(currentUp, targetUpDir, Time.deltaTime * 1f);
+        
+        // 使用叉積計算右方向，確保三個方向向量正交
+        Vector3 lerpedRight = Vector3.Cross(lerpedForward, lerpedUp).normalized;
+        lerpedUp = Vector3.Cross(lerpedRight, lerpedForward).normalized; // 重新計算上方向確保正交
+        
+        // 創建最終的旋轉
+        Quaternion finalRotation = Quaternion.LookRotation(lerpedForward, lerpedUp);
+        transform.rotation = finalRotation;
         
         // 繪製debug線條
         Debug.DrawLine(transform.position, circleCenter, Color.yellow); // 當前位置到圓心的連線
@@ -133,8 +196,12 @@ public class AirFighterBehavior : EnemyBehavior
         Debug.DrawRay(transform.position, upDir * 2f, Color.white); // 上方向
         Debug.DrawRay(transform.position, rightDir * 2f, Color.cyan); // 右方向
         
-        // 狀態切換
-        if (stateTimer >= circleDuration)
+        // 狀態切換：必須位移方向非常接近世界座標的(0,0,-1)才能離開狀態
+        Vector3 worldMinusZ = new Vector3(0, 0, -1);
+        float directionThreshold = 0.1f; // 方向相似度閾值
+        bool isCloseToMinusZ = Vector3.Distance(transform.forward, worldMinusZ) < directionThreshold;
+        
+        if (stateTimer >= circleDuration && isCloseToMinusZ)
         {
             currentState = FighterState.ReturnToStart;
             SetupNextState();
@@ -167,12 +234,17 @@ public class AirFighterBehavior : EnemyBehavior
         Debug.DrawLine(transform.position, new Vector3(transform.position.x, transform.position.y, startPosition.z), Color.yellow); // 到目標平面的距離
         
         // 檢查是否返回完成
-        if (Mathf.Abs(transform.position.z - startPosition.z) < 0.1f && 
-            Quaternion.Angle(transform.rotation, targetRotation) < 1f)
+        if (Mathf.Abs(transform.position.z - startPosition.z) < 10f && 
+            Quaternion.Angle(transform.rotation, targetRotation) < 0.1f)
         {
             // 返回完成後切換到對齊玩家狀態
             currentState = FighterState.AlignAttack;
             SetupNextState();
+        }
+        else
+        {
+            Debug.Log(Mathf.Abs(transform.position.z - startPosition.z));
+            Debug.Log(Quaternion.Angle(transform.rotation, targetRotation));
         }
     }
     
@@ -183,26 +255,55 @@ public class AirFighterBehavior : EnemyBehavior
         switch (currentState)
         {
             case FighterState.AlignAttack:
-                alignTargetPos = GetPlayerAlignPosition();
+                UpdateAlignDirection();
+                // 開始播放機槍音效
+                StartGatlingAudio();
                 break;
                 
-                         case FighterState.CircularMove:
-                 // 在自身-z方向（後方）選擇圓心點
-                 Vector3 currentPos = transform.position;
-                 
-                 // 使用transform.forward獲取物體的前方向量，取反得到後方
-                 // 固定使用circleRadius作為圓心距離
-                 circleCenter = currentPos - transform.forward * circleRadius;
-                 
-                 // 設置初始角度和位置
-                 idealAngle = 0f;
-                 currentAngle = 0f;
-                 idealPosition = currentPos;
-                 break;
+                                     case FighterState.CircularMove:
+                // 在transform.forward的y方向±45度和x方向±45度範圍內隨機選擇圓心點
+                Vector3 currentPos = transform.position;
+                
+                // 獲取戰機的前方向量
+                Vector3 forwardDir = transform.forward;
+                
+                // 在y方向±45度範圍內隨機偏移
+                float yAngleOffset = Random.Range(-45f, 45f);
+                Vector3 yRotatedDir = Quaternion.AngleAxis(yAngleOffset, transform.right) * forwardDir;
+                
+                // 在x方向±45度範圍內隨機偏移
+                float xAngleOffset = Random.Range(-45f, 45f);
+                Vector3 finalDir = Quaternion.AngleAxis(xAngleOffset, transform.up) * yRotatedDir;
+                
+                // 使用最終方向計算圓心位置
+                circleCenter = currentPos - yRotatedDir * circleRadius;
+                
+                // 設置初始角度和位置
+                idealAngle = 0f;
+                currentAngle = 0f;
+                idealPosition = currentPos;
+                break;
                 
             case FighterState.ReturnToStart:
                 // 不需要特別設置
                 break;
+        }
+    }
+    
+    private void UpdateAlignDirection()
+    {
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            Vector3 playerPos = player.transform.position;
+            // 計算到玩家上方偏移位置的方向
+            Vector3 targetPos = new Vector3(playerPos.x, playerPos.y + 2f, transform.position.z);
+            alignDirection = (targetPos - transform.position).normalized;
+        }
+        else
+        {
+            // 如果找不到玩家，使用預設方向
+            alignDirection = Vector3.forward;
         }
     }
     
@@ -218,28 +319,43 @@ public class AirFighterBehavior : EnemyBehavior
         return transform.position;
     }
     
-    private void FireMainCannon()
+    private void StartGatlingAudio()
     {
-        if (mainCannonPrefab == null) return;
-        
-        if (audioSource != null && cannonFireSfx != null)
+        if (audioSource != null && GatlingAudio != null && !isGatlingAudioPlaying)
         {
-            audioSource.PlayOneShot(cannonFireSfx);
+            audioSource.clip = GatlingAudio;
+            audioSource.loop = true;
+            audioSource.Play();
+            isGatlingAudioPlaying = true;
         }
+    }
+    
+    private void StopGatlingAudio()
+    {
+        if (audioSource != null && isGatlingAudioPlaying)
+        {
+            audioSource.Stop();
+            audioSource.loop = false;
+            isGatlingAudioPlaying = false;
+        }
+    }
+    
+    private void FireGatling()
+    {
+        if (GatlingPrefab == null || GatlingFirePoints == null || GatlingFirePoints.Length == 0) return;
         
         var player = GameObject.FindGameObjectWithTag("Player");
         if (player == null) return;
 
-        Vector3 firePos = transform.position;
-        Vector3 targetPos = player.transform.position;
-        Vector3 direction = (targetPos - firePos).normalized;
-        
-        GameObject cannon = Instantiate(mainCannonPrefab, firePos, Quaternion.LookRotation(direction));
-        var bullet = cannon.GetComponent<BulletBehavior>();
-        if (bullet != null)
+        // 從所有射擊點發射子彈
+        foreach (Transform firePoint in GatlingFirePoints)
         {
-            bullet.SetDirection(direction);
-            bullet.SetSpeed(mainCannonSpeed);
+            if (firePoint == null) continue;
+            
+            Vector3 firePos = firePoint.position;
+            Vector3 direction = firePoint.forward; // 朝著FirePoint的+z方向
+            
+            GameObject bullet = Instantiate(GatlingPrefab, firePos, Quaternion.LookRotation(direction));
         }
     }
     
