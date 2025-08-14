@@ -63,7 +63,8 @@ public class AsteroidObject : ControllableObject
 
     protected override void OnReleased()
     {
-        direction = Vector3.forward; // +z方向
+        direction = Vector3.forward;
+        
         speed = originalSpeed * releaseSpeedMultiplier;
         
         if (useRigidbody && rb != null)

@@ -118,6 +118,7 @@ public abstract class BulletBehavior : MonoBehaviour
     /// <param name="newLifetime">新的存活時間</param>
     public virtual void SetLifetime(float newLifetime)
     {
+        spawnTime = Time.time;
         lifetime = newLifetime;
     }
     

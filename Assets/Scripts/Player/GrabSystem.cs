@@ -332,6 +332,11 @@ public class GrabSystem : MonoBehaviour
         // 設定 ControllableObject 狀態為釋放
         if (currentControllable != null)
         {
+            // 設置釋放目標
+            if (target != null)
+            {
+                currentControllable.SetReleaseTarget(target);
+            }
             currentControllable.SetControlState(ControllableObject.ControlState.Released);
             currentControllable.SetDirection(releaseDirection);
             currentControllable = null;

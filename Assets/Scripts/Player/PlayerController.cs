@@ -83,7 +83,7 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         mainCamera = Camera.main;
-
+        EnableFire(true);
         // 自動取得 WeaponSystem
         if (weaponSystem == null)
             weaponSystem = GetComponent<WeaponSystem>();
@@ -442,12 +442,12 @@ public class PlayerController : MonoBehaviour
         {
             // 計算目標旋轉角度
             float targetZRotation = moveInput.x * maxCameraRotation; // A/D 控制 Z 軸旋轉
-            float targetXRotation = -moveInput.y * maxCameraRotation; // W/S 控制 X 軸旋轉
+            //float targetXRotation = -moveInput.y * maxCameraRotation; // W/S 控制 X 軸旋轉
 
             // 平滑插值到目標角度
             Vector3 currentRotation = mainCamera.transform.eulerAngles;
             currentRotation.z = Mathf.LerpAngle(currentRotation.z, targetZRotation, Time.deltaTime * cameraRotationSpeed);
-            currentRotation.x = Mathf.LerpAngle(currentRotation.x, targetXRotation, Time.deltaTime * cameraRotationSpeed);
+            //currentRotation.x = Mathf.LerpAngle(currentRotation.x, targetXRotation, Time.deltaTime * cameraRotationSpeed);
 
             // 應用旋轉
             mainCamera.transform.eulerAngles = currentRotation;

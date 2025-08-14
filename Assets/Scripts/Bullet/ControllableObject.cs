@@ -12,6 +12,15 @@ public abstract class ControllableObject : BulletBehavior
     public ControlState currentState = ControlState.Uncontrolled;
     protected float originalSpeed;
     protected readonly float releaseSpeedMultiplier = 5f;
+    protected Transform releaseTarget;
+
+    /// <summary>
+    /// 設置釋放目標
+    /// </summary>
+    public virtual void SetReleaseTarget(Transform target)
+    {
+        releaseTarget = target;
+    }
     
     protected override void BehaviorOnStart()
     {
@@ -88,7 +97,6 @@ public abstract class ControllableObject : BulletBehavior
     /// </summary>
     protected virtual void MoveReleased()
     {
-        direction = Vector3.forward;
         speed = originalSpeed * releaseSpeedMultiplier;
         transform.position += direction * speed * Time.deltaTime;
     }

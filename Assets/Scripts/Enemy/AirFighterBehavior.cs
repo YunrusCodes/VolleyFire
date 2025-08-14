@@ -66,6 +66,7 @@ public class AirFighterBehavior : EnemyBehavior
         if (controller.GetHealth().IsDead())
         {
             OnHealthDeath();
+            audioSource.Stop();
             return;
         }
 

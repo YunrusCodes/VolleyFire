@@ -7,7 +7,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: DroneCrash
+  m_Name: AirfighterCrash
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions: []
@@ -20,7 +20,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: c09fc70c1d2c3e94292bbd85a4f9cf87, type: 2}
+  m_Motion: {fileID: 7400000, guid: 43b44456311e3c04b89f10237dd2dd71, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -37,7 +37,7 @@ AnimatorStateMachine:
   m_ChildStates:
   - serializedVersion: 1
     m_State: {fileID: -3513372301078471132}
-    m_Position: {x: 370, y: 230, z: 0}
+    m_Position: {x: 380, y: 230, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 8795441888711837915}
     m_Position: {x: 380, y: 120, z: 0}
@@ -82,7 +82,7 @@ AnimatorController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Dron
+  m_Name: AirFighter
   serializedVersion: 5
   m_AnimatorParameters:
   - m_Name: Die
