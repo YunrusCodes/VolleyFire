@@ -252,10 +252,34 @@ MonoBehaviour:
   moveSpeed: 100
   OnWaveStart:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 2132144797}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
   OnWaveClear:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 2132144797}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   waveMoveBeforeDialogues:
     dialogues: []
     enabled: 0
@@ -5332,9 +5356,8 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
   waveMoveDuringDialogues:
-    dialogues:
-    - Wave1_2
-    enabled: 1
+    dialogues: []
+    enabled: 0
     autoRead: 1
     autoReadSpeed: 3
     enablePlayerFireDuringDialogue: 1
@@ -5347,8 +5370,9 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
   waveAttackBeforeDialogues:
-    dialogues: []
-    enabled: 0
+    dialogues:
+    - Wave1_2
+    enabled: 1
     autoRead: 1
     autoReadSpeed: 3
     enablePlayerFireDuringDialogue: 0
@@ -5359,7 +5383,19 @@ MonoBehaviour:
         m_Calls: []
     OnDialogueEnd:
       m_PersistentCalls:
-        m_Calls: []
+        m_Calls:
+        - m_Target: {fileID: 2132144797}
+          m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+          m_MethodName: SetActive
+          m_Mode: 6
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 1
+          m_CallState: 2
   waveProcessTimeDialogues: []
   enemyHealthDialogues: []
 --- !u!4 &517449889
@@ -6119,7 +6155,6 @@ MonoBehaviour:
   - {fileID: 682195397}
   - {fileID: 517449888}
   - {fileID: 130655280}
-  - {fileID: 0}
   - {fileID: 1672648380}
   - {fileID: 342792075}
   NextStageSceneName: Stage3
@@ -6487,7 +6522,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &2132144798
 MonoBehaviour:
   m_ObjectHideFlags: 0
