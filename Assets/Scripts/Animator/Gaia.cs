@@ -2,20 +2,22 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-public class Gaia : MonoBehaviour
+public class Gaia : GaiaBehavior
 {
-    private Animator animator;
 
-    void Start()
-    {
-        animator = GetComponent<Animator>();
-    }
     [Header("特效生成點")]
     public Transform punchSpawnPoint;
 
     [Header("Mesh控制")]
     public List<GameObject> MeshObjects = new List<GameObject>();    // 需要控制顯示的物件列表
 
+    [Header("火箭拳組件")]
+    public GameObject Model_Punch;      // 手臂模型
+    public GameObject Prefab_Punch;     // 火箭拳預製體
+
+    [Header("騎士踢組件")]
+    public GameObject Prefab_Kick;      // 踢擊預製體
+    public GameObject Prefab_ReturnKick;      // 踢擊預製體
     public void HideMesh(bool hide)
     {
         foreach (GameObject obj in MeshObjects)
@@ -27,44 +29,77 @@ public class Gaia : MonoBehaviour
         }
     }
 
-    [Header("火箭拳組件")]
-    public GameObject Model_Punch;      // 手臂模型
-    public GameObject Prefab_Punch;     // 火箭拳預製體
+    public void JumpingJack()
+    {
+        if(animator.GetBool("CanAttack")) StartCoroutine(JumpingJackMove());
+    }
+    Vector3 originalPosition;
+    Quaternion originalRotation;
+    IEnumerator JumpingJackMove()
+    {
+        animator.SetBool("CanAttack", false);
+        // 計算後上方位置
+        Vector3 backwardDirection = -transform.forward;
+        Vector3 upDirection = transform.up;
+        Vector3 diagonalDirection = (backwardDirection + upDirection).normalized;
+        
+        // 設定目標位置（斜後方5單位）
+        Vector3 startPosition = transform.position;
+        Vector3 targetPosition = startPosition + diagonalDirection * 25f;
 
-    [Header("騎士踢組件")]
-    public GameObject Prefab_Kick;      // 踢擊預製體
-    public GameObject Prefab_ReturnKick;      // 踢擊預製體
+        // 尋找標記為Player的物件
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        Vector3 targetDirection;
+        
+        if (player != null)
+        {
+            // 計算從踢擊到玩家的方向向量
+            targetDirection = (player.transform.position - targetPosition).normalized;
+        }
+        else
+        {
+            // 如果找不到玩家，使用預設的前向方向
+            targetDirection = transform.forward;
+            Debug.LogWarning("找不到標記為 Player 的物件，使用預設方向！");
+        }
+                
+        // 使用 Lerp 平滑旋轉
+        Quaternion targetRotation = Quaternion.LookRotation(targetDirection.normalized); 
+        Quaternion startRotation = transform.rotation;
 
+        animator.SetTrigger("RiderKick");
+        originalPosition = transform.position;
+        originalRotation = transform.rotation;
+        while (transform.position != targetPosition && transform.rotation != targetRotation)
+        {            
+            // 使用 Lerp 進行平滑移動
+            transform.position = Vector3.Lerp(transform.position, targetPosition, 0.1f);
+            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, 0.1f);
+
+            // 檢查是否足夠接近目標
+            float positionDistance = Vector3.Distance(transform.position, targetPosition);
+            float rotationDistance = Quaternion.Angle(transform.rotation, targetRotation);
+
+            if (positionDistance < 0.1f || rotationDistance < 0.1f)
+            {
+                // 直接設置到目標位置和旋轉
+                transform.position = targetPosition;
+                transform.rotation = targetRotation;
+            }
+
+            yield return null;
+        }
+        RiderKicking();
+    }
 
     // 騎士踢動畫事件
     public void RiderKicking()
     {
-        if (animator != null)
-        {
-            animator.SetBool("CanTranslate", false);
-        }
-
         if (Prefab_Kick != null)
         {
             GameObject kick = Instantiate(Prefab_Kick, transform.position, transform.rotation);
             HideMesh(true);
-            // 尋找標記為Player的物件
-            GameObject player = GameObject.FindGameObjectWithTag("Player");
-            Vector3 targetDirection;
-            
-            if (player != null)
-            {
-                // 計算從踢擊到玩家的方向向量
-                targetDirection = (player.transform.position - transform.position).normalized;
-            }
-            else
-            {
-                // 如果找不到玩家，使用預設的前向方向
-                targetDirection = transform.forward;
-                Debug.LogWarning("找不到標記為 Player 的物件，使用預設方向！");
-            }
-            
-            StartCoroutine(KickMove(kick, targetDirection));
+            StartCoroutine(KickMove(kick));
         }
         else
         {
@@ -106,20 +141,18 @@ public class Gaia : MonoBehaviour
         
         if (animator != null)
         {
-            animator.SetBool("CanTranslate", true);
+            animator.SetBool("Next", true);
+            animator.SetBool("CanAttack", true);
         }
         
         returnKickCoroutine = null;
     }
 
-    IEnumerator KickMove(GameObject kick, Vector3 targetDirection)
+    IEnumerator KickMove(GameObject kick)
     {
         float duration = 5f;
         float timer = 0f;
         float speed = 100f;
-        
-        // 使用 Lerp 平滑旋轉
-        kick.transform.rotation = Quaternion.LookRotation(targetDirection.normalized);
 
         while (timer < duration && kick != null && kick.activeInHierarchy)
         {
@@ -127,7 +160,8 @@ public class Gaia : MonoBehaviour
             kick.transform.position += kick.transform.forward * speed * Time.deltaTime;            
             yield return null;
         }
-        
+        transform.position = originalPosition;
+        transform.rotation = originalRotation;
         Destroy(kick);
         KickReturning();
     }
@@ -203,6 +237,13 @@ public class Gaia : MonoBehaviour
             Destroy(punch);
         }
         Model_Punch.SetActive(true);
+        
+        if (animator != null)
+        {
+            animator.SetBool("Next", true);
+            animator.SetBool("CanAttack", true);
+        }
+        
         returnPunchCoroutine = null;
     }
     IEnumerator RocketPunchMove(GameObject punch, Vector3 targetDirection)
