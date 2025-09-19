@@ -287,7 +287,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6729982a47835df4095a32f4c20c5a84, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  animator: {fileID: 0}
+  animator: {fileID: 69126873}
   isLeaving: 0
   punchSpawnPoint: {fileID: 2820785990389422531}
   MeshObjects:
@@ -6836,7 +6836,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 5553880146154815601, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5593117490783122087, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
       propertyPath: m_LocalPosition.x
@@ -6880,7 +6880,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6643417292323480715, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8357126842894378493, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
       propertyPath: m_Name
@@ -7499,7 +7499,7 @@ MonoBehaviour:
     autoReadSpeed: 0
     enablePlayerFireDuringDialogue: 1
     enablePlayerFireAfterDialogue: 1
-    BGMToSwitch: {fileID: 8300000, guid: 97687fff1fe998042909a1a3504388ec, type: 3}
+    BGMToSwitch: {fileID: 8300000, guid: ab4c20dd7f0c7884f8ee3cdca06a21aa, type: 3}
   enemyHealthDialogues:
   - targetHealth: {fileID: 0}
     healthThreshold: 250

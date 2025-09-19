@@ -12,10 +12,11 @@ public class GaiaBehavior : EnemyBehavior
 
     protected GaiaState currentState = GaiaState.Idle;
 
-    public virtual void Init()
+    public override void Init(EnemyController controller)
     {
         if (animator == null)
             animator = GetComponent<Animator>();
+        
     }
 
     public override void Tick()
@@ -39,9 +40,11 @@ public class GaiaBehavior : EnemyBehavior
                     TransitionToState(GaiaState.Idle);
                     break;
             }
-            
-            // 重置 Next 參數
             animator.SetBool("Next", false);
+        }
+        else if(currentState == GaiaState.Idle)
+        {
+            animator.SetBool("Next", true);
         }
     }
 
@@ -79,6 +82,7 @@ public class GaiaBehavior : EnemyBehavior
     {
         animator.SetTrigger("PowerUp");
         animator.SetBool("CanAttack", true);
+        animator.SetTrigger("RocketPunch");
     }
 
     void RiderKickStart()
