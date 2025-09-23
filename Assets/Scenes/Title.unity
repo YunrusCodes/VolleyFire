@@ -173,7 +173,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sceneToLoad: Stage0
   uiText: {fileID: 706892527}
-  fullText: 'Invasion Mission: <color=#feae34>Space Edition</color> '
+  fullText: UFO Duelist
   typingSpeed: 0.05
 --- !u!95 &206481236
 Animator:

@@ -1454,10 +1454,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   damageTextPrefabRef: {fileID: 9127619513034172901}
   waves:
-  - {fileID: 175308301}
   - {fileID: 495601958}
   - {fileID: 25530401}
   - {fileID: 2017132698}
+  - {fileID: 175308301}
   - {fileID: 389702296}
   NextStageSceneName: Stage3
   volume: {fileID: 832575518}
