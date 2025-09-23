@@ -311,6 +311,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHealth: 100
   currentHealth: 0
+  damageTextOffset: {x: 0, y: 1, z: 0}
 --- !u!114 &69126877
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6891,6 +6892,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
+--- !u!1 &1287543917 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3628160393298079666, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
+  m_PrefabInstance: {fileID: 1287543916}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1295379836
 GameObject:
   m_ObjectHideFlags: 0
@@ -7240,11 +7246,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4b7943fe8035db43a777f8afabfe2c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  damageTextPrefabRef: {fileID: 1287543917}
   waves:
-  - {fileID: 1672648380}
   - {fileID: 682195397}
   - {fileID: 517449888}
   - {fileID: 130655280}
+  - {fileID: 1672648380}
   - {fileID: 342792075}
   NextStageSceneName: Stage3
   volume: {fileID: 0}

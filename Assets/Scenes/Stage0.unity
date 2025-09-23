@@ -5088,6 +5088,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHealth: 500
   currentHealth: 0
+  damageTextOffset: {x: 0, y: 1, z: 0}
 --- !u!1 &263544746 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1977394872506268820, guid: d0b4ab92739fe804cb7103b46349b346, type: 3}
@@ -6279,6 +6280,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4b7943fe8035db43a777f8afabfe2c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  damageTextPrefabRef: {fileID: 1922379180}
   waves:
   - {fileID: 495601958}
   - {fileID: 905350715}
@@ -6627,6 +6629,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1922379180 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3628160393298079666, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
+  m_PrefabInstance: {fileID: 9127619513034172900}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &285839792904169507
 Transform:
   m_ObjectHideFlags: 0

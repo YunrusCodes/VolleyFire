@@ -419,6 +419,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHealth: 500
   currentHealth: 0
+  damageTextOffset: {x: 0, y: 1, z: 0}
 --- !u!54 &1947915166908493748
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2215,8 +2216,6 @@ MonoBehaviour:
   targetPointCount: 3
   turnSpeed: 50
   slashTriggerDistance: 0.5
-  markerColor: {r: 1, g: 0, b: 0, a: 1}
-  markerSize: 0.3
   boundaryX: {x: 34.9, y: -39.8}
   boundaryY: {x: 19.4, y: -14.3}
   gunBulletPrefab: {fileID: 7555402867869293541, guid: 11548ec74589a1840a46b6ee62504086, type: 3}
@@ -2224,14 +2223,10 @@ MonoBehaviour:
   slashDistance: {x: 0, y: -10, z: 15}
   swordMoveSpeed: 10
   returnSpeed: 60
-  isReturning: 0
   swordTransform: {fileID: 5006859066344003070}
   gunTransform: {fileID: 8157159392105848718}
   pistolTransform: {fileID: 5993519127051884493}
   minTargetPointDistance: 30
-  slashbool: 0
-  sheathbool: 0
-  drawshootbool: 0
   funnelSystem: {fileID: 4349951054928613277}
 --- !u!1 &6302740443002245681
 GameObject:

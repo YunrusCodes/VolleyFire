@@ -31,13 +31,6 @@ public class AsteroidObject : ControllableObject
         {
             transform.position += direction * speed * Time.deltaTime;
         }
-
-        // 檢查是否需要自我銷毀
-        float dist = transform.position.z - spawnPoint.position.z;
-        if (dist <= destroySelfZ)
-        {
-            Destroy(gameObject);
-        }
     }
 
     protected override void OnUncontrolled()
@@ -49,6 +42,13 @@ public class AsteroidObject : ControllableObject
         {
             rb.linearVelocity = direction * speed;
         }
+        
+        // 檢查是否需要自我銷毀
+        float dist = transform.position.z - spawnPoint.position.z;
+        if (dist <= destroySelfZ)
+        {
+            Destroy(gameObject);
+        }
     }
 
     protected override void OnControlled()
@@ -57,8 +57,7 @@ public class AsteroidObject : ControllableObject
         {
             rb.linearVelocity = Vector3.zero;
         }
-        // 進入控制狀態時設置無限生命週期
-        SetLifetime(-1f);
+
     }
 
     protected override void OnReleased()
@@ -91,7 +90,7 @@ public class AsteroidObject : ControllableObject
             {
                 targetHealth.TakeDamage(releaseDamage);
             }
-
+            Debug.Log("DestroyBullet");
             // 銷毀自己
             DestroyBullet();
         }

@@ -1,10 +1,15 @@
 using UnityEngine;
+using UnityEngine.UI;
+using System.Collections;
 
 public abstract class BaseHealth : MonoBehaviour, IHealth
 {
     [SerializeField] protected float maxHealth = 100;
     [SerializeField] protected float currentHealth;
     protected bool isDead = false;
+    
+    [Header("傷害文字設定")]
+    [SerializeField] protected Vector3 damageTextOffset = new Vector3(0, 1, 0);  // 傷害文字位置偏移
 
     protected virtual void Awake()
     {
@@ -17,6 +22,13 @@ public abstract class BaseHealth : MonoBehaviour, IHealth
         if (isDead) return;
         currentHealth -= damage;
         currentHealth = Mathf.Max(0, currentHealth);
+        
+        // 顯示傷害文字
+        if (StageManager.Instance != null)
+        {
+            StageManager.Instance.ShowDamageText(transform.position, damage, damageTextOffset, null);
+        }
+
         if (currentHealth <= 0)
         {
             Die();
@@ -55,4 +67,5 @@ public abstract class BaseHealth : MonoBehaviour, IHealth
     {
         currentHealth = maxHealth;
     }
+
 } 

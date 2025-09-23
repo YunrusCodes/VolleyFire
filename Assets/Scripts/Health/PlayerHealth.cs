@@ -27,7 +27,23 @@ public class PlayerHealth : BaseHealth
 
     public override void TakeDamage(float damage)
     {
-        base.TakeDamage(damage);
+        // 不直接呼叫 base.TakeDamage，而是複製其邏輯並修改顏色
+        Debug.Log("TakeDamage: " + damage);
+        if (isDead) return;
+        currentHealth -= damage;
+        currentHealth = Mathf.Max(0, currentHealth);
+        
+        // 顯示紫色傷害文字
+        if (StageManager.Instance != null)
+        {
+            StageManager.Instance.ShowDamageText(transform.position, damage, damageTextOffset, new Color(0.8f, 0f, 1f, 1f));
+        }
+
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+
         UpdateHealthBar();
     }
 
