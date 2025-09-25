@@ -7,6 +7,9 @@ public class CannonRay : BulletBehavior
     [SerializeField] private GameObject laserObject;       // 雷射物件
     [SerializeField] private float chargingTime = 1.0f;   // 續能時間
     [SerializeField] private float activeTime = 2.0f;     // 作用時間
+
+    public float GetChargingTime() => chargingTime;
+    public float GetActiveTime() => activeTime;
     [SerializeField] private float expandSpeed = 100f;     // 雷射擴展速度
     [SerializeField] private float shrinkSpeed = 5f;      // 雷射收縮速度
     [SerializeField] private float maxLength = 30f;       // 最大長度
@@ -21,6 +24,9 @@ public class CannonRay : BulletBehavior
     private bool isCharging = true;                       // 是否在續能中
     private bool isActive = false;                        // 是否在作用中
     private bool isShrinking = false;                     // 是否在收縮中
+
+    public bool IsCharging() => isCharging;
+    public bool IsActive() => isActive;
     private Transform spawnPoint;                         // 發射點
     private float damageInterval = 0.1f; // 傷害間隔
     private float damageTimer = 0f;      // 傷害計時器
@@ -216,9 +222,14 @@ public class CannonRay : BulletBehavior
             Debug.LogWarning("最大長度必須大於0，已自動調整為1");
         }
     }
+    public delegate void OnDestroyHandler(GameObject ray);
+    public event OnDestroyHandler OnDestroyed;
+
     public override void DestroyBullet(bool generateEffect = false)
     {
-
+        // 觸發銷毀事件
+        OnDestroyed?.Invoke(gameObject);
+        
         // 回收自己
         gameObject.SetActive(false);
     }
