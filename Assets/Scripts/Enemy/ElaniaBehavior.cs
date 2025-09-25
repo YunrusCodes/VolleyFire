@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 public class ElaniaBehavior : EnemyBehavior
 {
@@ -20,11 +21,20 @@ public class ElaniaBehavior : EnemyBehavior
     public Vector2 boundaryY = new Vector2(4f, -4f);
     
     [Header("加農砲設置")]
-    public GameObject cannonRayPrefab;
+    public GameObject cannonRayPrefab;  // 一般加農砲
+    public GameObject wormholeCannonPrefab;  // 蟲洞加農砲
     public List<Transform> cannonRaySpawnPoints = new List<Transform>();
     public List<GameObject> cannonRayInstances = new List<GameObject>();
     public float cannonFireInterval = 2f;
     private float cannonFireTimer = 0f;
+    
+    [Header("蟲洞加農砲預警線")]
+    public float warningLineLength = 100f;  // 預警線長度
+    public Color warningLineColor = Color.red;  // 預警線顏色
+    private List<LineRenderer> warningLines = new List<LineRenderer>();  // 預警線渲染器列表
+    private List<GameObject> warningTexts = new List<GameObject>();  // 預警文字列表
+    public Canvas targetCanvas;  // 目標UI Canvas
+    public GameObject warningTextPrefab;  // 預警文字預製體
 
     [Header("導彈設置")]
     public GameObject missilePrefab;
@@ -44,12 +54,15 @@ public class ElaniaBehavior : EnemyBehavior
 
     [Header("蟲洞設置")]
     public GameObject wormholePrefab;  // 蟲洞預製體
+    public GameObject wormholeMissilePrefab;  // 蟲洞飛彈預製體
     public WormholePlane[] wormholePlanes = new WormholePlane[] {
         new WormholePlane { z = 5f, color = new Color(1, 0, 0, 0.2f) },  // 紅色平面
         new WormholePlane { z = 10f, color = new Color(0, 1, 0, 0.2f) }, // 綠色平面
         new WormholePlane { z = 15f, color = new Color(0, 0, 1, 0.2f) }  // 藍色平面
     };
     public float wormholeHealthThreshold = 500f;  // 觸發蟲洞生成的血量閾值
+    private List<GameObject> activeWormholes = new List<GameObject>();  // 當前活躍的蟲洞
+    public int maxWormholeMissileCount = 8;  // 最大發射的蟲洞飛彈數量
     [Header("攻擊設置")]
     public int shotCountBeforeMove = 3;  // 發射幾次後移動
     private int currentShotCount = 0;
@@ -105,11 +118,77 @@ public class ElaniaBehavior : EnemyBehavior
     {
         if (wormholePrefab == null || wormholePlanes == null) return;
 
+        // 移除列表中已經被銷毀的蟲洞
+        activeWormholes.RemoveAll(wormhole => wormhole == null);
+
         // 在每個平面上生成一個蟲洞
-        foreach (var plane in wormholePlanes)
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
         {
-            Vector3 position = GetWormholePosition(plane);
-            Instantiate(wormholePrefab, position, Quaternion.identity);
+            foreach (var plane in wormholePlanes)
+            {
+                Vector3 position = GetWormholePosition(plane);
+                
+                // 計算朝向玩家的方向
+                Vector3 direction = (player.transform.position - position).normalized;
+                Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
+                
+                GameObject wormhole = Instantiate(wormholePrefab, position, rotation);
+                activeWormholes.Add(wormhole);
+            }
+        }
+
+        // 開始發射飛彈
+        StartCoroutine(FireWormholeMissiles());
+    }
+
+    private IEnumerator FireWormholeMissiles()
+    {
+        if (wormholeMissilePrefab == null) yield break;
+
+        // 隨機選擇不重複的蟲洞
+        List<GameObject> selectedWormholes = new List<GameObject>(activeWormholes);
+        System.Random rng = new System.Random();
+        int n = selectedWormholes.Count;
+        while (n > 1)
+        {
+            n--;
+            int k = rng.Next(n + 1);
+            GameObject temp = selectedWormholes[k];
+            selectedWormholes[k] = selectedWormholes[n];
+            selectedWormholes[n] = temp;
+        }
+
+        // 決定要發射的數量（8個或當前可用的最大數量）
+        int fireCount = Mathf.Min(maxWormholeMissileCount, selectedWormholes.Count);
+        selectedWormholes = selectedWormholes.Take(fireCount).ToList();
+
+        // 獲取玩家位置
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null) yield break;
+
+        // 從每個選中的蟲洞發射飛彈
+        foreach (GameObject wormhole in selectedWormholes)
+        {
+            if (wormhole != null)
+            {
+                // 計算朝向玩家的方向
+                Vector3 direction = (player.transform.position - wormhole.transform.position).normalized;
+                Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
+
+                // 生成飛彈
+                GameObject missile = Instantiate(wormholeMissilePrefab, wormhole.transform.position, rotation);
+                
+                // 如果飛彈有 BulletBehavior 組件，設置其方向
+                var bullet = missile.GetComponent<BulletBehavior>();
+                if (bullet != null)
+                {
+                    bullet.SetDirection(direction);
+                }
+
+                // 等待發射間隔
+                yield return new WaitForSeconds(missileFireInterval);
+            }
         }
     }
 
@@ -348,16 +427,131 @@ public class ElaniaBehavior : EnemyBehavior
 
         if (!canFire) return;  // 如果還有活躍的加農砲，不要發射新的
 
-        // 確保 cannonRayInstances 長度正確
-        while (cannonRayInstances.Count < cannonRaySpawnPoints.Count)
+        // 確保 cannonRayInstances 長度正確（考慮額外的蟲洞加農砲）
+        int maxCannonCount = cannonRaySpawnPoints.Count;
+        if (controller.GetHealth().GetCurrentHealth() <= wormholeHealthThreshold)
+        {
+            maxCannonCount += 2;  // 蟲洞模式下多兩個
+        }
+        while (cannonRayInstances.Count < maxCannonCount)
+        {
             cannonRayInstances.Add(null);
+        }
+
+        // 移除列表中已經被銷毀的蟲洞
+        activeWormholes.RemoveAll(wormhole => wormhole == null);
+
+        // 決定發射位置
+        List<Transform> spawnPositions;
+        if (controller.GetHealth().GetCurrentHealth() <= wormholeHealthThreshold && activeWormholes.Count >= cannonRaySpawnPoints.Count)
+        {
+            // 血量低於閾值且有足夠的蟲洞時，隨機選擇蟲洞作為發射點
+            spawnPositions = new List<Transform>();
+            var shuffledWormholes = new List<GameObject>(activeWormholes);
+            
+            // 洗牌算法
+            for (int i = shuffledWormholes.Count - 1; i > 0; i--)
+            {
+                int j = Random.Range(0, i + 1);
+                var temp = shuffledWormholes[i];
+                shuffledWormholes[i] = shuffledWormholes[j];
+                shuffledWormholes[j] = temp;
+            }
+
+            // 取前面幾個蟲洞的 Transform（比原始發射點多兩個）
+            int wormholeCount = cannonRaySpawnPoints.Count + 2;
+            for (int i = 0; i < wormholeCount && i < shuffledWormholes.Count; i++)
+            {
+                spawnPositions.Add(shuffledWormholes[i].transform);
+            }
+        }
+        else
+        {
+            // 否則使用原始發射點
+            spawnPositions = new List<Transform>(cannonRaySpawnPoints);
+        }
 
         // 發射加農砲
-        for (int i = 0; i < cannonRaySpawnPoints.Count; i++)
+        for (int i = 0; i < spawnPositions.Count; i++)
         {
-            Transform spawnPoint = cannonRaySpawnPoints[i];
-            GameObject ray = Instantiate(cannonRayPrefab, spawnPoint.position, spawnPoint.rotation);
+            Transform spawnPoint = spawnPositions[i];
+            bool isWormholeCannon = controller.GetHealth().GetCurrentHealth() <= wormholeHealthThreshold && spawnPositions != cannonRaySpawnPoints;
+            
+            // 如果是蟲洞加農砲，先創建預警線
+            if (isWormholeCannon)
+            {
+                // 創建預警線物件
+                GameObject warningLineObj = new GameObject($"WarningLine_{i}");
+                warningLineObj.transform.position = spawnPoint.position;
+                
+                // 添加 LineRenderer 組件
+                LineRenderer lineRenderer = warningLineObj.AddComponent<LineRenderer>();
+                lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
+                lineRenderer.startColor = warningLineColor;
+                lineRenderer.endColor = warningLineColor;
+                lineRenderer.startWidth = 0.1f;
+                lineRenderer.endWidth = 0.1f;
+                lineRenderer.positionCount = 2;
+                
+                // 設置線的起點和終點
+                Vector3 startPoint = spawnPoint.position;
+                Vector3 endPoint = startPoint + spawnPoint.forward * warningLineLength;
+                lineRenderer.SetPosition(0, startPoint);
+                lineRenderer.SetPosition(1, endPoint);
+                
+                warningLines.Add(lineRenderer);
+
+                // 計算線與z=0平面的交點
+                Vector3 direction = (endPoint - startPoint).normalized;
+                float t = -startPoint.z / direction.z;
+                Vector3 intersectionPoint = startPoint + direction * t;
+
+                // 如果有Canvas和預製體，創建UI文字
+                if (targetCanvas != null && warningTextPrefab != null)
+                {
+                    // 將世界座標轉換為螢幕座標
+                    Vector2 screenPoint = Camera.main.WorldToScreenPoint(intersectionPoint);
+                    
+                    // 創建UI文字
+                    GameObject warningTextObj = Instantiate(warningTextPrefab, targetCanvas.transform);
+                    RectTransform rectTransform = warningTextObj.GetComponent<RectTransform>();
+                    
+                    // 將螢幕座標轉換為Canvas座標
+                    Vector2 canvasPosition;
+                    RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                        targetCanvas.GetComponent<RectTransform>(),
+                        screenPoint,
+                        targetCanvas.worldCamera,
+                        out canvasPosition
+                    );
+                    
+                    rectTransform.anchoredPosition = canvasPosition;
+                    
+                    // 設置追蹤器組件
+                    var tracker = warningTextObj.AddComponent<WarningTextTracker>();
+                    tracker.targetLine = lineRenderer;
+                    tracker.targetCanvas = targetCanvas;
+                    
+                    // 保持在 Canvas 下並啟用
+                    warningTextObj.SetActive(true);
+                    warningTexts.Add(warningTextObj);
+                }
+            }
+
+            // 根據類型選擇預製體
+            GameObject prefabToUse = isWormholeCannon ? wormholeCannonPrefab : cannonRayPrefab;
+            GameObject ray = Instantiate(prefabToUse, spawnPoint.position, spawnPoint.rotation);
             cannonRayInstances[i] = ray;
+
+            // 如果是蟲洞加農砲，訂閱其 active 狀態變化
+            if (isWormholeCannon)
+            {
+                var rayComponent = ray.GetComponent<CannonRay>();
+                if (rayComponent != null)
+                {
+                    StartCoroutine(WatchCannonRayActive(rayComponent, warningLines[warningLines.Count - 1]));
+                }
+            }
             
             var bullet = ray.GetComponent<BulletBehavior>();
             if (bullet != null)
@@ -388,7 +582,7 @@ public class ElaniaBehavior : EnemyBehavior
         }
     }
 
-    private void OnCannonRayDestroyed(GameObject ray)
+    void OnCannonRayDestroyed(GameObject ray)
     {
         // 從列表中移除被銷毀的加農砲
         int index = cannonRayInstances.IndexOf(ray);
@@ -398,7 +592,7 @@ public class ElaniaBehavior : EnemyBehavior
         }
     }
 
-    private void OnDestroy()
+    void OnDestroy()
     {
         // 清理所有事件訂閱
         foreach (var ray in cannonRayInstances)
@@ -412,9 +606,57 @@ public class ElaniaBehavior : EnemyBehavior
                 }
             }
         }
+
+        // 清理所有預警線
+        foreach (var line in warningLines)
+        {
+            if (line != null)
+            {
+                Destroy(line.gameObject);
+            }
+        }
+        warningLines.Clear();
+
+        // 清理所有預警文字
+        foreach (var text in warningTexts)
+        {
+            if (text != null)
+            {
+                Destroy(text);
+            }
+        }
+        warningTexts.Clear();
     }
 
-    private IEnumerator FireMissileSequence()
+    IEnumerator WatchCannonRayActive(CannonRay cannonRay, LineRenderer warningLine)
+    {
+        // 等待直到加農砲進入 active 狀態
+        while (!cannonRay.IsActive())
+        {
+            yield return null;
+        }
+
+        // 當加農砲變為 active 時，銷毀預警線和對應的文字
+        if (warningLine != null)
+        {
+            int index = warningLines.IndexOf(warningLine);
+            if (index >= 0 && index < warningTexts.Count)
+            {
+                // 銷毀對應的文字
+                if (warningTexts[index] != null)
+                {
+                    Destroy(warningTexts[index]);
+                }
+                warningTexts.RemoveAt(index);
+            }
+            
+            // 銷毀預警線
+            warningLines.Remove(warningLine);
+            Destroy(warningLine.gameObject);
+        }
+    }
+
+    IEnumerator FireMissileSequence()
     {
         if (missilePrefab == null || missileWarningEffectPrefab == null || missileSpawnPoints.Count == 0) yield break;
 
@@ -465,7 +707,7 @@ public class ElaniaBehavior : EnemyBehavior
         }
     }
 
-    private void OnDrawGizmos()
+    void OnDrawGizmos()
     {
         // 畫出活動範圍邊界
         Vector3 min = new Vector3(boundaryX.y, boundaryY.y, transform.position.z);
