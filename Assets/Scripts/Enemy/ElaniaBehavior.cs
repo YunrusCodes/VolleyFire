@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 
 public class ElaniaBehavior : EnemyBehavior
@@ -24,6 +25,13 @@ public class ElaniaBehavior : EnemyBehavior
     public List<GameObject> cannonRayInstances = new List<GameObject>();
     public float cannonFireInterval = 2f;
     private float cannonFireTimer = 0f;
+
+    [Header("導彈設置")]
+    public GameObject missilePrefab;
+    public GameObject missileWarningEffectPrefab;  // 導彈預警發光效果
+    public List<Transform> missileSpawnPoints = new List<Transform>();
+    public float missileFireInterval = 0.025f;  // 導彈發射間隔
+    public float missileWarningDuration = 0.1f;   // 預警時間
     [Header("攻擊設置")]
     public int shotCountBeforeMove = 3;  // 發射幾次後移動
     private int currentShotCount = 0;
@@ -39,7 +47,7 @@ public class ElaniaBehavior : EnemyBehavior
     public bool CHARGE = false;           // 充能狀態
     public bool ACTIVE = false;           // 作用狀態
     private bool lastCHARGE = false;      // 上一次的充能狀態
-    private bool lastACTIVE = false;      // 上一次的作用狀態
+    private bool lastACTIVE = true;      // 上一次的作用狀態
 
     public override void Init(EnemyController controller)
     {
@@ -51,7 +59,7 @@ public class ElaniaBehavior : EnemyBehavior
         CHARGE = false;
         ACTIVE = false;
         lastCHARGE = false;
-        lastACTIVE = false;
+        lastACTIVE = true;
         
         // 初始化旋轉目標
         if (GameObject.FindGameObjectWithTag("Player") != null)
@@ -64,10 +72,18 @@ public class ElaniaBehavior : EnemyBehavior
         }
         currentShotCount = 0;
         SetNewRandomTarget();
+
     }
 
     public override void Tick()
     {
+        // 檢查狀態變化
+        if (lastACTIVE && !ACTIVE)
+        {
+            // 當 ACTIVE 從 true 變成 false 時，開始發射導彈序列
+            StartCoroutine(FireMissileSequence());
+        }
+
         // 保存當前狀態
         lastCHARGE = CHARGE;
         lastACTIVE = ACTIVE;
@@ -350,6 +366,57 @@ public class ElaniaBehavior : EnemyBehavior
                 {
                     cannonRay.OnDestroyed -= OnCannonRayDestroyed;
                 }
+            }
+        }
+    }
+
+    private IEnumerator FireMissileSequence()
+    {
+        if (missilePrefab == null || missileWarningEffectPrefab == null || missileSpawnPoints.Count == 0) yield break;
+
+        // 依序創建預警效果
+        List<GameObject> warningEffects = new List<GameObject>();
+        foreach (Transform spawnPoint in missileSpawnPoints)
+        {
+            GameObject warningEffect = Instantiate(missileWarningEffectPrefab, spawnPoint.position, spawnPoint.rotation, spawnPoint);
+            warningEffects.Add(warningEffect);
+            yield return new WaitForSeconds(missileFireInterval);
+        }
+
+        // 等待預警時間
+        yield return new WaitForSeconds(missileWarningDuration);
+
+        // 依序發射每個導彈
+        for (int i = 0; i < missileSpawnPoints.Count; i++)
+        {
+            Transform spawnPoint = missileSpawnPoints[i];
+            
+            // 銷毀對應的預警效果
+            if (warningEffects[i] != null)
+            {
+                Destroy(warningEffects[i]);
+            }
+
+            // 創建導彈
+            GameObject missile = Instantiate(missilePrefab, spawnPoint.position, spawnPoint.rotation);
+            
+            // 如果導彈有 BulletBehavior 組件，設置其方向
+            var bullet = missile.GetComponent<BulletBehavior>();
+            if (bullet != null)
+            {
+                bullet.SetDirection(spawnPoint.forward);
+            }
+
+            // 等待指定時間
+            yield return new WaitForSeconds(missileFireInterval);
+        }
+
+        // 確保所有預警效果都被清理
+        foreach (var effect in warningEffects)
+        {
+            if (effect != null)
+            {
+                Destroy(effect);
             }
         }
     }
