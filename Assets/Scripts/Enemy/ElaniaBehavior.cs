@@ -13,6 +13,7 @@ public class ElaniaBehavior : EnemyBehavior
     public float minSpeedRatio = 0.2f;
     [Tooltip("加農砲發射時的水平移動速度")]
     public float cannonSideMoveSpeed = 3f;
+    private int horizontalMoveDirection = 1;  // 1 = 右, -1 = 左
     [Tooltip("x: 上限, y: 下限")]
     public Vector2 boundaryX = new Vector2(8f, -8f);
     public Vector2 boundaryY = new Vector2(4f, -4f);
@@ -88,6 +89,14 @@ public class ElaniaBehavior : EnemyBehavior
 
     private void HandleMovement()
     {
+        // 檢查狀態變化
+        if (lastCHARGE && !CHARGE && !lastACTIVE && ACTIVE)
+        {
+            // 當 CHARGE 從 true 變成 false，且 ACTIVE 從 false 變成 true 時
+            // 隨機決定移動方向
+            horizontalMoveDirection = Random.value < 0.5f ? -1 : 1;
+        }
+
         if (CHARGE)
         {
             // 充能時停止移動
@@ -96,9 +105,7 @@ public class ElaniaBehavior : EnemyBehavior
         else if (ACTIVE)
         {
             // 作用時水平移動
-            float targetX = 0f;
-            float moveDirection = transform.position.x > targetX ? -1f : 1f;
-            Vector3 sideMovement = new Vector3(moveDirection * cannonSideMoveSpeed * Time.deltaTime, 0, 0);
+            Vector3 sideMovement = new Vector3(horizontalMoveDirection * cannonSideMoveSpeed * Time.deltaTime, 0, 0);
             transform.position += sideMovement;
         }
         else
@@ -128,21 +135,27 @@ public class ElaniaBehavior : EnemyBehavior
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotateSpeed * Time.deltaTime);
     }
 
+    [Header("作用時的上升設置")]
+    public float upwardMoveSpeed = 20f;  // 向上移動的速度
+
     private void HandleRotation()
     {
-        // 更新目標位置
         if (CHARGE && !ACTIVE)
         {
             // 充能狀態時，更新目標為玩家位置
             rotationTarget = GameObject.FindGameObjectWithTag("Player").transform.position;
         }
-        // 如果是作用狀態，保持原有目標不變
+        else if (!CHARGE && ACTIVE)
+        {
+            // 作用狀態時，目標點持續往上移動
+            rotationTarget += Vector3.up *0.085f;
+        }
 
         // 根據狀態使用不同的旋轉速度
-        float currentTurnSpeed = ACTIVE ? activeRotateSpeed : turnSpeed;
+        // float currentTurnSpeed = ACTIVE ? activeRotateSpeed : turnSpeed;
         
         // 使用儲存的目標位置進行旋轉
-        RotateTowards(rotationTarget, currentTurnSpeed);
+        RotateTowards(rotationTarget, activeRotateSpeed);
     }
 
     private void HandleAttack()
