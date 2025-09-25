@@ -32,6 +32,24 @@ public class ElaniaBehavior : EnemyBehavior
     public List<Transform> missileSpawnPoints = new List<Transform>();
     public float missileFireInterval = 0.025f;  // 導彈發射間隔
     public float missileWarningDuration = 0.1f;   // 預警時間
+
+    [System.Serializable]
+    public class WormholePlane
+    {
+        public float z = 10f;  // 平面的z座標
+        public Vector2 xRange = new Vector2(-8f, 8f);  // x範圍
+        public Vector2 yRange = new Vector2(-4f, 4f);  // y範圍
+        public Color color = new Color(1, 1, 1, 0.2f);  // 平面顯示顏色
+    }
+
+    [Header("蟲洞設置")]
+    public GameObject wormholePrefab;  // 蟲洞預製體
+    public WormholePlane[] wormholePlanes = new WormholePlane[] {
+        new WormholePlane { z = 5f, color = new Color(1, 0, 0, 0.2f) },  // 紅色平面
+        new WormholePlane { z = 10f, color = new Color(0, 1, 0, 0.2f) }, // 綠色平面
+        new WormholePlane { z = 15f, color = new Color(0, 0, 1, 0.2f) }  // 藍色平面
+    };
+    public float wormholeHealthThreshold = 500f;  // 觸發蟲洞生成的血量閾值
     [Header("攻擊設置")]
     public int shotCountBeforeMove = 3;  // 發射幾次後移動
     private int currentShotCount = 0;
@@ -75,12 +93,38 @@ public class ElaniaBehavior : EnemyBehavior
 
     }
 
+    private Vector3 GetWormholePosition(WormholePlane plane)
+    {
+        // 在指定平面的範圍內隨機生成位置
+        float randomX = Random.Range(plane.xRange.x, plane.xRange.y);
+        float randomY = Random.Range(plane.yRange.x, plane.yRange.y);
+        return new Vector3(randomX, randomY, plane.z);
+    }
+
+    private void SpawnWormholes()
+    {
+        if (wormholePrefab == null || wormholePlanes == null) return;
+
+        // 在每個平面上生成一個蟲洞
+        foreach (var plane in wormholePlanes)
+        {
+            Vector3 position = GetWormholePosition(plane);
+            Instantiate(wormholePrefab, position, Quaternion.identity);
+        }
+    }
+
     public override void Tick()
     {
         // 檢查狀態變化
         if (lastACTIVE && !ACTIVE)
         {
-            // 當 ACTIVE 從 true 變成 false 時，開始發射導彈序列
+            // 當 ACTIVE 從 true 變成 false 時
+            if (controller.GetHealth().GetCurrentHealth() <= wormholeHealthThreshold)
+            {
+                // 生成蟲洞
+                SpawnWormholes();
+            }
+            // 開始發射導彈序列
             StartCoroutine(FireMissileSequence());
         }
 
@@ -438,6 +482,47 @@ public class ElaniaBehavior : EnemyBehavior
         {
             Gizmos.color = Color.green;
             Gizmos.DrawWireSphere(targetPosition, 0.3f);
+        }
+
+        // 畫出蟲洞可生成的平面
+        if (wormholePlanes != null)
+        {
+            foreach (var plane in wormholePlanes)
+            {
+                // 設置 Gizmos 顏色
+                Gizmos.color = plane.color;
+                
+                // 計算平面的四個角點
+                Vector3 p1 = new Vector3(plane.xRange.x, plane.yRange.x, plane.z);
+                Vector3 p2 = new Vector3(plane.xRange.y, plane.yRange.x, plane.z);
+                Vector3 p3 = new Vector3(plane.xRange.y, plane.yRange.y, plane.z);
+                Vector3 p4 = new Vector3(plane.xRange.x, plane.yRange.y, plane.z);
+                
+                // 畫出平面邊框
+                Gizmos.DrawLine(p1, p2);
+                Gizmos.DrawLine(p2, p3);
+                Gizmos.DrawLine(p3, p4);
+                Gizmos.DrawLine(p4, p1);
+                
+                // 畫出一些交叉線來表示平面
+                int gridSize = 5;
+                for (int x = 0; x < gridSize; x++)
+                {
+                    float xPos = Mathf.Lerp(plane.xRange.x, plane.xRange.y, (float)x / (gridSize - 1));
+                    Gizmos.DrawLine(
+                        new Vector3(xPos, plane.yRange.x, plane.z),
+                        new Vector3(xPos, plane.yRange.y, plane.z)
+                    );
+                }
+                for (int y = 0; y < gridSize; y++)
+                {
+                    float yPos = Mathf.Lerp(plane.yRange.x, plane.yRange.y, (float)y / (gridSize - 1));
+                    Gizmos.DrawLine(
+                        new Vector3(plane.xRange.x, yPos, plane.z),
+                        new Vector3(plane.xRange.y, yPos, plane.z)
+                    );
+                }
+            }
         }
     }
 }
