@@ -27,7 +27,19 @@ public class ElaniaBehavior : EnemyBehavior
     public List<GameObject> cannonRayInstances = new List<GameObject>();
     public float cannonFireInterval = 2f;
     private float cannonFireTimer = 0f;
-    private bool UseHoleCanon = false;  // 是否使用蟲洞加農砲
+    private bool useHoleCanon = false;  // 是否使用蟲洞加農砲
+    public bool UseHoleCanon
+    {
+        get { return useHoleCanon; }
+        set 
+        { 
+            useHoleCanon = value;
+            if (mainWormhole != null)
+            {
+                mainWormhole.SetActive(value);
+            }
+        }
+    }
     
     [Header("蟲洞加農砲預警線")]
     public float warningLineLength = 100f;  // 預警線長度
@@ -56,6 +68,8 @@ public class ElaniaBehavior : EnemyBehavior
     [Header("蟲洞設置")]
     public GameObject wormholePrefab;  // 蟲洞預製體
     public GameObject wormholeMissilePrefab;  // 蟲洞飛彈預製體
+    public GameObject mainWormhole;    // 主蟲洞物件
+    public List<Transform> wormholeMissileWarningEffectPoints = new List<Transform>();    // 主蟲洞生成點
     public WormholePlane[] wormholePlanes = new WormholePlane[] {
         new WormholePlane { z = 5f, color = new Color(1, 0, 0, 0.2f) },  // 紅色平面
         new WormholePlane { z = 10f, color = new Color(0, 1, 0, 0.2f) }, // 綠色平面
@@ -92,6 +106,12 @@ public class ElaniaBehavior : EnemyBehavior
         ACTIVE = false;
         lastCHARGE = false;
         lastACTIVE = false;
+        
+        // 初始化主蟲洞狀態
+        if (mainWormhole != null)
+        {
+            mainWormhole.SetActive(false);
+        }
         
         // 初始化旋轉目標
         if (GameObject.FindGameObjectWithTag("Player") != null)
@@ -145,7 +165,7 @@ public class ElaniaBehavior : EnemyBehavior
     private IEnumerator FireWormholeMissiles()
     {
         GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player == null) yield break;
+        if (player == null || mainWormhole == null) yield break;
 
         // 隨機選擇不重複的蟲洞
         List<GameObject> selectedWormholes = new List<GameObject>(activeWormholes);
@@ -164,27 +184,58 @@ public class ElaniaBehavior : EnemyBehavior
         int fireCount = Mathf.Min(maxWormholeMissileCount, selectedWormholes.Count);
         selectedWormholes = selectedWormholes.Take(fireCount).ToList();
 
-        // 從每個選中的蟲洞發射飛彈，每0.25秒一個
+        // 發射點創建預警效果，並朝向主蟲洞
+        Queue<GameObject> initialWarningEffects = new Queue<GameObject>();
+        for(int i = 0; i < fireCount; i++)
+        {
+            Transform spawnPoint = wormholeMissileWarningEffectPoints[i%wormholeMissileWarningEffectPoints.Count];
+            // 創建預警效果並朝向主蟲洞
+            GameObject warningEffect = Instantiate(missileWarningEffectPrefab, spawnPoint.position, spawnPoint.rotation, transform);
+            initialWarningEffects.Enqueue(warningEffect);
+            warningEffect.transform.LookAt(mainWormhole.transform);
+        }
+
+        // 從每個選中的蟲洞發射飛彈
         foreach (GameObject wormhole in selectedWormholes)
         {
             if (wormhole != null)
             {
+                // 移動預警效果到主蟲洞
+                GameObject movingWarningEffect = initialWarningEffects.Dequeue();
+                float moveTime = 0f;
+                float moveDuration = 0.25f; // 移動時間
+                Vector3 startPos = movingWarningEffect.transform.position;
+                Vector3 endPos = mainWormhole.transform.position;
+                
+                while (moveTime < moveDuration)
+                {
+                    moveTime += Time.deltaTime;
+                    float t = moveTime / moveDuration;
+                    movingWarningEffect.transform.position = Vector3.Lerp(startPos, endPos, t);
+                    // 讓預警效果朝向移動方向
+                    if ((endPos - startPos).sqrMagnitude > 0.001f)
+                    {
+                        movingWarningEffect.transform.rotation = Quaternion.LookRotation((endPos - startPos).normalized);
+                    }
+                    yield return null;
+                }
+
+                // 銷毀移動的預警效果
+                Destroy(movingWarningEffect);
+
                 // 計算朝向玩家的方向
                 Vector3 direction = (player.transform.position - wormhole.transform.position).normalized;
-                Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up);
+                Quaternion rotation = Quaternion.LookRotation(direction);
 
                 // 生成飛彈
                 GameObject missile = Instantiate(wormholeMissilePrefab, wormhole.transform.position, rotation);
                 
-                // 如果飛彈有 BulletBehavior 組件，設置其方向
+                // 如果導彈有 BulletBehavior 組件，設置其方向
                 var bullet = missile.GetComponent<BulletBehavior>();
                 if (bullet != null)
                 {
                     bullet.SetDirection(direction);
                 }
-
-                // 等待0.25秒
-                yield return new WaitForSeconds(0.25f);
             }
         }
     }
