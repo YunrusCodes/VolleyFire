@@ -12,8 +12,8 @@ GameObject:
   - component: {fileID: 33762265132190592}
   - component: {fileID: 23455882565063832}
   - component: {fileID: 1612135955883067724}
-  - component: {fileID: 6853925521814086817}
   - component: {fileID: 9201404639343455137}
+  - component: {fileID: -7819414021675068029}
   m_Layer: 0
   m_Name: OrbitMissile_Elania
   m_TagString: Enemy
@@ -117,33 +117,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
---- !u!114 &6853925521814086817
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1259865673663102}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a17642307d31be34382efb1ae6a9758c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  speed: 30
-  lifetime: 10
-  useRigidbody: 0
-  explosionPrefab: {fileID: 8640070007292392689, guid: 1db44c370478b7146823784ef4dd7cc2, type: 3}
-  initialSpeed: 30
-  acceleration: 5
-  maxSpeed: 40
-  rotationSpeed: 225
-  trackingDelay: 0.5
-  targetTag: Player
-  damage: 2
-  currentSpeed: 0
-  isTracking: 0
-  target: {fileID: 0}
-  reachedMaxSpeed: 0
 --- !u!82 &9201404639343455137
 AudioSource:
   m_ObjectHideFlags: 0
@@ -241,6 +214,28 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &-7819414021675068029
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1259865673663102}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6165dcd1a9559ca4e924636bab0a60ef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speed: 80
+  lifetime: 5
+  useRigidbody: 0
+  explosionPrefab: {fileID: 8640070007292392689, guid: 1db44c370478b7146823784ef4dd7cc2, type: 3}
+  targetTag: Player
+  damage: 1
+  initialRotateSpeed: 0
+  maxRotateSpeed: 30
+  rotateAcceleration: 15
+  correctionThreshold: 0.5
 --- !u!1 &1702379867288058
 GameObject:
   m_ObjectHideFlags: 0
