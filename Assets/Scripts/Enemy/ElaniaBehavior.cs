@@ -46,6 +46,7 @@ public class ElaniaBehavior : EnemyBehavior
     public Color warningLineColor = Color.red;  // 預警線顏色
     private List<LineRenderer> warningLines = new List<LineRenderer>();  // 預警線渲染器列表
     private List<GameObject> warningTexts = new List<GameObject>();  // 預警文字列表
+    public List<GameObject> wormCanonWarningObjects = new List<GameObject>();  // 蟲洞加農砲預警物件列表
     public Canvas targetCanvas;  // 目標UI Canvas
     public GameObject warningTextPrefab;  // 預警文字預製體
 
@@ -68,7 +69,11 @@ public class ElaniaBehavior : EnemyBehavior
     [Header("蟲洞設置")]
     public GameObject wormholePrefab;  // 蟲洞預製體
     public GameObject wormholeMissilePrefab;  // 蟲洞飛彈預製體
+    public GameObject wormholeMissileWarningEffectPrefab;  // 蟲洞飛彈預警發光效果
     public GameObject mainWormhole;    // 主蟲洞物件
+    public GameObject TeleportEfftct_in;  // 發光效果預製體
+    public GameObject TeleportEfftct_out;  // 發光效果預製體
+    public GameObject ShinyEffect;  // 發光效果預製體
     public List<Transform> wormholeMissileWarningEffectPoints = new List<Transform>();    // 主蟲洞生成點
     public WormholePlane[] wormholePlanes = new WormholePlane[] {
         new WormholePlane { z = 5f, color = new Color(1, 0, 0, 0.2f) },  // 紅色平面
@@ -186,49 +191,47 @@ public class ElaniaBehavior : EnemyBehavior
 
         // 發射點創建預警效果，並朝向主蟲洞
         Queue<GameObject> initialWarningEffects = new Queue<GameObject>();
+        List<GameObject> teleportEfftcts = new List<GameObject>();
         for(int i = 0; i < fireCount; i++)
         {
             Transform spawnPoint = wormholeMissileWarningEffectPoints[i%wormholeMissileWarningEffectPoints.Count];
             // 創建預警效果並朝向主蟲洞
-            GameObject warningEffect = Instantiate(missileWarningEffectPrefab, spawnPoint.position, spawnPoint.rotation, transform);
+            GameObject warningEffect = Instantiate(wormholeMissileWarningEffectPrefab, spawnPoint.position, spawnPoint.rotation, transform);
             initialWarningEffects.Enqueue(warningEffect);
             warningEffect.transform.LookAt(mainWormhole.transform);
+            float moveTime = 0f;
+            float moveDuration = 0.25f; // 移動時間
+            Vector3 startPos = warningEffect.transform.position;
+            Vector3 endPos = mainWormhole.transform.position;
+            
+            while (moveTime < moveDuration)
+            {
+                moveTime += Time.deltaTime;
+                float t = moveTime / moveDuration;
+                warningEffect.transform.position = Vector3.Lerp(startPos, endPos, t);
+                // 讓預警效果朝向移動方向
+                if ((endPos - startPos).sqrMagnitude > 0.001f)
+                {
+                    warningEffect.transform.rotation = Quaternion.LookRotation((endPos - startPos).normalized);
+                }
+                yield return null;
+            }
+            GameObject teleportEfftct = Instantiate(TeleportEfftct_in, warningEffect.transform.position, warningEffect.transform.rotation);
+            teleportEfftcts.Add(teleportEfftct);
+            Destroy(warningEffect);
         }
-
         // 從每個選中的蟲洞發射飛彈
         foreach (GameObject wormhole in selectedWormholes)
         {
             if (wormhole != null)
             {
-                // 移動預警效果到主蟲洞
-                GameObject movingWarningEffect = initialWarningEffects.Dequeue();
-                float moveTime = 0f;
-                float moveDuration = 0.25f; // 移動時間
-                Vector3 startPos = movingWarningEffect.transform.position;
-                Vector3 endPos = mainWormhole.transform.position;
-                
-                while (moveTime < moveDuration)
-                {
-                    moveTime += Time.deltaTime;
-                    float t = moveTime / moveDuration;
-                    movingWarningEffect.transform.position = Vector3.Lerp(startPos, endPos, t);
-                    // 讓預警效果朝向移動方向
-                    if ((endPos - startPos).sqrMagnitude > 0.001f)
-                    {
-                        movingWarningEffect.transform.rotation = Quaternion.LookRotation((endPos - startPos).normalized);
-                    }
-                    yield return null;
-                }
-
-                // 銷毀移動的預警效果
-                Destroy(movingWarningEffect);
-
                 // 計算朝向玩家的方向
                 Vector3 direction = (player.transform.position - wormhole.transform.position).normalized;
                 Quaternion rotation = Quaternion.LookRotation(direction);
 
                 // 生成飛彈
                 GameObject missile = Instantiate(wormholeMissilePrefab, wormhole.transform.position, rotation);
+                Instantiate(TeleportEfftct_out, wormhole.transform.position, wormhole.transform.rotation);
                 
                 // 如果導彈有 BulletBehavior 組件，設置其方向
                 var bullet = missile.GetComponent<BulletBehavior>();
@@ -237,13 +240,20 @@ public class ElaniaBehavior : EnemyBehavior
                     bullet.SetDirection(direction);
                 }
             }
+            yield return new WaitForSeconds(0.25f);
+        }
+        
+        foreach (GameObject teleportEfftct in teleportEfftcts)
+        {
+            Destroy(teleportEfftct);
         }
     }
 
     public override void Tick()
     {
 
-        if(lastACTIVE && !ACTIVE && controller.GetHealth().GetCurrentHealth() <= wormholeHealthThreshold){
+        if(lastACTIVE && !ACTIVE && controller.GetHealth().GetCurrentHealth() <= wormholeHealthThreshold)
+        {
             UseHoleCanon = true;
         }
         
@@ -318,12 +328,12 @@ public class ElaniaBehavior : EnemyBehavior
 
     private void HandleRotation()
     {
-        if (CHARGE && !ACTIVE)
+        if (CHARGE && !ACTIVE && !UseHoleCanon)
         {
             // 充能狀態時，更新目標為玩家位置
             rotationTarget = GameObject.FindGameObjectWithTag("Player").transform.position;
         }
-        else if (!CHARGE && ACTIVE)
+        else if (!CHARGE && ACTIVE && !UseHoleCanon)
         {
             // 作用狀態時，目標點持續往上移動
             rotationTarget += Vector3.up *0.085f;
@@ -353,8 +363,6 @@ public class ElaniaBehavior : EnemyBehavior
         // 沒有實例時，重置所有狀態
         if (!hasInstance)
         {
-            lastACTIVE = ACTIVE;
-            lastCHARGE = CHARGE;
             CHARGE = false;
             ACTIVE = false;
             cannonStateTimer = 0f;
@@ -541,7 +549,8 @@ public class ElaniaBehavior : EnemyBehavior
     private void FireWormholeCannonRay()
     {
         
-        StartCoroutine(FireNormalMissiles(1f));
+        StartCoroutine(FireNormalMissiles(4f));
+        StartCoroutine(ExpandWormCanonWarningObjects(0.5f,3f));
         // 隨機選擇蟲洞
         var shuffledWormholes = new List<GameObject>(activeWormholes);
         for (int i = shuffledWormholes.Count - 1; i > 0; i--)
@@ -637,6 +646,35 @@ public class ElaniaBehavior : EnemyBehavior
         
     }
 
+    private IEnumerator ExpandWormCanonWarningObjects(float expandTime, float delayTime)
+    {
+        float initialWarningObjectsZ = 0;
+        float maxWarningObjectsZ = 13f;
+        float warningObjectsExpandTime = expandTime;
+        float warningObjectsExpandSpeed = (maxWarningObjectsZ - initialWarningObjectsZ) / warningObjectsExpandTime;
+        float warningObjectsExpandTimer = 0f;
+        foreach (GameObject warningObject in wormCanonWarningObjects)
+        {
+            warningObject.SetActive(true);
+        }
+        while (warningObjectsExpandTimer < warningObjectsExpandTime)
+        {
+            warningObjectsExpandTimer += Time.deltaTime;
+            float z = initialWarningObjectsZ + warningObjectsExpandSpeed * warningObjectsExpandTimer;
+            foreach (GameObject warningObject in wormCanonWarningObjects)
+            {
+                warningObject.transform.localScale = new Vector3(warningObject.transform.localScale.x, warningObject.transform.localScale.y, z);
+            }
+            yield return null;
+        }
+        ShinyEffect.SetActive(true);
+        yield return new WaitForSeconds(delayTime);
+        foreach (GameObject warningObject in wormCanonWarningObjects)
+        {
+            warningObject.SetActive(false);
+        }
+        ShinyEffect.SetActive(false);
+    }
     void OnCannonRayDestroyed(GameObject ray)
     {
         // 從列表中移除被銷毀的加農砲
