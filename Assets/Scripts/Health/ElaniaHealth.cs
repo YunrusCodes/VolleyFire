@@ -29,6 +29,7 @@ public class ElaniaHealth : EnemyHealth
                     GameObject newBullet = Instantiate(lastHitBullet, 
                         randomWormhole.transform.position, 
                         Quaternion.identity);
+                    newBullet.tag = "Teleported";
 
                     // 移除所有原有的子彈行為組件，但先保存爆炸特效
                     GameObject explosionPrefab = null;
@@ -47,6 +48,13 @@ public class ElaniaHealth : EnemyHealth
                     }
                     else{
                         explosionPrefab = reflectDefaultBulletExplosionPrefab;
+                    }
+                    ControllableObject[] oldControllableObjects = newBullet.GetComponents<ControllableObject>();
+                    if(oldControllableObjects.Length > 0){
+                        foreach (var controllableObject in oldControllableObjects)
+                        {
+                            Destroy(controllableObject);
+                        }
                     }
 
                     // 添加新的 StraightBullet 組件並設置其設定
