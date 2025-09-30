@@ -1,4 +1,5 @@
 using UnityEngine;
+using VolleyFire.Bullets;
 
 /// <summary>
 /// 筆直前行子彈 - 繼承自BulletBehavior
@@ -7,6 +8,19 @@ public class StraightBullet : BulletBehavior
 {
     [SerializeField] private string targetTag;
     [SerializeField] private float damage = 1f;
+    [SerializeField] public BulletSettings settings;
+    public void SetFromSettings(BulletSettings settings)
+    {
+        if (settings != null)
+        {
+            speed = settings.speed;
+            damage = settings.damage;
+            useRigidbody = settings.useRigidbody;
+            lifetime = settings.lifetime;
+            targetTag = settings.targetTag;
+            explosionPrefab = settings.explosionPrefab;
+        }
+    }
 
     protected override void BehaviorOnStart()
     {

@@ -82,6 +82,7 @@ public class ElaniaBehavior : EnemyBehavior
     };
     public float wormholeHealthThreshold = 500f;  // 觸發蟲洞生成的血量閾值
     private List<GameObject> activeWormholes = new List<GameObject>();  // 當前活躍的蟲洞
+    private ElaniaHealth elaniaHealth;  // 參考到ElaniaHealth組件
     public int maxWormholeMissileCount = 8;  // 最大發射的蟲洞飛彈數量
     [Header("攻擊設置")]
     public int shotCountBeforeMove = 3;  // 發射幾次後移動
@@ -103,6 +104,7 @@ public class ElaniaBehavior : EnemyBehavior
     public override void Init(EnemyController controller)
     {
         this.controller = controller;
+        elaniaHealth = GetComponent<ElaniaHealth>();
         // 初始化加農砲實例列表
         cannonRayInstances = new List<GameObject>(new GameObject[cannonRaySpawnPoints.Count]);
         // 初始化加農砲狀態
@@ -161,6 +163,10 @@ public class ElaniaBehavior : EnemyBehavior
             
             GameObject wormhole = Instantiate(wormholePrefab, position, rotation);
             activeWormholes.Add(wormhole);
+            if (elaniaHealth != null)
+            {
+                elaniaHealth.UpdateWormholes(activeWormholes);
+            }
 
             // 等待0.25秒
             yield return new WaitForSeconds(0.25f);
@@ -255,6 +261,7 @@ public class ElaniaBehavior : EnemyBehavior
         if(lastACTIVE && !ACTIVE && controller.GetHealth().GetCurrentHealth() <= wormholeHealthThreshold)
         {
             UseHoleCanon = true;
+            gameObject.tag = "Wormhole";
         }
         
         if (controller.GetHealth().IsDead())

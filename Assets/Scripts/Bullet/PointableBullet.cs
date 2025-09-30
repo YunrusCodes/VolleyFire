@@ -16,7 +16,6 @@ public class PointableBullet : BulletBehavior
         targetEnemy = null;  // 初始化
         direction = transform.forward;
         m_Effect = this.explosionPrefab;
-        this.explosionPrefab = null;
     }
 
     public override void Initialize(FirePoint firePoint)
@@ -73,7 +72,6 @@ public class PointableBullet : BulletBehavior
     {
         if (collision.gameObject.CompareTag(targetTag))
         {
-            this.explosionPrefab = m_Effect;
             var targetHealth = collision.gameObject.GetComponent<BaseHealth>();
             if (targetHealth != null)
             {

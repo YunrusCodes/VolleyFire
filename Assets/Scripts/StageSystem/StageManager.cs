@@ -224,7 +224,7 @@ public class StageManager : MonoBehaviour
         }
     }
 
-    public void ShowDamageText(Vector3 worldPosition, float damage, Vector3 offset, Color? customColor = null)
+    public void ShowDamageText(Vector3 worldPosition, float damage, Vector3 offset, Color? customColor = null, string customText = null)
     {
         if (DamageTextPrefab == null) return;
 
@@ -238,9 +238,30 @@ public class StageManager : MonoBehaviour
             Text damageText = damageTextObj.GetComponent<Text>();
             if (damageText != null)
             {
-                // 檢查是否有小數點
-                float decimals = damage - Mathf.Floor(damage);
-                damageText.text = decimals > 0 ? damage.ToString("F1") : damage.ToString("F0");
+                // 如果有自訂文字就使用自訂文字，否則顯示傷害數值
+                if (!string.IsNullOrEmpty(customText))
+                {
+                    damageText.text = customText;
+                    // 檢查並設置 Outline
+                    var outline = damageText.GetComponent<UnityEngine.UI.Outline>();
+                    if (outline != null)
+                    {
+                        outline.enabled = true;
+                        outline.effectColor = Color.white;
+                    }
+                }
+                else
+                {
+                    // 檢查是否有小數點
+                    float decimals = damage - Mathf.Floor(damage);
+                    damageText.text = decimals > 0 ? damage.ToString("F1") : damage.ToString("F0");
+                    // 關閉 Outline
+                    var outline = damageText.GetComponent<UnityEngine.UI.Outline>();
+                    if (outline != null)
+                    {
+                        outline.enabled = false;
+                    }
+                }
                 // 設置傷害文字顏色
                 damageText.color = customColor ?? (damage <= 20f ? new Color(0.5f, 1f, 1f, 1f) : Color.red);
                 StartCoroutine(AnimateDamageText(damageTextObj));

@@ -43,6 +43,8 @@ public class PlayerController : MonoBehaviour
     public Sprite looseTargetSprite;          // 寬鬆判定（檢測盒命中）的準心圖片
     public Image targetCrosshairImage;        // 目標準心圖片
     [SerializeField] private float crosshairRayDistance = 100f; // 射線距離可在 Inspector 設定
+    [Header("目標設定")]
+    [SerializeField] private string[] targetTags = new string[] { "Enemy", "Wormhole" };  // 可瞄準的目標標籤列表
     private bool isPreciseTarget = false;      // 是否為精準命中
 
     [Header("偵測線")]
@@ -169,8 +171,18 @@ public class PlayerController : MonoBehaviour
         {
             // 忽略 Player 與 Beam
             if (hit.collider.CompareTag("Player") || hit.collider.CompareTag("Beam")) continue;
-            // 只偵測敵人
-            if (!hit.collider.CompareTag("Enemy")) continue;
+            
+            // 檢查是否為可瞄準目標
+            bool isTargetable = false;
+            foreach (string tag in targetTags)
+            {
+                if (hit.collider.CompareTag(tag))
+                {
+                    isTargetable = true;
+                    break;
+                }
+            }
+            if (!isTargetable) continue;
             
             currentTarget = hit.transform;
             isPreciseTarget = true;  // 射線直接命中為精準判定
@@ -219,7 +231,16 @@ public class PlayerController : MonoBehaviour
 
                 foreach (var hitCollider in hitColliders)
                 {
-                    if (!hitCollider.CompareTag("Enemy")) continue;
+                    bool isTargetable = false;
+                    foreach (string tag in targetTags)
+                    {
+                        if (hitCollider.CompareTag(tag))
+                        {
+                            isTargetable = true;
+                            break;
+                        }
+                    }
+                    if (!isTargetable) continue;
 
                     float distance = Vector3.Distance(playerShip.transform.position, hitCollider.transform.position);
                     if (distance < nearestDistance)

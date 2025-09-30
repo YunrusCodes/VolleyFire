@@ -140,23 +140,36 @@ public class ControllableMissile : ControllableObject
         
         speed = originalSpeed * releaseSpeedMultiplier;      
 
-        // 如果沒有目標，尋找最近的敵人
-        if (!releaseTarget.gameObject.CompareTag("Enemy"))
+        // 如果沒有目標，尋找最近的目標（敵人或蟲洞）
+        bool isValidTarget = false;
+        string[] validTags = new string[] { "Enemy", "Wormhole" };
+        foreach (string tag in validTags)
+        {
+            if (releaseTarget != null && releaseTarget.gameObject.CompareTag(tag))
+            {
+                isValidTarget = true;
+                break;
+            }
+        }
+
+        if (!isValidTarget)
         {
             float nearestDistance = float.MaxValue;
-            GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
-            
-            foreach (GameObject enemy in enemies)
+            foreach (string tag in validTags)
             {
-                // 檢查碰撞體是否啟用
-                Collider enemyCollider = enemy.GetComponent<Collider>();
-                if (enemyCollider == null || !enemyCollider.enabled) continue;
-
-                float distance = Vector3.Distance(transform.position, enemy.transform.position);
-                if (distance < nearestDistance)
+                GameObject[] targets = GameObject.FindGameObjectsWithTag(tag);
+                foreach (GameObject target in targets)
                 {
-                    nearestDistance = distance;
-                    releaseTarget = enemy.transform;
+                    // 檢查碰撞體是否啟用
+                    Collider targetCollider = target.GetComponent<Collider>();
+                    if (targetCollider == null || !targetCollider.enabled) continue;
+
+                    float distance = Vector3.Distance(transform.position, target.transform.position);
+                    if (distance < nearestDistance)
+                    {
+                        nearestDistance = distance;
+                        releaseTarget = target.transform;
+                    }
                 }
             }
         }

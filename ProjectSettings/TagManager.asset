@@ -8,6 +8,8 @@ TagManager:
   - Obstacle
   - Beam
   - ControllAble
+  - Wormhole
+  - Teleported
   layers:
   - Default
   - TransparentFX
