@@ -68,6 +68,7 @@ public class ElaniaBehavior : EnemyBehavior
 
     [Header("蟲洞設置")]
     public GameObject wormholePrefab;  // 蟲洞預製體
+    public GameObject controllableWormholePrefab;  // 可控制蟲洞預製體
     public GameObject wormholeMissilePrefab;  // 蟲洞飛彈預製體
     public GameObject wormholeMissileWarningEffectPrefab;  // 蟲洞飛彈預警發光效果
     public GameObject mainWormhole;    // 主蟲洞物件
@@ -255,13 +256,54 @@ public class ElaniaBehavior : EnemyBehavior
         }
     }
 
+    private void TransformRandomWormhole()
+    {
+        if (activeWormholes.Count > 0)
+        {
+            // 隨機選擇一個蟲洞
+            int index = Random.Range(0, activeWormholes.Count);
+            GameObject selectedWormhole = activeWormholes[index];
+            
+            if (selectedWormhole != null)
+            {
+                // 記錄位置
+                Vector3 position = selectedWormhole.transform.position;
+                
+                // 關閉舊蟲洞並從列表移除
+                selectedWormhole.SetActive(false);
+                activeWormholes.RemoveAt(index);
+
+                // 生成可控制蟲洞
+                GameObject controllableWormhole = Instantiate(controllableWormholePrefab, position, Quaternion.identity);
+                
+                // 找到玩家並直接看向玩家
+                GameObject player = GameObject.FindGameObjectWithTag("Player");
+                if (player != null)
+                {
+                    controllableWormhole.transform.LookAt(player.transform);
+                }
+                
+                // 更新 ElaniaHealth 中的蟲洞列表
+                if (elaniaHealth != null)
+                {
+                    elaniaHealth.UpdateWormholes(activeWormholes);
+                }
+            }
+        }
+    }
+
     public override void Tick()
     {
-
         if(lastACTIVE && !ACTIVE && controller.GetHealth().GetCurrentHealth() <= wormholeHealthThreshold)
         {
             UseHoleCanon = true;
             gameObject.tag = "Wormhole";
+        }
+
+        // 當 ACTIVE 從 true 變成 false 時，轉換一個蟲洞
+        if (lastACTIVE && !ACTIVE && UseHoleCanon)
+        {
+            TransformRandomWormhole();
         }
         
         if (controller.GetHealth().IsDead())

@@ -71,7 +71,7 @@ public class CannonRay : BulletBehavior
     protected override void Move()
     {
         // 如果有發射點，更新位置和旋轉
-        if(!spawnPoint.gameObject.activeSelf) Destroy(gameObject);
+        if(spawnPoint == null || !spawnPoint.gameObject.activeSelf) Destroy(gameObject);
         if (spawnPoint != null)
         {
             transform.position = spawnPoint.position;
