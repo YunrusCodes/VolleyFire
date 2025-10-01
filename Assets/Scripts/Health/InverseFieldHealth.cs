@@ -3,14 +3,43 @@ using System.Collections;
 
 public class InverseFieldHealth : BaseHealth
 {
+    public static InverseFieldHealth instance { get; private set; }
     private LineRenderer lineRenderer;
+    private float countdownDuration = 3f;
+    public System.Action onTimeAdded;  // 當時間被加入時的事件
+    [SerializeField] private TextMesh timeText;
+    private float hideTextTimer = 0f;
+    private const float TEXT_HIDE_DELAY = 0.5f;
+
+    public void ResetTime()
+    {
+        currentCountdown = countdownDuration;
+        hideTextTimer = 0f;
+        if (timeText != null)
+        {
+            timeText.gameObject.SetActive(true);
+            timeText.text = currentCountdown.ToString("F2");
+        }
+        onTimeAdded?.Invoke();
+    }
+
+    protected void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
     private Color normalColor = Color.blue;
     private Color hitColor = Color.white;
     private float normalWidth = 0.1f;
     private float hitWidth = 1f;
     private float effectTime = 0.2f;
     
-    [SerializeField] private float countdownTime = 0f;
     public float currentCountdown { get; private set; } = 0f;
     private bool isExpanding = false;
     private float expandDuration = 0.5f;
@@ -23,24 +52,14 @@ public class InverseFieldHealth : BaseHealth
     [SerializeField] public Transform MainWormHole;
     [SerializeField] private Collider[] playerColliders;
 
-
+    private Collider m_Collider;
 
     protected void Start()
-    {        
-        // 尋找玩家物件
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
-        {
-            transform.SetParent(player.transform);
-            transform.localPosition = Vector3.zero;
-            transform.localRotation = Quaternion.identity;
-        }
+    {
+        gameObject.tag = "Player";
+        m_Collider = transform.GetComponent<Collider>();
+        m_Collider.enabled = false;
         playerColliders = playerHealth.transform.GetComponentsInChildren<Collider>();
-        foreach (var collider in playerColliders)
-        {
-            collider.enabled = false;
-        }
-
         // 記錄原始縮放值
         originalScale = transform.localScale;
         // 初始設為0
@@ -54,23 +73,81 @@ public class InverseFieldHealth : BaseHealth
         lineRenderer.startColor = normalColor;
         lineRenderer.endColor = normalColor;
         lineRenderer.positionCount = 2;
+
+        // 如果沒有指定TextMesh，就創建一個
+        if (timeText == null)
+        {
+            GameObject textObj = new GameObject("TimeText");
+            textObj.transform.SetParent(transform);
+            textObj.transform.localPosition = Vector3.up * 0.5f; // 在物體上方0.5單位
+            timeText = textObj.AddComponent<TextMesh>();
+            timeText.alignment = TextAlignment.Center;
+            timeText.anchor = TextAnchor.LowerCenter;
+            timeText.fontSize = 50;
+            timeText.characterSize = 0.1f;
+        }
+        timeText.gameObject.SetActive(false); // 一開始先隱藏
     }
 
     private void Update()
     {
+        transform.position = playerHealth.transform.position;
         if (lineRenderer != null && MainWormHole != null)
         {
-            lineRenderer.SetPosition(0, transform.position);
-            lineRenderer.SetPosition(1, MainWormHole.position);
+            // 根據碰撞體狀態設置LineRenderer的啟用狀態
+            lineRenderer.enabled = m_Collider.enabled;
+            
+            if (lineRenderer.enabled)
+            {
+                lineRenderer.SetPosition(0, transform.position);
+                lineRenderer.SetPosition(1, MainWormHole.position);
+            }
 
             // 處理倒數計時
             if (currentCountdown > 0)
             {
+                // 如果碰撞體還沒開啟，先開啟
+                if (!m_Collider.enabled)
+                {
+                    m_Collider.enabled = true;
+                    foreach (var collider in playerColliders)
+                    {
+                        collider.enabled = false;
+                    }
+                    StartCoroutine(PlayExpandAnimation());
+                }
+
+                // 倒數
                 currentCountdown -= Time.deltaTime;
                 if (currentCountdown <= 0)
                 {
                     currentCountdown = 0;
+                    m_Collider.enabled = false;
+                    foreach (var collider in playerColliders)
+                    {
+                        collider.enabled = true;
+                    }
                     StartCoroutine(PlayShrinkAnimation());
+                }
+
+                // 更新文字
+                if (timeText != null)
+                {
+                    timeText.text = currentCountdown.ToString("F2");
+                    timeText.gameObject.SetActive(true);
+                }
+                hideTextTimer = 0f;
+            }
+            else
+            {
+                // 處理文字隱藏
+                if (timeText != null && timeText.gameObject.activeSelf)
+                {
+                    hideTextTimer += Time.deltaTime;
+                    if (hideTextTimer >= TEXT_HIDE_DELAY)
+                    {
+                        timeText.gameObject.SetActive(false);
+                    }
                 }
             }
 
@@ -93,20 +170,6 @@ public class InverseFieldHealth : BaseHealth
         }
     }
 
-    public void SetCountdownTime(float time)
-    {
-        // 如果從0變成非0
-        if (currentCountdown <= 0 && time > 0)
-        {
-            StartCoroutine(PlayExpandAnimation());
-        }
-        // 如果從非0變成0
-        else if (currentCountdown > 0 && time <= 0)
-        {
-            StartCoroutine(PlayShrinkAnimation());
-        }
-        currentCountdown = time;
-    }
 
     private IEnumerator PlayExpandAnimation()
     {

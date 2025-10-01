@@ -12,7 +12,7 @@ public class InverseFieldHealthEditor : Editor
 
         if (GUILayout.Button("Add 3 Seconds"))
         {
-            script.SetCountdownTime(script.currentCountdown + 3f);
+            if (InverseFieldHealth.instance != null) InverseFieldHealth.instance.ResetTime();
         }
     }
 }

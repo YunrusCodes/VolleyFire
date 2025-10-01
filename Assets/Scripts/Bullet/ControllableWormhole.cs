@@ -53,7 +53,10 @@ public class ControllableWormhole : ControllableObject
 
     protected override void OnReleased()
     { 
-
+        // 加三秒
+           if (InverseFieldHealth.instance != null) InverseFieldHealth.instance.ResetTime();
+        // 破壞物件
+        Destroy(gameObject);
     }
 
     protected override void MoveReleased()
