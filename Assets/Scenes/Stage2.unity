@@ -222,6 +222,15 @@ MonoBehaviour:
     enablePlayerFireAfterDialogue: 1
     BGMToSwitch: {fileID: 0}
   enemyHealthDialogues: []
+  hintText: {fileID: 61002212}
+  hintObject: {fileID: 61002213}
+  enemyHealthHints:
+  - targetHealth: {fileID: 9127619513034172902}
+    healthThreshold: 0
+    isAboveThreshold: 1
+    durationThreshold: 0
+    hintText: "\u8ACB\u7559\u610F\u80FD\u91CF\u5149\u675F\uFF0C\u52D5\u91CF\u64CD\u4F5C\u53EF\u79FB\u9664\u88DD\u7F6E"
+    enabled: 1
 --- !u!4 &25530402
 Transform:
   m_ObjectHideFlags: 0
@@ -243,6 +252,119 @@ Transform:
   - {fileID: 1293794282}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &61002211
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 867368704040994157, guid: 6605cd289600cde4092ead18b3ec70be, type: 3}
+      propertyPath: m_Pivot.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 867368704040994157, guid: 6605cd289600cde4092ead18b3ec70be, type: 3}
+      propertyPath: m_Pivot.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 867368704040994157, guid: 6605cd289600cde4092ead18b3ec70be, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 867368704040994157, guid: 6605cd289600cde4092ead18b3ec70be, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 867368704040994157, guid: 6605cd289600cde4092ead18b3ec70be, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 867368704040994157, guid: 6605cd289600cde4092ead18b3ec70be, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 867368704040994157, guid: 6605cd289600cde4092ead18b3ec70be, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 867368704040994157, guid: 6605cd289600cde4092ead18b3ec70be, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 867368704040994157, guid: 6605cd289600cde4092ead18b3ec70be, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 867368704040994157, guid: 6605cd289600cde4092ead18b3ec70be, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 867368704040994157, guid: 6605cd289600cde4092ead18b3ec70be, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 867368704040994157, guid: 6605cd289600cde4092ead18b3ec70be, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 867368704040994157, guid: 6605cd289600cde4092ead18b3ec70be, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 867368704040994157, guid: 6605cd289600cde4092ead18b3ec70be, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 867368704040994157, guid: 6605cd289600cde4092ead18b3ec70be, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 867368704040994157, guid: 6605cd289600cde4092ead18b3ec70be, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 867368704040994157, guid: 6605cd289600cde4092ead18b3ec70be, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 867368704040994157, guid: 6605cd289600cde4092ead18b3ec70be, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 867368704040994157, guid: 6605cd289600cde4092ead18b3ec70be, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 867368704040994157, guid: 6605cd289600cde4092ead18b3ec70be, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3988180245432857376, guid: 6605cd289600cde4092ead18b3ec70be, type: 3}
+      propertyPath: m_Name
+      value: Canvas_Hint
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 6605cd289600cde4092ead18b3ec70be, type: 3}
+--- !u!114 &61002212 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5782759806653987019, guid: 6605cd289600cde4092ead18b3ec70be, type: 3}
+  m_PrefabInstance: {fileID: 61002211}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &61002213 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6362797265616746469, guid: 6605cd289600cde4092ead18b3ec70be, type: 3}
+  m_PrefabInstance: {fileID: 61002211}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &116242927
 GameObject:
   m_ObjectHideFlags: 0
@@ -505,6 +627,21 @@ MonoBehaviour:
     enablePlayerFireDuringDialogue: 0
     enablePlayerFireAfterDialogue: 0
     BGMToSwitch: {fileID: 0}
+  hintText: {fileID: 61002212}
+  hintObject: {fileID: 61002213}
+  enemyHealthHints:
+  - targetHealth: {fileID: 891206125}
+    healthThreshold: 0
+    isAboveThreshold: 1
+    durationThreshold: 1
+    hintText: "\u6575\u6A5F\u517C\u5177\u6A5F\u52D5\u6027\u8207\u6230\u9B25\u529B\uFF0C\u7559\u610F\u5176\u884C\u70BA"
+    enabled: 1
+  - targetHealth: {fileID: 891206125}
+    healthThreshold: 250
+    isAboveThreshold: 0
+    durationThreshold: 1
+    hintText: "\u5EFA\u8B70\u512A\u5148\u64CA\u843D\u50DA\u6A5F\u88DD\u7F6E"
+    enabled: 1
 --- !u!4 &175308302
 Transform:
   m_ObjectHideFlags: 0
@@ -773,6 +910,9 @@ MonoBehaviour:
         m_Calls: []
   waveProcessTimeDialogues: []
   enemyHealthDialogues: []
+  hintText: {fileID: 0}
+  hintObject: {fileID: 0}
+  enemyHealthHints: []
 --- !u!4 &389702297
 Transform:
   m_ObjectHideFlags: 0
@@ -1011,6 +1151,9 @@ MonoBehaviour:
     enablePlayerFireAfterDialogue: 1
     BGMToSwitch: {fileID: 0}
   enemyHealthDialogues: []
+  hintText: {fileID: 61002212}
+  hintObject: {fileID: 61002213}
+  enemyHealthHints: []
 --- !u!4 &495601959
 Transform:
   m_ObjectHideFlags: 0
@@ -2245,6 +2388,9 @@ MonoBehaviour:
     enablePlayerFireAfterDialogue: 1
     BGMToSwitch: {fileID: 0}
   enemyHealthDialogues: []
+  hintText: {fileID: 0}
+  hintObject: {fileID: 0}
+  enemyHealthHints: []
 --- !u!4 &2017132699
 Transform:
   m_ObjectHideFlags: 0
@@ -7412,6 +7558,17 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 3628160393298079666, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
   m_PrefabInstance: {fileID: 9127619513034172900}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &9127619513034172902 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4339682622986420541, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
+  m_PrefabInstance: {fileID: 9127619513034172900}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4440106f657ab7942941c235a9b888d3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -7430,3 +7587,4 @@ SceneRoots:
   - {fileID: 1627279892}
   - {fileID: 1150962803}
   - {fileID: 2112823580}
+  - {fileID: 61002211}

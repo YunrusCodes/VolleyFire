@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class EnemyWave : MonoBehaviour
 {
@@ -22,6 +23,11 @@ public class EnemyWave : MonoBehaviour
     public List<WaveProcessTimeDialogueData> waveProcessTimeDialogues = new List<WaveProcessTimeDialogueData>(); // 波次進行時間觸發
     public List<EnemyHealthDialogueData> enemyHealthDialogues = new List<EnemyHealthDialogueData>(); // 敵人血量觸發
 
+    [Header("提示系統")]
+    public Text hintText; // 提示文字 UI 組件
+    public GameObject hintObject; // HINT 物件（控制 SetActive）
+    public List<EnemyHealthHintData> enemyHealthHints = new List<EnemyHealthHintData>(); // 敵人血量提示
+
     private bool isMoving = true;
     private bool isWaveActive = false;
     public bool isWaveClear { get; private set; } = false;
@@ -29,6 +35,12 @@ public class EnemyWave : MonoBehaviour
 
     private void Start()
     {
+        // 確保 HINT 物件初始狀態為關閉
+        if (hintObject != null)
+        {
+            hintObject.SetActive(false);
+        }
+        
         // 使用協程串接對話與移動流程
         StartCoroutine(WaveDialogueAndMoveFlow());
     }
@@ -102,6 +114,8 @@ public class EnemyWave : MonoBehaviour
             CheckWaveProcessTimeDialogues();
             // 檢查敵人血量觸發對話
             CheckEnemyHealthDialogues();
+            // 檢查敵人血量提示
+            CheckEnemyHealthHints();
             bool waveClear = true;
             foreach (var enemy in enemies)
             {
@@ -113,6 +127,8 @@ public class EnemyWave : MonoBehaviour
                 Debug.Log("Wave cleared!");
                 isWaveClear = true;
                 OnWaveClear?.Invoke();
+                // 清空提示文字
+                ClearHintText();
             }
         }
         else
@@ -162,6 +178,59 @@ public class EnemyWave : MonoBehaviour
     }
     
     /// <summary>
+    /// 檢查敵人血量提示
+    /// </summary>
+    private void CheckEnemyHealthHints()
+    {
+        foreach (var healthHint in enemyHealthHints)
+        {
+            string hintText = healthHint.CheckAndTriggerHint();
+            if (!string.IsNullOrEmpty(hintText))
+            {
+                ShowHintText(hintText);
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 顯示提示文字
+    /// </summary>
+    private void ShowHintText(string text)
+    {
+        if (hintText != null)
+        {
+            hintText.text = text;
+            Debug.Log($"顯示提示: {text}");
+        }
+        
+        // 開啟 HINT 物件
+        if (hintObject != null)
+        {
+            hintObject.SetActive(true);
+            Debug.Log("開啟 HINT 物件");
+        }
+    }
+    
+    /// <summary>
+    /// 清空提示文字
+    /// </summary>
+    private void ClearHintText()
+    {
+        if (hintText != null)
+        {
+            hintText.text = "";
+            Debug.Log("清空提示文字");
+        }
+        
+        // 關閉 HINT 物件
+        if (hintObject != null)
+        {
+            hintObject.SetActive(false);
+            Debug.Log("關閉 HINT 物件");
+        }
+    }
+    
+    /// <summary>
     /// 設置等待對話狀態
     /// </summary>
     public void SetWaitingForDialogue(bool waiting)
@@ -196,6 +265,17 @@ public class EnemyWave : MonoBehaviour
         foreach (var timeDialogue in waveProcessTimeDialogues)
         {
             timeDialogue.ResetTrigger();
+        }
+    }
+    
+    /// <summary>
+    /// 重置所有血量提示觸發狀態
+    /// </summary>
+    public void ResetHealthHints()
+    {
+        foreach (var healthHint in enemyHealthHints)
+        {
+            healthHint.ResetTrigger();
         }
     }
     
@@ -240,6 +320,26 @@ public class EnemyWave : MonoBehaviour
     }
     
     /// <summary>
+    /// 添加敵人血量提示
+    /// </summary>
+    /// <param name="targetHealth">目標血量組件</param>
+    /// <param name="healthThreshold">血量閾值（實際血量值）</param>
+    /// <param name="isAboveThreshold">true: 血量高於閾值, false: 血量低於閾值</param>
+    /// <param name="durationThreshold">持續時間閾值（秒）</param>
+    /// <param name="hintText">提示文字</param>
+    public void AddEnemyHealthHint(BaseHealth targetHealth, float healthThreshold, bool isAboveThreshold, float durationThreshold, string hintText)
+    {
+        var healthHint = new EnemyHealthHintData();
+        healthHint.targetHealth = targetHealth;
+        healthHint.healthThreshold = healthThreshold;
+        healthHint.isAboveThreshold = isAboveThreshold;
+        healthHint.durationThreshold = durationThreshold;
+        healthHint.hintText = hintText;
+        
+        enemyHealthHints.Add(healthHint);
+    }
+    
+    /// <summary>
     /// 測試時間對話（用於調試）
     /// </summary>
     [ContextMenu("測試時間對話")]
@@ -258,5 +358,92 @@ public class EnemyWave : MonoBehaviour
         
         // 強制開始計時
         StartWaveProcessTimeDialogues();
+    }
+}
+
+/// <summary>
+/// 敵人血量提示數據
+/// </summary>
+[System.Serializable]
+public class EnemyHealthHintData
+{
+    [Header("觸發條件")]
+    public BaseHealth targetHealth;
+    public float healthThreshold = 50f; // 實際血量閾值
+    public bool isAboveThreshold = false; // true: 血量高於閾值, false: 血量低於閾值
+    public float durationThreshold = 3f; // 持續時間閾值（秒）
+    
+    [Header("提示設定")]
+    public string hintText = "提示：敵人血量異常！";
+    public bool enabled = true;
+    
+    [Header("狀態")]
+    private bool triggered = false; // 避免重複觸發
+    private float conditionStartTime = 0f; // 條件開始時間
+    private bool isConditionMet = false; // 條件是否滿足
+    
+    public EnemyHealthHintData()
+    {
+        targetHealth = null;
+        healthThreshold = 50f;
+        isAboveThreshold = false;
+        durationThreshold = 3f;
+        hintText = "提示：敵人血量異常！";
+        enabled = true;
+        triggered = false;
+        conditionStartTime = 0f;
+        isConditionMet = false;
+    }
+    
+    /// <summary>
+    /// 檢查並觸發血量提示
+    /// </summary>
+    public string CheckAndTriggerHint()
+    {
+        if (!enabled || triggered || targetHealth == null) return null;
+        
+        float currentHealth = targetHealth.GetCurrentHealth();
+        
+        bool conditionMet = isAboveThreshold ? 
+            currentHealth >= healthThreshold : 
+            currentHealth <= healthThreshold;
+        
+        if (conditionMet)
+        {
+            if (!isConditionMet)
+            {
+                // 條件剛開始滿足，記錄開始時間
+                isConditionMet = true;
+                conditionStartTime = Time.time;
+            }
+            else
+            {
+                // 條件持續滿足，檢查是否超過持續時間閾值
+                float duration = Time.time - conditionStartTime;
+                if (duration >= durationThreshold)
+                {
+                    triggered = true;
+                    return hintText;
+                }
+            }
+        }
+        else
+        {
+            // 條件不滿足，重置狀態
+            isConditionMet = false;
+            conditionStartTime = 0f;
+        }
+        
+        return null;
+    }
+    
+    /// <summary>
+    /// 重置觸發狀態
+    /// </summary>
+    public void ResetTrigger()
+    {
+        triggered = false;
+        isConditionMet = false;
+        conditionStartTime = 0f;
     }
 } 
