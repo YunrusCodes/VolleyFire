@@ -12,6 +12,14 @@ public class EnemyWave : MonoBehaviour
     public Transform targetPosition;
     public float moveSpeed = 5f;
 
+    [Header("Boss 血條設置")]
+    [SerializeField] private BaseHealth bossHealth;
+    [SerializeField] private Slider bossHealthSlider;
+    [SerializeField] private Image bossFillImage;
+    [SerializeField] private Color bossFullHealthColor = Color.green;
+    [SerializeField] private Color bossLowHealthColor = Color.red;
+    [SerializeField] private float bossLowHealthPercent = 0.3f;
+
     [Header("事件")]
     public UnityEvent OnWaveStart = new UnityEvent();
     public UnityEvent OnWaveClear = new UnityEvent();
@@ -40,6 +48,9 @@ public class EnemyWave : MonoBehaviour
         {
             hintObject.SetActive(false);
         }
+
+        // 初始化 Boss 血條
+        InitializeBossHealthBar();
         
         // 使用協程串接對話與移動流程
         StartCoroutine(WaveDialogueAndMoveFlow());
@@ -106,6 +117,9 @@ public class EnemyWave : MonoBehaviour
         // 如果正在等待對話完成，則不執行戰鬥邏輯
         if (isWaitingForDialogue)
             return;
+
+        // 更新 Boss 血條
+        UpdateBossHealthBar();
 
         // 只負責戰鬥階段
         if (isWaveActive)
@@ -278,7 +292,36 @@ public class EnemyWave : MonoBehaviour
             healthHint.ResetTrigger();
         }
     }
-    
+
+    /// <summary>
+    /// 初始化 Boss 血條
+    /// </summary>
+    private void InitializeBossHealthBar()
+    {
+        if (bossHealth != null)
+        {
+            bossHealthSlider.gameObject.SetActive(true);
+            bossHealthSlider.maxValue = bossHealth.GetMaxHealth();
+            bossHealthSlider.value = bossHealth.GetCurrentHealth();
+            UpdateBossHealthBar();
+        }
+    }
+
+    /// <summary>
+    /// 更新 Boss 血條
+    /// </summary>
+    private void UpdateBossHealthBar()
+    {
+        if (bossHealth == null || bossHealthSlider == null || bossFillImage == null) return;
+
+        bossHealthSlider.value = bossHealth.GetCurrentHealth();
+        
+        // 計算血量百分比
+        float healthPercent = bossHealth.GetCurrentHealth() / bossHealth.GetMaxHealth();
+        
+        // 根據血量百分比更新顏色
+        bossFillImage.color = Color.Lerp(bossLowHealthColor, bossFullHealthColor, healthPercent / bossLowHealthPercent);
+    }
 
     
     /// <summary>
