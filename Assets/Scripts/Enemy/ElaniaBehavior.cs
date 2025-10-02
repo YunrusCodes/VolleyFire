@@ -204,6 +204,8 @@ public class ElaniaBehavior : EnemyBehavior
             Transform spawnPoint = wormholeMissileWarningEffectPoints[i%wormholeMissileWarningEffectPoints.Count];
             // 創建預警效果並朝向主蟲洞
             GameObject warningEffect = Instantiate(wormholeMissileWarningEffectPrefab, spawnPoint.position, spawnPoint.rotation, transform);
+            
+            StageManager.Instance.ShowDamageText(transform.position, 0, Vector3.zero, Color.gray, "Teleported!");
             initialWarningEffects.Enqueue(warningEffect);
             warningEffect.transform.LookAt(mainWormhole.transform);
             float moveTime = 0f;

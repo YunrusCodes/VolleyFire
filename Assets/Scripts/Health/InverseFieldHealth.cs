@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class InverseFieldHealth : BaseHealth
 {
@@ -7,9 +8,10 @@ public class InverseFieldHealth : BaseHealth
     private LineRenderer lineRenderer;
     private float countdownDuration = 3f;
     public System.Action onTimeAdded;  // 當時間被加入時的事件
-    [SerializeField] private TextMesh timeText;
+    [SerializeField] private Text timeText;
     private float hideTextTimer = 0f;
     private const float TEXT_HIDE_DELAY = 0.5f;
+    [SerializeField] private RectTransform textRectTransform;
 
     public void ResetTime()
     {
@@ -73,19 +75,6 @@ public class InverseFieldHealth : BaseHealth
         lineRenderer.startColor = normalColor;
         lineRenderer.endColor = normalColor;
         lineRenderer.positionCount = 2;
-
-        // 如果沒有指定TextMesh，就創建一個
-        if (timeText == null)
-        {
-            GameObject textObj = new GameObject("TimeText");
-            textObj.transform.SetParent(transform);
-            textObj.transform.localPosition = Vector3.up * 0.5f; // 在物體上方0.5單位
-            timeText = textObj.AddComponent<TextMesh>();
-            timeText.alignment = TextAlignment.Center;
-            timeText.anchor = TextAnchor.LowerCenter;
-            timeText.fontSize = 50;
-            timeText.characterSize = 0.1f;
-        }
         timeText.gameObject.SetActive(false); // 一開始先隱藏
     }
 
@@ -133,8 +122,20 @@ public class InverseFieldHealth : BaseHealth
                 // 更新文字
                 if (timeText != null)
                 {
+                    // 更新文字內容
                     timeText.text = currentCountdown.ToString("F2");
                     timeText.gameObject.SetActive(true);
+
+                    // 更新文字位置
+                    Vector3 screenPos = Camera.main.WorldToScreenPoint(transform.position + Vector3.up * 0.5f);
+                    if (screenPos.z > 0 && textRectTransform != null)
+                    {
+                        textRectTransform.position = screenPos;
+                    }
+                    else
+                    {
+                        timeText.gameObject.SetActive(false);
+                    }
                 }
                 hideTextTimer = 0f;
             }
@@ -147,6 +148,19 @@ public class InverseFieldHealth : BaseHealth
                     if (hideTextTimer >= TEXT_HIDE_DELAY)
                     {
                         timeText.gameObject.SetActive(false);
+                    }
+                    else
+                    {
+                        // 即使在隱藏延遲中也要更新位置
+                        Vector3 screenPos = Camera.main.WorldToScreenPoint(transform.position + Vector3.up * 0.5f);
+                        if (screenPos.z > 0 && textRectTransform != null)
+                        {
+                            textRectTransform.position = screenPos;
+                        }
+                        else
+                        {
+                            timeText.gameObject.SetActive(false);
+                        }
                     }
                 }
             }
@@ -215,6 +229,8 @@ public class InverseFieldHealth : BaseHealth
 
         // 對目標造成傷害
         TargetHealth.TakeDamage(damage * damageMultiplier);
+        
+        StageManager.Instance.ShowDamageText(transform.position, 0, damageTextOffset, Color.gray, "Transfer!");
 
         // 生成爆炸效果
         if (explosionPrefab != null)
