@@ -34,8 +34,14 @@ public class ControllableWormhole : ControllableObject
         useRigidbody = false;
     }
 
+    private bool showUse = false;
     protected override void MoveUncontrolled()
-    {
+    {        
+        if (!showUse)
+        {
+            StageManager.Instance.ShowDamageText(transform.position, 0, Vector3.zero, Color.blue, "Inversed!");
+            showUse = true;
+        }
         elapsedTime += Time.deltaTime;
     }
 
