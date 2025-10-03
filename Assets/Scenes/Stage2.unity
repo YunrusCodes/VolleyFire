@@ -119,11 +119,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &9687170 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2874410942375872459, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
-  m_PrefabInstance: {fileID: 9127619513034172900}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &25530400
 GameObject:
   m_ObjectHideFlags: 0
@@ -168,6 +163,9 @@ MonoBehaviour:
   bossFullHealthColor: {r: 0, g: 1, b: 0, a: 1}
   bossLowHealthColor: {r: 1, g: 0, b: 0, a: 1}
   bossLowHealthPercent: 0.3
+  bossIconImage: {fileID: 0}
+  bossIconSprite: {fileID: 0}
+  healthBarFillDuration: 1
   OnWaveStart:
     m_PersistentCalls:
       m_Calls: []
@@ -547,6 +545,9 @@ MonoBehaviour:
   bossFullHealthColor: {r: 0, g: 1, b: 0, a: 1}
   bossLowHealthColor: {r: 1, g: 0, b: 0, a: 1}
   bossLowHealthPercent: 0.3
+  bossIconImage: {fileID: 332899274}
+  bossIconSprite: {fileID: 21300000, guid: b3aad15348a258044804c988ae55c05f, type: 3}
+  healthBarFillDuration: 1
   OnWaveStart:
     m_PersistentCalls:
       m_Calls:
@@ -862,6 +863,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67db9e8f0e2ae9c40bc1e2b64352a6b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &332899274 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8200115648927145909, guid: cd33a0b2f97764c4da658de4de57a47b, type: 3}
+  m_PrefabInstance: {fileID: 332899271}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &342156913
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -985,24 +997,15 @@ MonoBehaviour:
   bossFullHealthColor: {r: 0, g: 1, b: 0, a: 1}
   bossLowHealthColor: {r: 1, g: 0, b: 0, a: 1}
   bossLowHealthPercent: 0.3
+  bossIconImage: {fileID: 0}
+  bossIconSprite: {fileID: 0}
+  healthBarFillDuration: 1
   OnWaveStart:
     m_PersistentCalls:
       m_Calls: []
   OnWaveClear:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 9687170}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 1
-        m_CallState: 2
+      m_Calls: []
   waveMoveBeforeDialogues:
     dialogues: []
     enabled: 1
@@ -1235,6 +1238,9 @@ MonoBehaviour:
   bossFullHealthColor: {r: 0, g: 1, b: 0, a: 1}
   bossLowHealthColor: {r: 1, g: 0, b: 0, a: 1}
   bossLowHealthPercent: 0.3
+  bossIconImage: {fileID: 0}
+  bossIconSprite: {fileID: 0}
+  healthBarFillDuration: 1
   OnWaveStart:
     m_PersistentCalls:
       m_Calls: []
@@ -2477,6 +2483,9 @@ MonoBehaviour:
   bossFullHealthColor: {r: 0, g: 1, b: 0, a: 1}
   bossLowHealthColor: {r: 1, g: 0, b: 0, a: 1}
   bossLowHealthPercent: 0.3
+  bossIconImage: {fileID: 0}
+  bossIconSprite: {fileID: 0}
+  healthBarFillDuration: 1
   OnWaveStart:
     m_PersistentCalls:
       m_Calls: []
@@ -7649,6 +7658,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2907263123242341661, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2907263123242341661, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5593117490783122087, guid: 137187917011a4e40983c7892ac2ccad, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

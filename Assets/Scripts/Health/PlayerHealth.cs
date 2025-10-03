@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
+using System.Collections;
 
 public class PlayerHealth : BaseHealth
 {
@@ -10,6 +11,7 @@ public class PlayerHealth : BaseHealth
     public Color fullHealthColor = Color.green;     // 滿血顏色
     public Color lowHealthColor = Color.red;        // 低血顏色
     public float lowHealthPercent = 0.3f;          // 低血量百分比閾值
+    public float healthBarFillDuration = 1f;       // 血條注滿的時間
 
     // 死亡事件
     public UnityEvent onPlayerDeath = new UnityEvent();
@@ -20,9 +22,41 @@ public class PlayerHealth : BaseHealth
         if (healthSlider != null)
         {
             healthSlider.maxValue = maxHealth;
-            healthSlider.value = currentHealth;
-            UpdateHealthBar();
+            healthSlider.value = 0;  // 先設為0
+            StartCoroutine(FillHealthBarAnimation());
         }
+    }
+
+    private IEnumerator FillHealthBarAnimation()
+    {
+        float targetHealth = currentHealth;
+        float currentValue = 0f;
+        float elapsedTime = 0f;
+
+        while (elapsedTime < healthBarFillDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float t = elapsedTime / healthBarFillDuration;
+            
+            // 使用 EaseOutQuad 緩動函數讓動畫更自然
+            t = t * (2 - t);
+            
+            currentValue = Mathf.Lerp(0, targetHealth, t);
+            healthSlider.value = currentValue;
+
+            // 更新顏色
+            if (fillImage != null)
+            {
+                float healthPercent = currentValue / maxHealth;
+                fillImage.color = Color.Lerp(lowHealthColor, fullHealthColor, healthPercent / lowHealthPercent);
+            }
+
+            yield return null;
+        }
+
+        // 確保最終值正確
+        healthSlider.value = targetHealth;
+        UpdateHealthBar();
     }
 
     public override void TakeDamage(float damage)

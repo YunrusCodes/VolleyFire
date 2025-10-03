@@ -20,6 +20,11 @@ public class EnemyWave : MonoBehaviour
     [SerializeField] private Color bossLowHealthColor = Color.red;
     [SerializeField] private float bossLowHealthPercent = 0.3f;
 
+    [Header("Boss 圖示設置")]
+    [SerializeField] private Image bossIconImage;
+    [SerializeField] private Sprite bossIconSprite;
+    [SerializeField] private float healthBarFillDuration = 1f;  // 血條注滿的時間
+
     [Header("事件")]
     public UnityEvent OnWaveStart = new UnityEvent();
     public UnityEvent OnWaveClear = new UnityEvent();
@@ -131,6 +136,14 @@ public class EnemyWave : MonoBehaviour
             // 檢查敵人血量提示
             CheckEnemyHealthHints();
             bool waveClear = true;
+            // 第一次進入戰鬥階段時顯示血條
+            if (bossHealth != null && !bossHealthSlider.gameObject.activeSelf)
+            {
+                bossHealthSlider.gameObject.SetActive(true);
+                if (bossIconImage != null) bossIconImage.gameObject.SetActive(true);
+                StartCoroutine(FillHealthBarAnimation());
+            }
+
             foreach (var enemy in enemies)
             {
                 enemy.WaveProcessing();
@@ -300,11 +313,53 @@ public class EnemyWave : MonoBehaviour
     {
         if (bossHealth != null)
         {
-            bossHealthSlider.gameObject.SetActive(true);
+            // 設置血條初始值，但不顯示
             bossHealthSlider.maxValue = bossHealth.GetMaxHealth();
-            bossHealthSlider.value = bossHealth.GetCurrentHealth();
-            UpdateBossHealthBar();
+            bossHealthSlider.value = 0;
+            bossHealthSlider.gameObject.SetActive(false);
+
+            // 設置圖示，但不顯示
+            if (bossIconImage != null)
+            {
+                if (bossIconSprite != null)
+                {
+                    bossIconImage.sprite = bossIconSprite;
+                }
+                bossIconImage.gameObject.SetActive(false);
+            }
         }
+    }
+
+    private IEnumerator FillHealthBarAnimation()
+    {
+        float targetHealth = bossHealth.GetCurrentHealth();
+        float currentValue = 0f;
+        float elapsedTime = 0f;
+
+        while (elapsedTime < healthBarFillDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float t = elapsedTime / healthBarFillDuration;
+            
+            // 使用 EaseOutQuad 緩動函數讓動畫更自然
+            t = t * (2 - t);
+            
+            currentValue = Mathf.Lerp(0, targetHealth, t);
+            bossHealthSlider.value = currentValue;
+
+            // 更新顏色
+            if (bossFillImage != null)
+            {
+                float healthPercent = currentValue / bossHealth.GetMaxHealth();
+                bossFillImage.color = Color.Lerp(bossLowHealthColor, bossFullHealthColor, healthPercent / bossLowHealthPercent);
+            }
+
+            yield return null;
+        }
+
+        // 確保最終值正確
+        bossHealthSlider.value = targetHealth;
+        UpdateBossHealthBar();
     }
 
     /// <summary>
@@ -312,15 +367,27 @@ public class EnemyWave : MonoBehaviour
     /// </summary>
     private void UpdateBossHealthBar()
     {
-        if (bossHealth == null || bossHealthSlider == null || bossFillImage == null) return;
+        if (bossHealth == null) return;
 
-        bossHealthSlider.value = bossHealth.GetCurrentHealth();
-        
-        // 計算血量百分比
-        float healthPercent = bossHealth.GetCurrentHealth() / bossHealth.GetMaxHealth();
-        
-        // 根據血量百分比更新顏色
-        bossFillImage.color = Color.Lerp(bossLowHealthColor, bossFullHealthColor, healthPercent / bossLowHealthPercent);
+        if (bossHealthSlider != null)
+        {
+            bossHealthSlider.value = bossHealth.GetCurrentHealth();
+            
+            if (bossFillImage != null)
+            {
+                // 計算血量百分比
+                float healthPercent = bossHealth.GetCurrentHealth() / bossHealth.GetMaxHealth();
+                
+                // 根據血量百分比更新顏色
+                bossFillImage.color = Color.Lerp(bossLowHealthColor, bossFullHealthColor, healthPercent / bossLowHealthPercent);
+            }
+        }
+
+        // 根據血條的啟用狀態控制圖示
+        if (bossIconImage != null)
+        {
+            bossIconImage.gameObject.SetActive(bossHealthSlider.gameObject.activeSelf);
+        }
     }
 
     
