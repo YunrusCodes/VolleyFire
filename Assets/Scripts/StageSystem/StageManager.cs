@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
@@ -8,6 +9,13 @@ using Yarn.Unity;
 
 public class StageManager : MonoBehaviour
 {
+    private static StageManager instance;
+    public static StageManager Instance => instance;
+
+    [Header("UI 設定")]
+    public static GameObject DamageTextPrefab { get; private set; }
+    [SerializeField] private GameObject damageTextPrefabRef;  // 在 Inspector 中設置
+    
     [Header("敵人波次列表")]
     public List<EnemyWave> waves = new List<EnemyWave>();
     
@@ -32,8 +40,16 @@ public class StageManager : MonoBehaviour
     private const string RETRY_KEY = "IsRetry";
     private const string WAVE_INDEX_KEY = "LastWaveIndex";
 
+    private void Awake()
+    {
+        instance = this;
+    }
+
     private void Start()
     {
+        // 設置傷害文字預製體的靜態參考
+        DamageTextPrefab = damageTextPrefabRef;
+        
         // 檢查是否為重試
         bool isRetry = PlayerPrefs.GetInt(RETRY_KEY, 0) == 1;
         if (isRetry)
@@ -206,6 +222,85 @@ public class StageManager : MonoBehaviour
             }
             bloom.intensity.value = to;
         }
+    }
+
+    public void ShowDamageText(Vector3 worldPosition, float damage, Vector3 offset, Color? customColor = null, string customText = null)
+    {
+        if (DamageTextPrefab == null) return;
+
+        // 獲取物件在螢幕上的位置
+        Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPosition + offset);
+        
+        // 如果物件在攝影機前方才顯示傷害文字
+        if (screenPos.z > 0)
+        {
+            GameObject damageTextObj = Instantiate(DamageTextPrefab, screenPos, Quaternion.identity, GameObject.Find("Canvas").transform);
+            Text damageText = damageTextObj.GetComponent<Text>();
+            if (damageText != null)
+            {
+                // 如果有自訂文字就使用自訂文字，否則顯示傷害數值
+                if (!string.IsNullOrEmpty(customText))
+                {
+                    damageText.text = customText;
+                    // 檢查並設置 Outline
+                    var outline = damageText.GetComponent<UnityEngine.UI.Outline>();
+                    if (outline != null)
+                    {
+                        outline.enabled = true;
+                        outline.effectColor = Color.white;
+                    }
+                }
+                else
+                {
+                    // 檢查是否有小數點
+                    float decimals = damage - Mathf.Floor(damage);
+                    damageText.text = decimals > 0 ? damage.ToString("F1") : damage.ToString("F0");
+                    // 關閉 Outline
+                    var outline = damageText.GetComponent<UnityEngine.UI.Outline>();
+                    if (outline != null)
+                    {
+                        outline.enabled = false;
+                    }
+                }
+                // 設置傷害文字顏色
+                damageText.color = customColor ?? (damage <= 20f ? new Color(0.5f, 1f, 1f, 1f) : Color.red);
+                StartCoroutine(AnimateDamageText(damageTextObj));
+            }
+        }
+    }
+
+    private IEnumerator AnimateDamageText(GameObject damageTextObj)
+    {
+        if (damageTextObj == null) yield break;
+
+        Text damageText = damageTextObj.GetComponent<Text>();
+        if (damageText == null) yield break;
+
+        float duration = 1.0f;        // 動畫持續時間
+        float moveSpeed = 50f;        // 上移速度
+        Color textColor = damageText.color;
+        Vector3 startPos = damageTextObj.transform.position;
+        float timer = 0f;
+
+        damageTextObj.SetActive(true);
+        while (timer < duration)
+        {
+            timer += Time.deltaTime;
+            float progress = timer / duration;
+
+            // 向上移動
+            Vector3 newPos = startPos + Vector3.up * (moveSpeed * progress);
+            damageTextObj.transform.position = newPos;
+
+            // 淡出效果
+            textColor.a = 1 - progress;
+            damageText.color = textColor;
+
+            yield return null;
+        }
+
+        // 動畫結束後銷毀物件
+        Destroy(damageTextObj);
     }
 
     private IEnumerator BloomAndReload()

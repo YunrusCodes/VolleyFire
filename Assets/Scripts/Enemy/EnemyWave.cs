@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class EnemyWave : MonoBehaviour
 {
@@ -10,6 +11,19 @@ public class EnemyWave : MonoBehaviour
     [Header("目標位置")]
     public Transform targetPosition;
     public float moveSpeed = 5f;
+
+    [Header("Boss 血條設置")]
+    [SerializeField] private BaseHealth bossHealth;
+    [SerializeField] private Slider bossHealthSlider;
+    [SerializeField] private Image bossFillImage;
+    [SerializeField] private Color bossFullHealthColor = Color.green;
+    [SerializeField] private Color bossLowHealthColor = Color.red;
+    [SerializeField] private float bossLowHealthPercent = 0.3f;
+
+    [Header("Boss 圖示設置")]
+    [SerializeField] private Image bossIconImage;
+    [SerializeField] private Sprite bossIconSprite;
+    [SerializeField] private float healthBarFillDuration = 1f;  // 血條注滿的時間
 
     [Header("事件")]
     public UnityEvent OnWaveStart = new UnityEvent();
@@ -22,6 +36,11 @@ public class EnemyWave : MonoBehaviour
     public List<WaveProcessTimeDialogueData> waveProcessTimeDialogues = new List<WaveProcessTimeDialogueData>(); // 波次進行時間觸發
     public List<EnemyHealthDialogueData> enemyHealthDialogues = new List<EnemyHealthDialogueData>(); // 敵人血量觸發
 
+    [Header("提示系統")]
+    public Text hintText; // 提示文字 UI 組件
+    public GameObject hintObject; // HINT 物件（控制 SetActive）
+    public List<EnemyHealthHintData> enemyHealthHints = new List<EnemyHealthHintData>(); // 敵人血量提示
+
     private bool isMoving = true;
     private bool isWaveActive = false;
     public bool isWaveClear { get; private set; } = false;
@@ -29,6 +48,15 @@ public class EnemyWave : MonoBehaviour
 
     private void Start()
     {
+        // 確保 HINT 物件初始狀態為關閉
+        if (hintObject != null)
+        {
+            hintObject.SetActive(false);
+        }
+
+        // 初始化 Boss 血條
+        InitializeBossHealthBar();
+        
         // 使用協程串接對話與移動流程
         StartCoroutine(WaveDialogueAndMoveFlow());
     }
@@ -95,6 +123,9 @@ public class EnemyWave : MonoBehaviour
         if (isWaitingForDialogue)
             return;
 
+        // 更新 Boss 血條
+        UpdateBossHealthBar();
+
         // 只負責戰鬥階段
         if (isWaveActive)
         {
@@ -102,7 +133,17 @@ public class EnemyWave : MonoBehaviour
             CheckWaveProcessTimeDialogues();
             // 檢查敵人血量觸發對話
             CheckEnemyHealthDialogues();
+            // 檢查敵人血量提示
+            CheckEnemyHealthHints();
             bool waveClear = true;
+            // 第一次進入戰鬥階段時顯示血條
+            if (bossHealth != null && !bossHealthSlider.gameObject.activeSelf)
+            {
+                bossHealthSlider.gameObject.SetActive(true);
+                if (bossIconImage != null) bossIconImage.gameObject.SetActive(true);
+                StartCoroutine(FillHealthBarAnimation());
+            }
+
             foreach (var enemy in enemies)
             {
                 enemy.WaveProcessing();
@@ -113,6 +154,8 @@ public class EnemyWave : MonoBehaviour
                 Debug.Log("Wave cleared!");
                 isWaveClear = true;
                 OnWaveClear?.Invoke();
+                // 清空提示文字
+                ClearHintText();
             }
         }
         else
@@ -162,6 +205,59 @@ public class EnemyWave : MonoBehaviour
     }
     
     /// <summary>
+    /// 檢查敵人血量提示
+    /// </summary>
+    private void CheckEnemyHealthHints()
+    {
+        foreach (var healthHint in enemyHealthHints)
+        {
+            string hintText = healthHint.CheckAndTriggerHint();
+            if (!string.IsNullOrEmpty(hintText))
+            {
+                ShowHintText(hintText);
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 顯示提示文字
+    /// </summary>
+    private void ShowHintText(string text)
+    {
+        if (hintText != null)
+        {
+            hintText.text = text;
+            Debug.Log($"顯示提示: {text}");
+        }
+        
+        // 開啟 HINT 物件
+        if (hintObject != null)
+        {
+            hintObject.SetActive(true);
+            Debug.Log("開啟 HINT 物件");
+        }
+    }
+    
+    /// <summary>
+    /// 清空提示文字
+    /// </summary>
+    private void ClearHintText()
+    {
+        if (hintText != null)
+        {
+            hintText.text = "";
+            Debug.Log("清空提示文字");
+        }
+        
+        // 關閉 HINT 物件
+        if (hintObject != null)
+        {
+            hintObject.SetActive(false);
+            Debug.Log("關閉 HINT 物件");
+        }
+    }
+    
+    /// <summary>
     /// 設置等待對話狀態
     /// </summary>
     public void SetWaitingForDialogue(bool waiting)
@@ -199,6 +295,100 @@ public class EnemyWave : MonoBehaviour
         }
     }
     
+    /// <summary>
+    /// 重置所有血量提示觸發狀態
+    /// </summary>
+    public void ResetHealthHints()
+    {
+        foreach (var healthHint in enemyHealthHints)
+        {
+            healthHint.ResetTrigger();
+        }
+    }
+
+    /// <summary>
+    /// 初始化 Boss 血條
+    /// </summary>
+    private void InitializeBossHealthBar()
+    {
+        if (bossHealth != null)
+        {
+            // 設置血條初始值，但不顯示
+            bossHealthSlider.maxValue = bossHealth.GetMaxHealth();
+            bossHealthSlider.value = 0;
+            bossHealthSlider.gameObject.SetActive(false);
+
+            // 設置圖示，但不顯示
+            if (bossIconImage != null)
+            {
+                if (bossIconSprite != null)
+                {
+                    bossIconImage.sprite = bossIconSprite;
+                }
+                bossIconImage.gameObject.SetActive(false);
+            }
+        }
+    }
+
+    private IEnumerator FillHealthBarAnimation()
+    {
+        float targetHealth = bossHealth.GetCurrentHealth();
+        float currentValue = 0f;
+        float elapsedTime = 0f;
+
+        while (elapsedTime < healthBarFillDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float t = elapsedTime / healthBarFillDuration;
+            
+            // 使用 EaseOutQuad 緩動函數讓動畫更自然
+            t = t * (2 - t);
+            
+            currentValue = Mathf.Lerp(0, targetHealth, t);
+            bossHealthSlider.value = currentValue;
+
+            // 更新顏色
+            if (bossFillImage != null)
+            {
+                float healthPercent = currentValue / bossHealth.GetMaxHealth();
+                bossFillImage.color = Color.Lerp(bossLowHealthColor, bossFullHealthColor, healthPercent / bossLowHealthPercent);
+            }
+
+            yield return null;
+        }
+
+        // 確保最終值正確
+        bossHealthSlider.value = targetHealth;
+        UpdateBossHealthBar();
+    }
+
+    /// <summary>
+    /// 更新 Boss 血條
+    /// </summary>
+    private void UpdateBossHealthBar()
+    {
+        if (bossHealth == null) return;
+
+        if (bossHealthSlider != null)
+        {
+            bossHealthSlider.value = bossHealth.GetCurrentHealth();
+            
+            if (bossFillImage != null)
+            {
+                // 計算血量百分比
+                float healthPercent = bossHealth.GetCurrentHealth() / bossHealth.GetMaxHealth();
+                
+                // 根據血量百分比更新顏色
+                bossFillImage.color = Color.Lerp(bossLowHealthColor, bossFullHealthColor, healthPercent / bossLowHealthPercent);
+            }
+        }
+
+        // 根據血條的啟用狀態控制圖示
+        if (bossIconImage != null)
+        {
+            bossIconImage.gameObject.SetActive(bossHealthSlider.gameObject.activeSelf);
+        }
+    }
 
     
     /// <summary>
@@ -240,6 +430,26 @@ public class EnemyWave : MonoBehaviour
     }
     
     /// <summary>
+    /// 添加敵人血量提示
+    /// </summary>
+    /// <param name="targetHealth">目標血量組件</param>
+    /// <param name="healthThreshold">血量閾值（實際血量值）</param>
+    /// <param name="isAboveThreshold">true: 血量高於閾值, false: 血量低於閾值</param>
+    /// <param name="durationThreshold">持續時間閾值（秒）</param>
+    /// <param name="hintText">提示文字</param>
+    public void AddEnemyHealthHint(BaseHealth targetHealth, float healthThreshold, bool isAboveThreshold, float durationThreshold, string hintText)
+    {
+        var healthHint = new EnemyHealthHintData();
+        healthHint.targetHealth = targetHealth;
+        healthHint.healthThreshold = healthThreshold;
+        healthHint.isAboveThreshold = isAboveThreshold;
+        healthHint.durationThreshold = durationThreshold;
+        healthHint.hintText = hintText;
+        
+        enemyHealthHints.Add(healthHint);
+    }
+    
+    /// <summary>
     /// 測試時間對話（用於調試）
     /// </summary>
     [ContextMenu("測試時間對話")]
@@ -258,5 +468,92 @@ public class EnemyWave : MonoBehaviour
         
         // 強制開始計時
         StartWaveProcessTimeDialogues();
+    }
+}
+
+/// <summary>
+/// 敵人血量提示數據
+/// </summary>
+[System.Serializable]
+public class EnemyHealthHintData
+{
+    [Header("觸發條件")]
+    public BaseHealth targetHealth;
+    public float healthThreshold = 50f; // 實際血量閾值
+    public bool isAboveThreshold = false; // true: 血量高於閾值, false: 血量低於閾值
+    public float durationThreshold = 3f; // 持續時間閾值（秒）
+    
+    [Header("提示設定")]
+    public string hintText = "提示：敵人血量異常！";
+    public bool enabled = true;
+    
+    [Header("狀態")]
+    private bool triggered = false; // 避免重複觸發
+    private float conditionStartTime = 0f; // 條件開始時間
+    private bool isConditionMet = false; // 條件是否滿足
+    
+    public EnemyHealthHintData()
+    {
+        targetHealth = null;
+        healthThreshold = 50f;
+        isAboveThreshold = false;
+        durationThreshold = 3f;
+        hintText = "提示：敵人血量異常！";
+        enabled = true;
+        triggered = false;
+        conditionStartTime = 0f;
+        isConditionMet = false;
+    }
+    
+    /// <summary>
+    /// 檢查並觸發血量提示
+    /// </summary>
+    public string CheckAndTriggerHint()
+    {
+        if (!enabled || triggered || targetHealth == null) return null;
+        
+        float currentHealth = targetHealth.GetCurrentHealth();
+        
+        bool conditionMet = isAboveThreshold ? 
+            currentHealth >= healthThreshold : 
+            currentHealth <= healthThreshold;
+        
+        if (conditionMet)
+        {
+            if (!isConditionMet)
+            {
+                // 條件剛開始滿足，記錄開始時間
+                isConditionMet = true;
+                conditionStartTime = Time.time;
+            }
+            else
+            {
+                // 條件持續滿足，檢查是否超過持續時間閾值
+                float duration = Time.time - conditionStartTime;
+                if (duration >= durationThreshold)
+                {
+                    triggered = true;
+                    return hintText;
+                }
+            }
+        }
+        else
+        {
+            // 條件不滿足，重置狀態
+            isConditionMet = false;
+            conditionStartTime = 0f;
+        }
+        
+        return null;
+    }
+    
+    /// <summary>
+    /// 重置觸發狀態
+    /// </summary>
+    public void ResetTrigger()
+    {
+        triggered = false;
+        isConditionMet = false;
+        conditionStartTime = 0f;
     }
 } 

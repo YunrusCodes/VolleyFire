@@ -121,10 +121,23 @@ public abstract class BulletBehavior : MonoBehaviour
         spawnTime = Time.time;
         lifetime = newLifetime;
     }
+
+    /// <summary>
+    /// 獲取爆炸特效預製體
+    /// </summary>
+    public GameObject GetExplosionPrefab()
+    {
+        return explosionPrefab;
+    }
     
     /// <summary>
     /// 銷毀子彈
     /// </summary>
+    public FirePoint GetFirePoint()
+    {
+        return firePoint;
+    }
+
     public virtual void DestroyBullet(bool generateEffect = true)
     {
         Debug.LogWarning("DestroyBullet called, generateEffect: " + generateEffect);
