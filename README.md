@@ -64,12 +64,11 @@
 ### 系統要求
 
 - **作業系統**：Windows 10/11
-- **Unity 版本**：2021.3 LTS 或更高版本
+- **Unity 版本**：Unity 6.0 或更高版本（專案使用 Unity 6.0.47f1）
 - **硬體要求**：
-  - CPU：Intel Core i5 或同等級
-  - 記憶體：8 GB RAM
-  - 顯示卡：支援 DirectX 11
-  - 硬碟空間：2 GB 可用空間
+  - CPU：Intel Core i5 或同等級（建議更高）
+  - 記憶體：8 GB RAM（建議 16 GB）
+  - 硬碟空間：至少 2 GB 可用空間（建議預留更多空間用於 Unity 編輯器和快取）
 
 ### 安裝步驟
 
@@ -81,19 +80,19 @@
 
 2. **開啟 Unity**
    - 使用 Unity Hub 開啟專案
-   - 確保 Unity 版本為 2021.3 LTS 或更高
+   - 確保 Unity 版本為 Unity 6.0 或更高（建議使用 Unity 6.0.47f1）
 
 3. **載入場景**
-   - 在 Unity 編輯器中開啟 `Assets/Scenes/Stage0.unity`
+   - 在 Unity 編輯器中開啟 `Assets/Scenes/Intro.unity`
    - 點擊 Play 按鈕開始遊戲
 
 ### 開發環境設置
 
 專案使用以下技術和工具：
 
-- **Unity 引擎**：2021.3 LTS+
-- **渲染管線**：Universal Render Pipeline (URP)
-- **輸入系統**：Unity Input System
+- **Unity 引擎**：Unity 6.0+
+- **渲染管線**：Universal Render Pipeline (URP) 17.0.4
+- **輸入系統**：Unity Input System 1.14.0
 - **對話系統**：Yarn Spinner
 - **程式語言**：C#
 
@@ -105,8 +104,8 @@
 
 | 操作 | 按鍵 | 說明 |
 |------|------|------|
-| 移動 | **W/A/S/D** 或 **方向鍵** | 在 2D 平面內移動戰機 |
-| 射擊 | **滑鼠左鍵**（按住） | 連續射擊，自動瞄準 |
+| 移動 | **W/A/S/D** | 在 2D 平面內移動幽浮 |
+| 射擊 | **滑鼠左鍵**（按住） | 射擊 (支援連射) |
 | 瞄準 | **滑鼠移動** | 控制準心位置 |
 
 ### 遊戲機制
@@ -114,16 +113,15 @@
 - **移動**：戰機在 X/Y 平面內移動，有邊界限制
 - **射擊**：按住滑鼠左鍵可連續射擊，準心會自動瞄準敵人
 - **準心反饋**：
-  - 普通準心：無目標時
-  - 精準目標：射線命中敵人（綠色）
-  - 寬鬆目標：檢測盒命中敵人（黃色）
+  - 無目標(同心圓)
+  - 精準目標：射線命中敵人（十字準心）
+  - 寬鬆目標：檢測盒命中敵人（指向準心）
 
 ### 戰鬥提示
 
 - 注意閃避敵人的攻擊
 - **機器人 Boss**：當其血量降低時會召喚浮游炮，需要同時應對本體和浮游炮的攻擊
 - Boss 戰時注意觀察血條和攻擊模式
-- 善用對話系統了解劇情和提示
 
 ---
 
@@ -152,117 +150,3 @@ VolleyFire/
 ├── GDD.md                   # 遊戲設計文件
 └── README.md                # 本文件
 ```
-
-### 主要腳本說明
-
-詳細的腳本系統說明請參考：[`Assets/Scripts/README.md`](Assets/Scripts/README.md)
-
-#### 核心腳本
-
-- **PlayerController.cs**：玩家控制器，處理移動和射擊
-- **WeaponSystem.cs**：武器系統，管理多發射點射擊
-- **EnemyController.cs**：敵人控制器基類
-- **EnemyWave.cs**：波次管理系統
-- **FunnelSystem.cs**：Funnel 浮游炮系統
-- **StageManager.cs**：關卡管理器
-
----
-
-## 開發指南
-
-### 添加新敵人
-
-1. 創建新的腳本繼承 `EnemyBehavior`
-2. 實現 `Tick()` 方法定義敵人行為
-3. 在 Unity 編輯器中設置敵人預製體
-4. 將敵人添加到波次中
-
-範例：
-```csharp
-public class MyEnemyBehavior : EnemyBehavior
-{
-    public override void Tick()
-    {
-        // 實現敵人行為邏輯
-    }
-}
-```
-
-### 添加新子彈類型
-
-1. 創建新的腳本繼承 `BulletBehavior`
-2. 實現子彈的移動和碰撞邏輯
-3. 創建子彈預製體並設置到武器系統
-
-### 配置波次
-
-1. 在場景中創建 `EnemyWave` GameObject
-2. 添加敵人到 `enemies` 列表
-3. 設置 `targetPosition` 目標位置
-4. 配置對話和提示系統
-
----
-
-## 已知問題
-
-- 部分敵人的 AI 行為可能需要進一步優化
-- 某些場景的效能可能需要優化
-
----
-
-## 未來計劃
-
-- [ ] 更多敵人類型和 Boss
-- [ ] 武器升級系統
-- [ ] 技能系統
-- [ ] 成就系統
-- [ ] 更多關卡和劇情
-- [ ] 效能優化
-- [ ] 專案腳本架構優化
-
----
-
-## 貢獻指南
-
-歡迎貢獻！請遵循以下步驟：
-
-1. Fork 本專案
-2. 創建功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 開啟 Pull Request
-
-### 程式碼規範
-
-- 使用 C# 命名規範
-- 添加適當的註釋
-- 保持程式碼整潔和可讀性
-
----
-
-## 授權
-
-本專案採用 MIT 授權條款。詳見 [LICENSE](LICENSE) 文件。
-
----
-
-## 聯絡方式
-
-- **專案維護者**：VolleyFire 開發團隊
-- **問題回報**：[GitHub Issues](https://github.com/yourusername/VolleyFire/issues)
-
----
-
-## 致謝
-
-感謝所有為本專案做出貢獻的開發者和測試者！
-
----
-
-<div align="center">
-
-**享受遊戲！** 🎮✨
-
-Made with ❤️ by VolleyFire Team
-
-</div>
