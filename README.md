@@ -1,8 +1,12 @@
+<div align="center">
+
 # Unity 3D 宇宙射擊遊戲《幽浮決鬥者》
 
 **一款操作幽浮的 3D 宇宙彈幕射擊遊戲**
 
-[遊戲概述](#遊戲概述) • [功能特色](#功能特色) • [快速開始](#快速開始) • [操作說明](#操作說明) • [專案結構](#專案結構)
+### 🎮 [立即試玩 Demo on itch.io →](https://yunruscodes.itch.io/ufo-duelist)
+
+[遊戲概述](#遊戲概述) • [立即試玩](#立即試玩) • [功能特色](#功能特色) • [開發者指南](#開發者指南從原始碼建置) • [操作說明](#操作說明) • [專案結構](#專案結構)
 
 </div>
 
@@ -18,6 +22,16 @@
 - 🛰️ **環境武器操控系統**：操控隕石與人造衛星，將場景物件拉過來並砸向敵人
 - 🤖 **多樣化的敵人 AI**：每種敵人都有獨特的行為模式和攻擊方式
 - 💥 **刺激的 Boss 戰**：挑戰強大的 Boss 敵人
+
+---
+
+## 立即試玩
+
+### 🎮 最快速的方式：下載打包好的 Demo
+
+**[→ UFO-Duelist Demo by YunrusCodes (itch.io)](https://yunruscodes.itch.io/ufo-duelist)**
+
+下載後解壓縮，執行 `UFO Duelist.exe` 即可遊玩。Windows SmartScreen 可能警告未簽章的執行檔，這對個人專案屬正常，可安心忽略。
 
 ---
 
@@ -59,7 +73,7 @@
 
 ---
 
-## 快速開始
+## 開發者指南（從原始碼建置）
 
 ### 系統要求
 
@@ -73,10 +87,10 @@
 ### 安裝步驟
 
 1. **克隆專案**
-   ```bash
+```bash
    git clone https://github.com/YunrusCodes/VolleyFire.git
    cd VolleyFire
-   ```
+```
 
 2. **開啟 Unity**
    - 使用 Unity Hub 開啟專案
